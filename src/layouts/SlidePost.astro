@@ -1,5 +1,6 @@
 ---
 import Base from './Base.astro';
+import QuestionForm from '../components/QuestionForm.astro';
 
 interface Props {
   title: string;
@@ -16,6 +17,18 @@ const base = import.meta.env.BASE_URL;
 
     <div id="slides-wrapper" class="slides-wrapper">
       <slot />
+      <section class="scene" data-scene="questions" data-animation="text-reveal">
+        <div class="scene-layout">
+          <div class="scene-text">
+            <p class="week-tag animate-in">That's a wrap on Week {week}</p>
+            <h2 class="animate-in">What did you want to know more about?</h2>
+            <p class="animate-in">Every question helps shape what gets covered next.</p>
+          </div>
+          <div class="scene-visual" style="align-items:flex-start">
+            <QuestionForm postTitle={title} />
+          </div>
+        </div>
+      </section>
     </div>
 
     <nav class="slide-nav">
