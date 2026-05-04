@@ -1,0 +1,120 @@
+---
+interface Props {
+  word: string;
+  definition: string;
+  analogy?: string;
+}
+const { word, definition, analogy } = Astro.props;
+---
+
+<span class="term" role="button" tabindex="0" aria-label={`Definition of ${word}`}>
+  <slot />
+  <span class="term-card" role="tooltip">
+    <strong class="tc-word">{word}</strong>
+    <p class="tc-def">{definition}</p>
+    {analogy && <p class="tc-analogy">Think of it like: {analogy}</p>}
+  </span>
+</span>
+
+<style>
+  .term {
+    position: relative;
+    display: inline;
+    border-bottom: 1.5px dotted #6ee7b7;
+    color: #6ee7b7;
+    cursor: help;
+  }
+
+  .term-card {
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 280px;
+    background: #161616;
+    border: 1px solid #2a2a2a;
+    border-radius: 10px;
+    padding: 0.9rem 1rem;
+    z-index: 200;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.18s ease, transform 0.18s ease;
+    transform: translateX(-50%) translateY(4px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+  }
+
+  /* Arrow */
+  .term-card::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: #2a2a2a;
+  }
+
+  .tc-word {
+    display: block;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #6ee7b7;
+    margin-bottom: 0.4rem;
+    font-weight: 700;
+  }
+
+  .tc-def {
+    font-size: 0.88rem;
+    color: #bbb;
+    line-height: 1.55;
+    margin: 0;
+  }
+
+  .tc-analogy {
+    font-size: 0.82rem;
+    color: #666;
+    line-height: 1.5;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid #222;
+  }
+
+  /* Desktop: show on hover */
+  @media (hover: hover) {
+    .term:hover .term-card {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateX(-50%) translateY(0);
+    }
+  }
+
+  /* Mobile and touch: show when .active */
+  .term.active .term-card {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(-50%) translateY(0);
+  }
+</style>
+
+<script>
+  document.querySelectorAll('.term').forEach(term => {
+    term.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isActive = term.classList.contains('active');
+      document.querySelectorAll('.term.active').forEach(t => t.classList.remove('active'));
+      if (!isActive) term.classList.add('active');
+    });
+
+    term.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        term.dispatchEvent(new Event('click', { bubbles: true }));
+      }
+    });
+  });
+
+  document.addEventListener('click', () => {
+    document.querySelectorAll('.term.active').forEach(t => t.classList.remove('active'));
+  });
+</script>
