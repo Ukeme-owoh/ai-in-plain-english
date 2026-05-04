@@ -1,0 +1,16 @@
+---
+interface Props {
+  animation: string;
+  index: number;
+}
+const { animation, index } = Astro.props;
+---
+
+<section class="scene" data-scene={index} data-animation={animation}>
+  <div class="scene-layout">
+    <div class="scene-text">
+      <slot />
+    </div>
+    <div class="scene-visual"></div>
+  </div>
+</section>
