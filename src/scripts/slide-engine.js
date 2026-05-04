@@ -720,6 +720,133 @@ const animations = {
     gsap.to('#seq-cmplx', { autoAlpha: 1, duration: 0.4, delay: 1 });
   },
 
+  'patterns': (scene, visual) => {
+    gsap.fromTo(scene.querySelectorAll('.animate-in'),
+      { y: 24, autoAlpha: 0 },
+      { y: 0, autoAlpha: 1, duration: 0.7, stagger: 0.12, ease: 'power2.out' }
+    );
+
+    if (!visual) return;
+
+    const stories = [
+      'The Lion, the Witch and the Wardrobe',
+      'Coraline',
+      'Through the Looking Glass',
+      'Alice in Wonderland',
+      'The Secret Garden',
+      'A Wrinkle in Time',
+      'Bridge to Terabithia',
+      'Where the Wild Things Are',
+      "Howl's Moving Castle",
+      'The Phantom Tollbooth',
+      'The Neverending Story',
+      'Spirited Away',
+    ];
+
+    // Active pattern through network — preset path
+    const activeNodes = { 0: [0, 2, 3], 1: [1, 2], 2: [0, 2] };
+    const isNodeActive = (l, i) => activeNodes[l]?.includes(i);
+    const isLineActive = (l, i, j) => isNodeActive(l, i) && isNodeActive(l + 1, j);
+
+    const nnYs = [200, 235, 270];
+    const nnXs = [105, 135, 165, 195];
+
+    let svg = `<svg viewBox="0 0 320 360" class="visual-svg patterns-svg">
+      <defs>
+        <clipPath id="scroll-clip">
+          <rect x="14" y="36" width="292" height="68"/>
+        </clipPath>
+      </defs>
+
+      <!-- Training data window -->
+      <rect x="10" y="10" width="300" height="100" fill="#0f0f0f" stroke="#1a1a1a" rx="6"/>
+      <text x="20" y="26" font-size="8" fill="#555" letter-spacing="1">TRAINING DATA</text>
+      <g clip-path="url(#scroll-clip)">
+        <g id="scroll-content">
+          ${stories.map((s, i) =>
+            `<text x="20" y="${52 + i * 22}" font-size="11" fill="#666" font-style="italic">${s}</text>`
+          ).join('')}
+        </g>
+      </g>
+
+      <!-- Pattern label and arrow -->
+      <text id="pat-focus" x="160" y="138" text-anchor="middle"
+        font-size="13" fill="#6ee7b7" font-weight="700" opacity="0">girl + door + adventure</text>
+      <text id="pat-arrow" x="160" y="158" text-anchor="middle"
+        font-size="9" fill="#555" opacity="0">activates these weights</text>
+
+      <!-- Neural network connections -->
+      ${[0, 1].flatMap(l =>
+        nnXs.flatMap((x1, i) =>
+          nnXs.map((x2, j) =>
+            `<line class="pat-line ${isLineActive(l, i, j) ? 'active' : ''}"
+              x1="${x1}" y1="${nnYs[l]}"
+              x2="${x2}" y2="${nnYs[l + 1]}"
+              stroke="#1f1f1f" stroke-width="0.6" opacity="0"/>`
+          )
+        )
+      ).join('')}
+
+      <!-- Neural network nodes -->
+      ${nnYs.flatMap((y, l) =>
+        nnXs.map((x, i) =>
+          `<circle class="pat-node ${isNodeActive(l, i) ? 'active' : ''}"
+            cx="${x}" cy="${y}" r="6"
+            fill="${isNodeActive(l, i) ? '#6ee7b7' : '#1a1a1a'}"
+            stroke="${isNodeActive(l, i) ? '#6ee7b7' : '#2a2a2a'}" stroke-width="1.2"
+            opacity="0"/>`
+        )
+      ).join('')}
+
+      <!-- Output sentence -->
+      <text id="pat-out-label" x="160" y="312" text-anchor="middle"
+        font-size="8" fill="#444" letter-spacing="1" opacity="0">GENERATED</text>
+      <text id="pat-out-text" x="160" y="332" text-anchor="middle"
+        font-size="10" fill="#a78bfa" font-style="italic" opacity="0">She hesitated, her hand trembling</text>
+      <text id="pat-out-text2" x="160" y="346" text-anchor="middle"
+        font-size="10" fill="#a78bfa" font-style="italic" opacity="0">as she reached for the handle.</text>
+    </svg>
+    <p class="visual-caption">The patterns are stored as numbers. Reading the prompt activates a specific subset of them.</p>`;
+
+    visual.innerHTML = svg;
+
+    const tl = gsap.timeline({ delay: 0.4 });
+
+    // Phase 1: scroll training data upward
+    tl.fromTo('#scroll-content',
+      { y: 90 },
+      { y: -160, duration: 2.4, ease: 'power1.inOut' }
+    );
+
+    // Phase 2: focus pattern emerges
+    tl.to('#pat-focus', { opacity: 1, duration: 0.5, ease: 'back.out(1.4)' }, '-=0.4')
+      .to('#pat-arrow', { opacity: 0.8, duration: 0.3 }, '+=0.2');
+
+    // Phase 3: network appears, then active path lights up
+    tl.to('.pat-line', { opacity: 0.4, duration: 0.3 }, '+=0.1')
+      .to('.pat-node', { opacity: 0.6, duration: 0.3 }, '<')
+      .to('.pat-node.active', {
+        opacity: 1,
+        scale: 1.2,
+        transformOrigin: 'center',
+        duration: 0.35,
+        stagger: 0.08,
+        ease: 'back.out(1.7)'
+      }, '+=0.1')
+      .to('.pat-line.active', {
+        opacity: 0.85,
+        stroke: '#6ee7b7',
+        strokeWidth: 1.2,
+        duration: 0.3,
+        stagger: 0.04
+      }, '-=0.4');
+
+    // Phase 4: generated output
+    tl.to('#pat-out-label', { opacity: 0.7, duration: 0.3 }, '+=0.3')
+      .to('#pat-out-text',  { opacity: 1, duration: 0.5 })
+      .to('#pat-out-text2', { opacity: 1, duration: 0.5 }, '+=0.1');
+  },
+
   'parallel': (scene, visual) => {
     if (!visual) return;
     const tokens = ['The', 'cat', 'sat', 'on', 'mat'];
