@@ -158,6 +158,12 @@
   color: #6ee7b7;
 }
 
+.nav-author {
+  color: #333;
+  font-size: 0.78rem;
+  margin-left: 0.4rem;
+}
+
 .nav-center {
   display: flex;
   align-items: center;
