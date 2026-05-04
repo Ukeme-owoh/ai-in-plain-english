@@ -326,6 +326,112 @@ const animations = {
     tl.to('#arch-attn rect', { stroke: '#c4b5fd', strokeWidth: 3, duration: 0.4, repeat: 2, yoyo: true, ease: 'sine.inOut' }, '+=0.3');
   },
 
+  'embeddings': (scene, visual) => {
+    gsap.fromTo(scene.querySelectorAll('.animate-in'),
+      { y: 24, autoAlpha: 0 },
+      { y: 0, autoAlpha: 1, duration: 0.7, stagger: 0.12, ease: 'power2.out' }
+    );
+
+    if (!visual) return;
+
+    const words = [
+      { word: 'door',    x: 100, y: 165, color: '#6ee7b7' },
+      { word: 'gate',    x: 70,  y: 195, color: '#6ee7b7' },
+      { word: 'window',  x: 130, y: 145, color: '#6ee7b7' },
+      { word: 'tuesday', x: 245, y: 90,  color: '#a78bfa' },
+      { word: 'monday',  x: 270, y: 115, color: '#a78bfa' },
+    ];
+
+    const sample = [0.42, -0.18, 0.91, 0.05, -0.33, 0.77, 0.62, -0.45, 0.12, 0.28];
+
+    visual.innerHTML = `
+      <svg viewBox="0 0 320 280" class="visual-svg embed-svg">
+        <!-- Cluster regions (behind dots) -->
+        <ellipse class="cluster-region" id="cluster-1"
+          cx="100" cy="170" rx="55" ry="40" fill="#6ee7b7" opacity="0"/>
+        <ellipse class="cluster-region" id="cluster-2"
+          cx="258" cy="102" rx="40" ry="28" fill="#a78bfa" opacity="0"/>
+
+        <!-- Phase 1: "door" word and embedding numbers -->
+        <text id="emb-word-init" x="160" y="70" text-anchor="middle"
+          font-size="22" font-weight="700" fill="#6ee7b7" opacity="0">door</text>
+        <text id="emb-bracket-l" x="22" y="115" font-size="16" fill="#555" opacity="0">[</text>
+        <text id="emb-bracket-r" x="298" y="115" font-size="16" fill="#555" opacity="0">]</text>
+        ${sample.map((n, i) => `
+          <text class="emb-num" data-i="${i}"
+            x="${36 + i * 26}" y="115"
+            font-size="9" fill="#888" font-family="monospace" opacity="0">${n.toFixed(2)}</text>
+        `).join('')}
+
+        <!-- Captions -->
+        <text id="emb-caption-1" x="160" y="148" text-anchor="middle"
+          font-size="10" fill="#666" opacity="0">A list of numbers</text>
+        <text id="emb-caption-2" x="160" y="163" text-anchor="middle"
+          font-size="10" fill="#666" opacity="0">becomes a point in space</text>
+
+        <!-- Phase 2: dots and labels -->
+        ${words.map((w, i) => `
+          <circle class="emb-dot" data-i="${i}"
+            cx="${w.x}" cy="${w.y}" r="5" fill="${w.color}" opacity="0"/>
+          <text class="emb-label" data-i="${i}"
+            x="${w.x}" y="${w.y - 9}" text-anchor="middle"
+            font-size="10" fill="${w.color}" opacity="0">${w.word}</text>
+        `).join('')}
+
+        <!-- Cluster labels -->
+        <text id="cluster-label-1" x="100" y="230" text-anchor="middle"
+          font-size="9" fill="#6ee7b7" opacity="0" font-weight="600">openings</text>
+        <text id="cluster-label-2" x="258" y="148" text-anchor="middle"
+          font-size="9" fill="#a78bfa" opacity="0" font-weight="600">days</text>
+
+        <!-- Distance indicator -->
+        <line id="dist-line" x1="100" y1="165" x2="245" y2="90"
+          stroke="#444" stroke-width="0.5" stroke-dasharray="3,3" opacity="0"/>
+        <text id="dist-label" x="170" y="118" text-anchor="middle"
+          font-size="8" fill="#555" opacity="0">far apart</text>
+      </svg>
+      <p class="visual-caption">Door and gate live in the same neighborhood. Door and tuesday live in different cities.</p>`;
+
+    const tl = gsap.timeline({ delay: 0.5 });
+
+    // Phase 1: word and numbers
+    tl.to('#emb-word-init', { opacity: 1, duration: 0.5, ease: 'power2.out' })
+      .to(['#emb-bracket-l', '#emb-bracket-r'], { opacity: 1, duration: 0.3 }, '+=0.2')
+      .to('.emb-num', { opacity: 1, duration: 0.05, stagger: 0.05, ease: 'none' })
+      .to({}, { duration: 0.5 })
+
+      // Phase 2: caption
+      .to(['#emb-caption-1', '#emb-caption-2'], { opacity: 1, duration: 0.4, stagger: 0.15 })
+      .to({}, { duration: 0.6 })
+
+      // Phase 3: collapse — numbers fade, word fades, door dot appears at its position
+      .to(['.emb-num', '#emb-bracket-l', '#emb-bracket-r'], { opacity: 0, duration: 0.4 })
+      .to(['#emb-caption-1', '#emb-caption-2'], { opacity: 0, duration: 0.3 }, '<')
+      .to('#emb-word-init', { opacity: 0, duration: 0.3 }, '<0.1')
+      .to('.emb-dot[data-i="0"]', {
+        opacity: 1, duration: 0.5, ease: 'back.out(1.7)'
+      }, '<0.1')
+      .to('.emb-label[data-i="0"]', { opacity: 1, duration: 0.3 }, '<0.15')
+
+      // Phase 4: other words pop in (cluster 1 first, then cluster 2)
+      .to('.emb-dot[data-i="1"]',   { opacity: 1, duration: 0.35, ease: 'back.out' }, '+=0.25')
+      .to('.emb-label[data-i="1"]', { opacity: 1, duration: 0.25 }, '<0.1')
+      .to('.emb-dot[data-i="2"]',   { opacity: 1, duration: 0.35, ease: 'back.out' }, '+=0.15')
+      .to('.emb-label[data-i="2"]', { opacity: 1, duration: 0.25 }, '<0.1')
+      .to('.emb-dot[data-i="3"]',   { opacity: 1, duration: 0.4, ease: 'back.out' }, '+=0.3')
+      .to('.emb-label[data-i="3"]', { opacity: 1, duration: 0.25 }, '<0.1')
+      .to('.emb-dot[data-i="4"]',   { opacity: 1, duration: 0.35, ease: 'back.out' }, '+=0.15')
+      .to('.emb-label[data-i="4"]', { opacity: 1, duration: 0.25 }, '<0.1')
+
+      // Phase 5: clusters and distance line
+      .to('#cluster-1', { opacity: 0.1, duration: 0.5 }, '+=0.3')
+      .to('#cluster-2', { opacity: 0.1, duration: 0.5 }, '<')
+      .to('#cluster-label-1', { opacity: 0.85, duration: 0.4 }, '<0.2')
+      .to('#cluster-label-2', { opacity: 0.85, duration: 0.4 }, '<')
+      .to('#dist-line',  { opacity: 0.5, duration: 0.4 }, '+=0.2')
+      .to('#dist-label', { opacity: 0.7, duration: 0.4 }, '<0.1');
+  },
+
   'tokens': (scene, visual) => {
     if (!visual) return;
     const sentence = 'Transformers changed everything';
