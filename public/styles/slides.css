@@ -239,6 +239,11 @@
   max-width: 380px;
 }
 
+/* Embedding space */
+.embed-svg {
+  max-width: 400px;
+}
+
 /* Navigation bar */
 
 .slide-nav {
