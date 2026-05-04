@@ -393,6 +393,164 @@ const animations = {
     });
   },
 
+  'qkv': (scene, visual) => {
+    if (!visual) return;
+    const roles = [
+      { letter: 'Q', label: 'Query', color: '#60a5fa', question: 'What am I looking for?', example: '"bank" asks: am I near water words or money words?' },
+      { letter: 'K', label: 'Key',   color: '#6ee7b7', question: 'What do I contain?',     example: '"steep" signals: I am about terrain and incline.' },
+      { letter: 'V', label: 'Value', color: '#a78bfa', question: 'What do I send?',         example: '"steep" sends its full meaning when attended to.' },
+    ];
+
+    visual.innerHTML = `
+      <div class="qkv-grid">
+        ${roles.map((r, i) => `
+          <div class="qkv-card" id="qkv-${i}" style="--c:${r.color}">
+            <div class="qkv-letter">${r.letter}</div>
+            <div class="qkv-label">${r.label}</div>
+            <div class="qkv-question">${r.question}</div>
+            <div class="qkv-example">${r.example}</div>
+          </div>
+        `).join('')}
+      </div>
+      <p class="visual-caption" id="qkv-caption" style="opacity:0">Every token computes all three simultaneously, for every other token in the sequence.</p>`;
+
+    gsap.fromTo('.qkv-card',
+      { y: 30, autoAlpha: 0 },
+      { y: 0, autoAlpha: 1, duration: 0.55, stagger: 0.2, ease: 'power3.out' }
+    );
+    gsap.to('#qkv-caption', { autoAlpha: 1, duration: 0.4, delay: 1 });
+  },
+
+  'dot-product': (scene, visual) => {
+    if (!visual) return;
+    const queryToken = 'bank';
+    const pairs = [
+      { word: 'river', score: 8.4, highlight: true  },
+      { word: 'steep', score: 7.2, highlight: true  },
+      { word: 'muddy', score: 6.8, highlight: true  },
+      { word: 'was',   score: 1.4, highlight: false },
+      { word: 'The',   score: 0.9, highlight: false },
+    ];
+    const maxScore = 8.4;
+
+    visual.innerHTML = `
+      <div class="dp-wrap">
+        <div class="dp-query-label">Query: <strong style="color:#60a5fa">"${queryToken}"</strong> × each Key</div>
+        <div class="dp-rows" id="dp-rows">
+          ${pairs.map((p, i) => `
+            <div class="dp-row" id="dp-row-${i}">
+              <span class="dp-word ${p.highlight ? 'dp-hi' : ''}">${p.word}</span>
+              <div class="dp-bar-wrap">
+                <div class="dp-bar" id="dp-bar-${i}" style="--target:${(p.score / maxScore * 100).toFixed(1)}%;background:${p.highlight ? '#6ee7b7' : '#333'}"></div>
+              </div>
+              <span class="dp-score" id="dp-score-${i}" style="opacity:0;color:${p.highlight ? '#6ee7b7' : '#555'}">${p.score}</span>
+            </div>
+          `).join('')}
+        </div>
+        <p class="visual-caption" id="dp-caption" style="opacity:0">Higher score = stronger match = more attention. "bank" cares most about terrain words.</p>
+      </div>`;
+
+    const tl = gsap.timeline();
+    tl.fromTo('#dp-rows', { autoAlpha: 0, y: 10 }, { autoAlpha: 1, y: 0, duration: 0.4 });
+
+    pairs.forEach((_, i) => {
+      tl.fromTo(`#dp-bar-${i}`, { width: '0%' }, { width: `var(--target)`, duration: 0.5, ease: 'power2.out' }, i * 0.12)
+        .to(`#dp-score-${i}`, { autoAlpha: 1, duration: 0.2 }, i * 0.12 + 0.4);
+    });
+
+    tl.to('#dp-caption', { autoAlpha: 1, duration: 0.4 }, '+=0.3');
+  },
+
+  'softmax': (scene, visual) => {
+    if (!visual) return;
+    const raw   = [8.4, 7.2, 6.8, 1.4, 0.9];
+    const words = ['river', 'steep', 'muddy', 'was', 'The'];
+    const colors = ['#6ee7b7','#6ee7b7','#6ee7b7','#444','#444'];
+
+    const expVals = raw.map(v => Math.exp(v));
+    const sumExp  = expVals.reduce((a, b) => a + b, 0);
+    const probs   = expVals.map(v => v / sumExp);
+
+    visual.innerHTML = `
+      <div class="sm-wrap">
+        <div class="sm-row-head">
+          <span class="sm-col-label">Token</span>
+          <span class="sm-col-label sm-raw-head" id="sm-raw-title">Raw score</span>
+          <span class="sm-col-label sm-prob-head" id="sm-prob-title" style="opacity:0">Attention weight</span>
+        </div>
+        ${words.map((w, i) => `
+          <div class="sm-row" id="sm-row-${i}">
+            <span class="sm-word" style="color:${colors[i]}">${w}</span>
+            <div class="sm-bar-wrap">
+              <div class="sm-bar sm-bar-raw"  id="smr-${i}" style="width:${(raw[i] / raw[0] * 100).toFixed(1)}%;background:${colors[i]}"></div>
+              <div class="sm-bar sm-bar-prob" id="smp-${i}" style="width:0%;background:${colors[i]}"></div>
+            </div>
+            <span class="sm-val sm-raw-val"  id="smrv-${i}">${raw[i]}</span>
+            <span class="sm-val sm-prob-val" id="smpv-${i}" style="opacity:0">${(probs[i] * 100).toFixed(1)}%</span>
+          </div>
+        `).join('')}
+        <p class="visual-caption" id="sm-caption" style="opacity:0">All weights sum to 100%. "river" gets 52% of bank's attention.</p>
+      </div>`;
+
+    const tl = gsap.timeline();
+    tl.fromTo('.sm-row', { autoAlpha: 0, x: -10 }, { autoAlpha: 1, x: 0, duration: 0.3, stagger: 0.08 })
+      .to({}, { duration: 0.6 })
+      .to('#sm-raw-title', { autoAlpha: 0, duration: 0.3 })
+      .to('#sm-prob-title', { autoAlpha: 1, duration: 0.3 }, '<');
+
+    words.forEach((_, i) => {
+      tl.to(`#smr-${i}`, { width: '0%', duration: 0.4, ease: 'power2.in' }, '-=0.2')
+        .to(`#smrv-${i}`, { autoAlpha: 0, duration: 0.2 }, '<')
+        .to(`#smp-${i}`, { width: `${(probs[i] * 100).toFixed(1)}%`, duration: 0.5, ease: 'power2.out' }, '<0.1')
+        .to(`#smpv-${i}`, { autoAlpha: 1, duration: 0.2 }, '<0.4');
+    });
+
+    tl.to('#sm-caption', { autoAlpha: 1, duration: 0.4 }, '+=0.3');
+  },
+
+  'weighted-sum': (scene, visual) => {
+    if (!visual) return;
+    const contributors = [
+      { word: 'river', weight: 0.52, color: '#6ee7b7' },
+      { word: 'steep', weight: 0.28, color: '#34d399' },
+      { word: 'muddy', weight: 0.13, color: '#a7f3d0' },
+      { word: 'was',   weight: 0.04, color: '#333'    },
+      { word: 'The',   weight: 0.03, color: '#2a2a2a' },
+    ];
+
+    visual.innerHTML = `
+      <div class="ws-wrap">
+        <div class="ws-label">How "bank" is understood after attention</div>
+        <div class="ws-blend" id="ws-blend">
+          ${contributors.map((c, i) => `
+            <div class="ws-chunk" id="ws-chunk-${i}"
+              style="flex:${c.weight};background:${c.color};opacity:0" title="${c.word}: ${(c.weight*100).toFixed(0)}%">
+            </div>
+          `).join('')}
+        </div>
+        <div class="ws-legend" id="ws-legend" style="opacity:0">
+          ${contributors.filter(c => c.weight > 0.03).map(c =>
+            `<span class="ws-leg-item"><span class="ws-leg-dot" style="background:${c.color}"></span>${c.word} ${(c.weight*100).toFixed(0)}%</span>`
+          ).join('')}
+        </div>
+        <p class="ws-output" id="ws-output" style="opacity:0">
+          Output: "bank" now carries the meaning of a riverbank. The geometry words dominated.
+        </p>
+        <p class="visual-caption" id="ws-caption" style="opacity:0">This enriched representation flows into the feed-forward layer, and then the next token's attention, and so on.</p>
+      </div>`;
+
+    const tl = gsap.timeline();
+    tl.fromTo('#ws-blend', { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.3 });
+
+    contributors.forEach((_, i) => {
+      tl.to(`#ws-chunk-${i}`, { autoAlpha: 1, duration: 0.4, ease: 'power2.out' }, i * 0.15);
+    });
+
+    tl.to('#ws-legend', { autoAlpha: 1, duration: 0.4 }, '+=0.3')
+      .to('#ws-output',  { autoAlpha: 1, duration: 0.5 }, '+=0.3')
+      .to('#ws-caption', { autoAlpha: 1, duration: 0.4 }, '+=0.2');
+  },
+
   'text-reveal': (scene) => {
     gsap.fromTo(scene.querySelectorAll('.animate-in'),
       { y: 24, autoAlpha: 0 },
