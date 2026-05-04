@@ -11,11 +11,12 @@ const base = import.meta.env.BASE_URL;
 
     <header class="home-header">
       <p class="home-eyebrow">AI in Plain English</p>
-      <h1 class="home-title">Modern AI, explained<br/>without the PhD.</h1>
+      <h1 class="home-title">Modern AI, explained.</h1>
       <p class="home-sub">
         One visual post a week. Transformers. Reasoning models. Agents. Evals.
         Written for curious people who want to understand AI without enrolling in a degree.
       </p>
+      <p class="home-author">By <strong>Ukeme Owoh</strong></p>
     </header>
 
     <section class="post-grid">
@@ -74,6 +75,16 @@ const base = import.meta.env.BASE_URL;
     color: #777;
     line-height: 1.75;
     max-width: 52ch;
+  }
+
+  .home-author {
+    margin-top: 1.25rem;
+    font-size: 0.9rem;
+    color: #555;
+  }
+
+  .home-author strong {
+    color: #e8e8e8;
   }
 
   .post-grid {
