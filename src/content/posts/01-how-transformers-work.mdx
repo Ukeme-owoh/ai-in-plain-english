@@ -6,6 +6,7 @@ week: 1
 ---
 
 import Scene from '../../components/Scene.astro';
+import Term from '../../components/Term.astro';
 
 <Scene animation="title" index={0}>
   <p class="week-tag animate-in">Week 1</p>
@@ -16,42 +17,85 @@ import Scene from '../../components/Scene.astro';
 <Scene animation="foundation" index={1}>
   <h2 class="animate-in">One idea. Every model.</h2>
   <p class="animate-in">ChatGPT, Claude, Gemini. All of them run on the same architecture.</p>
-  <p class="animate-in">It is called the transformer. Understanding it changes how you see everything else.</p>
+  <p class="animate-in">
+    It is called the <Term word="Transformer" definition="A neural network architecture invented in 2017. It processes all words in a sentence at the same time, instead of one at a time. Every major AI model today is built on it." analogy="An orchestra playing all instruments at once, instead of one musician playing alone.">transformer</Term>. Understanding it changes how you see everything else.
+  </p>
 </Scene>
 
 <Scene animation="tokens" index={2}>
   <h2 class="animate-in">Text becomes numbers</h2>
-  <p class="animate-in">Before a model reads your words, it breaks them into pieces called tokens.</p>
-  <p class="animate-in">A token is roughly four characters. Models do not think in words. They think in numbers.</p>
+  <p class="animate-in">
+    Before a model reads your words, it breaks them into pieces called <Term word="Tokens" definition="The smallest chunks a language model reads. A token is roughly 4 characters or about 3/4 of a word. The sentence 'Hello world' is 3 tokens." analogy="The way you sound out syllables when reading a new word out loud.">tokens</Term>.
+  </p>
+  <p class="animate-in">
+    Each token becomes a number called an <Term word="Embedding" definition="A list of hundreds of numbers that represents a word. Words with similar meanings end up with similar number patterns. 'King' and 'Queen' have embeddings that are mathematically close to each other." analogy="GPS coordinates for meaning. Just like coordinates tell you where a place is on a map, embeddings tell you where a word sits in the space of all possible meanings.">embedding</Term>. Models do not think in words. They think in numbers.
+  </p>
 </Scene>
 
 <Scene animation="heatmap" index={3}>
   <h2 class="animate-in">Which words matter?</h2>
-  <p class="animate-in">For every token, the model asks one question: which other tokens matter right now?</p>
-  <p class="animate-in">In "The bank was steep and muddy," the word "bank" attends most to "steep" and "muddy." That is how it knows you mean a riverbank.</p>
-  <p class="animate-in">This process is called attention.</p>
+  <p class="animate-in">
+    For every token, the model asks one question: which other tokens matter right now? This process is called <Term word="Attention" definition="A mechanism that lets every word look at every other word in the sentence and decide how much each one matters for understanding its own meaning. It runs on every single token, at the same time." analogy="The way you re-read the beginning of a sentence when a word near the end surprises you.">attention</Term>.
+  </p>
+  <p class="animate-in">
+    In "The bank was steep and muddy," the word "bank" attends most to "steep" and "muddy." That is how the model knows you mean a riverbank, not a financial institution.
+  </p>
 </Scene>
 
-<Scene animation="sequential" index={4}>
+<Scene animation="qkv" index={4}>
+  <h2 class="animate-in">How attention works: Q, K, V</h2>
+  <p class="animate-in">
+    Every token plays three roles at once. It sends out a <Term word="Query (Q)" definition="A question a token asks about what context it needs. The word 'bank' asks: am I near words about money, or words about nature?" analogy="Typing a search into Google — you are asking for specific information.">Query</Term>, broadcasts a <Term word="Key (K)" definition="A signal a token sends out about what it contains. The word 'steep' signals: I am about terrain, gradient, physical incline." analogy="The title of a book on a library shelf — it tells you what is inside without opening it.">Key</Term>, and holds a <Term word="Value (V)" definition="The actual information a token passes along when it is attended to. If 'steep' gets high attention from 'bank', its Value — its full meaning — flows into the output." analogy="The actual contents of the book, shared only when someone checks it out.">Value</Term>.
+  </p>
+  <p class="animate-in">Query finds what it needs. Key offers what it has. Value delivers the meaning.</p>
+</Scene>
+
+<Scene animation="dot-product" index={5}>
+  <h2 class="animate-in">Scoring similarity</h2>
+  <p class="animate-in">
+    The model measures how well a Query matches each Key using a <Term word="Dot Product" definition="A math operation that measures how similar two lists of numbers are. If two vectors point in the same direction, their dot product is high. If they point in opposite directions, it is near zero." analogy="Asking 'how much do you have in common?' Two people who both love jazz and hate mornings have a high dot product.">dot product</Term>.
+  </p>
+  <p class="animate-in">High score means strong match. Low score means ignore it. The model computes this for every pair of tokens simultaneously.</p>
+</Scene>
+
+<Scene animation="softmax" index={6}>
+  <h2 class="animate-in">Turning scores into weights</h2>
+  <p class="animate-in">
+    Raw scores get converted into probabilities by a function called <Term word="Softmax" definition="A math function that takes a list of raw scores and squashes them into probabilities that add up to exactly 1. The highest score gets the biggest share. Very low scores get nearly zero." analogy="Dividing a pizza based on how hungry everyone is. The hungriest person gets the biggest slice, but everyone gets something.">softmax</Term>.
+  </p>
+  <p class="animate-in">Now every token has a clear attention budget. It knows exactly how much of its focus to give each other word.</p>
+</Scene>
+
+<Scene animation="weighted-sum" index={7}>
+  <h2 class="animate-in">Building the output</h2>
+  <p class="animate-in">
+    The final step is a <Term word="Weighted Sum" definition="Adding up the Values of all tokens, but multiplying each one by its attention weight first. Tokens with high attention contribute more to the output. Tokens with low attention barely register." analogy="Making a smoothie where the flavor of each fruit depends on how much you add. More mango = mango-forward smoothie.">weighted sum</Term> of all Values.
+  </p>
+  <p class="animate-in">
+    "Bank" blends in a heavy dose of "river", "steep", and "muddy." The output is no longer just the word "bank." It carries the full context of being a riverbank.
+  </p>
+</Scene>
+
+<Scene animation="sequential" index={8}>
   <h2 class="animate-in">How models used to work</h2>
   <p class="animate-in">Before transformers, models read text one word at a time, left to right.</p>
   <p class="animate-in">By the time they reached the end of a long sentence, they had forgotten the beginning.</p>
 </Scene>
 
-<Scene animation="parallel" index={5}>
+<Scene animation="parallel" index={9}>
   <h2 class="animate-in">Transformers read everything at once</h2>
-  <p class="animate-in">Every token can attend to every other token simultaneously.</p>
+  <p class="animate-in">Every token runs attention against every other token simultaneously.</p>
   <p class="animate-in">That parallel processing is why transformers are faster to train and better at remembering context across long documents.</p>
 </Scene>
 
-<Scene animation="text-reveal" index={6}>
+<Scene animation="text-reveal" index={10}>
   <h2 class="animate-in">Why this matters to you</h2>
   <p class="animate-in">The attention mechanism is why Claude can follow a 10,000-word document.</p>
   <p class="animate-in">The model is not scanning through text. It is weighing relationships across the whole thing at once.</p>
   <p class="animate-in">That is the transformer.</p>
 </Scene>
 
-<Scene animation="next" index={7}>
+<Scene animation="next" index={11}>
   <p class="week-tag animate-in">Coming up</p>
   <h2 class="animate-in">Week 2: Training LLMs</h2>
   <p class="animate-in">Now you have the architecture. Next week you get the engine. How these models learn from data, and what scale actually means.</p>
