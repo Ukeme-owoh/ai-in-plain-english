@@ -1177,6 +1177,115 @@ const animations = {
     tl.to('#sm-caption', { autoAlpha: 1, duration: 0.4 }, '+=0.3');
   },
 
+  'pipeline': (scene, visual) => {
+    gsap.fromTo(scene.querySelectorAll('.animate-in'),
+      { y: 24, autoAlpha: 0 },
+      { y: 0, autoAlpha: 1, duration: 0.7, stagger: 0.12, ease: 'power2.out' }
+    );
+
+    if (!visual) return;
+
+    const story = "Once upon a time, there was a curious girl named Maya. On her seventh birthday, she discovered a small wooden door at the back of her closet. It was no bigger than a book. When she pressed her hand against it, the door creaked open.";
+    const words = story.split(' ');
+    const wordCount = words.length;
+
+    const stages = [
+      { label: 'Tokens', color: '#60a5fa', x: 40  },
+      { label: 'Layers', color: '#a78bfa', x: 110 },
+      { label: 'Output', color: '#f472b6', x: 180 },
+      { label: 'Sample', color: '#6ee7b7', x: 250 },
+    ];
+
+    let svg = `<svg viewBox="0 0 300 360" class="visual-svg pipeline-svg">
+      <defs>
+        <marker id="pipe-head" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+          <path d="M0,0 L6,3 L0,6 Z" fill="#444"/>
+        </marker>
+        <filter id="signal-glow">
+          <feGaussianBlur stdDeviation="2.5" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+
+      <!-- Pipeline header -->
+      <text x="150" y="22" text-anchor="middle"
+        font-size="8" fill="#666" letter-spacing="1.5">PIPELINE</text>
+
+      <!-- Stage boxes -->
+      ${stages.map(s => `
+        <rect x="${s.x - 25}" y="40" width="50" height="30" rx="6"
+          fill="#161616" stroke="${s.color}" stroke-width="1.4" opacity="0.5"/>
+        <text x="${s.x}" y="59" text-anchor="middle"
+          font-size="9" fill="${s.color}" font-weight="600">${s.label}</text>
+      `).join('')}
+
+      <!-- Connecting arrows -->
+      ${stages.slice(0, -1).map((s, i) => `
+        <line x1="${s.x + 25}" y1="55" x2="${stages[i + 1].x - 25}" y2="55"
+          stroke="#333" stroke-width="1" marker-end="url(#pipe-head)"/>
+      `).join('')}
+
+      <!-- Loop-back arrow -->
+      <path d="M ${stages[3].x + 25} 55 Q 285 55 285 95 Q 285 110 150 110 Q 15 110 15 95 Q 15 55 ${stages[0].x - 25} 55"
+        stroke="#444" stroke-width="1" fill="none" stroke-dasharray="3,3" opacity="0.7"
+        marker-end="url(#pipe-head)"/>
+      <text x="150" y="125" text-anchor="middle"
+        font-size="8" fill="#555" font-style="italic">add token, repeat</text>
+
+      <!-- Signal dot (animated) -->
+      <circle id="pipe-signal" cx="${stages[0].x}" cy="55" r="4" fill="#fff" filter="url(#signal-glow)"/>
+
+      <!-- Counter -->
+      <text id="pipe-counter" x="150" y="158" text-anchor="middle"
+        font-size="13" fill="#6ee7b7" font-weight="700">Token 1 of ${wordCount}</text>
+
+      <!-- Story panel -->
+      <rect x="8" y="174" width="284" height="180" fill="#0f0f0f" stroke="#1a1a1a" rx="6"/>
+      <text x="18" y="190" font-size="8" fill="#555" letter-spacing="1">YOUR PARAGRAPH</text>
+
+      <foreignObject x="16" y="198" width="268" height="150">
+        <div xmlns="http://www.w3.org/1999/xhtml" class="pipe-story-text">
+          ${words.map((w, i) =>
+            `<span class="pipe-story-word" data-i="${i}">${w}${i < words.length - 1 ? ' ' : ''}</span>`
+          ).join('')}
+        </div>
+      </foreignObject>
+    </svg>
+    <p class="visual-caption">Watch ${wordCount} cycles. Each one adds one word.</p>`;
+
+    visual.innerHTML = svg;
+
+    // Hide all words initially
+    gsap.set('.pipe-story-word', { opacity: 0 });
+
+    // Pipeline signal cycles continuously
+    const cycleDuration = 0.16;
+    const pipeTl = gsap.timeline({ repeat: wordCount - 1 });
+    pipeTl.set('#pipe-signal', { attr: { cx: stages[0].x }, opacity: 1 })
+          .to('#pipe-signal', {
+            attr: { cx: stages[3].x },
+            duration: cycleDuration * 0.7,
+            ease: 'power1.inOut'
+          })
+          .to('#pipe-signal', { opacity: 0, duration: cycleDuration * 0.1 })
+          .to({}, { duration: cycleDuration * 0.2 });
+
+    // Word reveal + counter update
+    const wordTl = gsap.timeline({ delay: 0.5 });
+    words.forEach((_, i) => {
+      const at = i * cycleDuration;
+      wordTl.to(`.pipe-story-word[data-i="${i}"]`, {
+        opacity: 1,
+        duration: cycleDuration * 0.4,
+        ease: 'power2.out'
+      }, at + cycleDuration * 0.6);
+      wordTl.call(() => {
+        const counter = visual.querySelector('#pipe-counter');
+        if (counter) counter.textContent = `Token ${i + 1} of ${wordCount}`;
+      }, [], at + cycleDuration * 0.5);
+    });
+  },
+
   'weighted-sum': (scene, visual) => {
     if (!visual) return;
     const contributors = [
