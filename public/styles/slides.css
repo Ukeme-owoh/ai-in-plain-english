@@ -244,6 +244,11 @@
   max-width: 400px;
 }
 
+/* Context window */
+.ctx-svg {
+  max-width: 460px;
+}
+
 /* Navigation bar */
 
 .slide-nav {

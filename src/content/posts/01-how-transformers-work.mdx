@@ -66,7 +66,7 @@ import Term from '../../components/Term.astro';
   <p class="animate-in">Door at token four still affects door at token eighty four.</p>
 </Scene>
 
-<Scene animation="text-reveal" index={7}>
+<Scene animation="context-window" index={7}>
   <h2 class="animate-in">The context window grows</h2>
   <p class="animate-in">
     Every word Claude generates gets added to what it sees next time. By token ninety four, it is attending to the original prompt plus everything it has produced so far. This visible region is called the <Term word="Context Window" definition="Everything the model can see when it predicts the next token. It includes your prompt and all the text the model has generated so far. Modern models can hold hundreds of thousands of tokens in context." analogy="A whiteboard the model can read but not erase. Everything that goes on stays on, until the board fills up.">context window</Term>.
