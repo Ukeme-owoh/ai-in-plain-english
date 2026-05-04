@@ -79,6 +79,57 @@ const animations = {
     );
   },
 
+  'hero': (scene, visual) => {
+    // Animate the scene text first
+    gsap.fromTo(scene.querySelectorAll('.animate-in'),
+      { y: 30, autoAlpha: 0 },
+      { y: 0, autoAlpha: 1, duration: 0.7, stagger: 0.14, ease: 'power3.out' }
+    );
+
+    if (!visual) return;
+
+    const userMsg = "Tell me a story about a girl who finds a door in her closet.";
+    const claudeMsg = "Once upon a time, there was a curious girl named Maya. On her seventh birthday, she discovered a small wooden door at the back of her closet. It was no bigger than a book. When she pressed her hand against it, the door creaked open.";
+
+    const words = claudeMsg.split(' ');
+    const wordsHtml = words.map((w, i) =>
+      `<span class="hero-word">${w}${i < words.length - 1 ? ' ' : ''}</span>`
+    ).join('');
+
+    visual.innerHTML = `
+      <div class="chat-ui">
+        <div class="chat-bubble user" id="hero-user">
+          <span class="bubble-label">You</span>
+          <p class="bubble-text">${userMsg}</p>
+        </div>
+        <div class="chat-bubble claude" id="hero-claude">
+          <span class="bubble-label">Claude</span>
+          <div class="typing-indicator" id="hero-typing">
+            <span></span><span></span><span></span>
+          </div>
+          <div class="bubble-text" id="hero-claude-text" style="display:none">${wordsHtml}</div>
+        </div>
+      </div>`;
+
+    gsap.set('#hero-user', { autoAlpha: 0, y: 14 });
+    gsap.set('#hero-claude', { autoAlpha: 0, y: 14 });
+    gsap.set(visual.querySelectorAll('.hero-word'), { autoAlpha: 0 });
+
+    const tl = gsap.timeline({ delay: 0.6 });
+    tl.to('#hero-user',   { autoAlpha: 1, y: 0, duration: 0.5, ease: 'power2.out' })
+      .to({}, { duration: 0.5 })
+      .to('#hero-claude', { autoAlpha: 1, y: 0, duration: 0.4, ease: 'power2.out' })
+      .to({}, { duration: 1.0 })
+      .set('#hero-typing', { display: 'none' })
+      .set('#hero-claude-text', { display: 'block' })
+      .to(visual.querySelectorAll('.hero-word'), {
+        autoAlpha: 1,
+        duration: 0.04,
+        stagger: 0.05,
+        ease: 'none'
+      });
+  },
+
   'foundation': (scene, visual) => {
     if (!visual) return;
     visual.innerHTML = `
