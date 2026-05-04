@@ -1,6 +1,6 @@
 ---
 title: "How Transformers Work"
-description: "Every AI model you use today is built on one idea. Here is how it works."
+description: "You type a sentence. Claude writes a story. Here is everything that happens in between."
 publishDate: 2024-01-07
 week: 1
 ---
@@ -8,95 +8,110 @@ week: 1
 import Scene from '../../components/Scene.astro';
 import Term from '../../components/Term.astro';
 
-<Scene animation="title" index={0}>
+<Scene animation="hero" index={0}>
   <p class="week-tag animate-in">Week 1</p>
-  <h1 class="animate-in">How Transformers Work</h1>
-  <p class="animate-in">Every AI model you use today is built on the same foundation. This is it.</p>
+  <h1 class="animate-in">Tell me a story.</h1>
+  <p class="animate-in">You typed thirteen words. Claude wrote ninety four. It happened in three seconds.</p>
+  <p class="animate-in">Claude did not plan the plot. It did not know the ending before it started.</p>
+  <p class="animate-in">Here is what it actually did.</p>
 </Scene>
 
-<Scene animation="foundation" index={1}>
-  <h2 class="animate-in">One idea. Every model.</h2>
-  <p class="animate-in">ChatGPT, Claude, Gemini. All of them run on the same architecture.</p>
-  <p class="animate-in">
-    It is called the <Term word="Transformer" definition="A neural network architecture invented in 2017. It processes all words in a sentence at the same time, instead of one at a time. Every major AI model today is built on it." analogy="An orchestra playing all instruments at once, instead of one musician playing alone.">transformer</Term>. Understanding it changes how you see everything else.
-  </p>
+<Scene animation="text-reveal" index={1}>
+  <h2 class="animate-in">The simple answer</h2>
+  <p class="animate-in">Claude does not write a story. It predicts one word. Then another. Then another.</p>
+  <p class="animate-in">That is all it ever does.</p>
+  <p class="animate-in">So why does the story not fall apart after sentence two?</p>
 </Scene>
 
 <Scene animation="tokens" index={2}>
-  <h2 class="animate-in">Text becomes numbers</h2>
+  <h2 class="animate-in">Tokens are not words</h2>
   <p class="animate-in">
-    Before a model reads your words, it breaks them into pieces called <Term word="Tokens" definition="The smallest chunks a language model reads. A token is roughly 4 characters or about 3/4 of a word. The sentence 'Hello world' is 3 tokens." analogy="The way you sound out syllables when reading a new word out loud.">tokens</Term>.
+    Before predicting anything, Claude breaks your sentence into <Term word="Tokens" definition="The smallest pieces a model reads. A token is roughly four characters or about three quarters of a word. The thirteen words in your prompt become eight tokens." analogy="The way you sound out syllables when you read an unfamiliar word out loud.">tokens</Term>.
   </p>
-  <p class="animate-in">
-    Each token becomes a number called an <Term word="Embedding" definition="A list of hundreds of numbers that represents a word. Words with similar meanings end up with similar number patterns. 'King' and 'Queen' have embeddings that are mathematically close to each other." analogy="GPS coordinates for meaning. Just like coordinates tell you where a place is on a map, embeddings tell you where a word sits in the space of all possible meanings.">embedding</Term>. Models do not think in words. They think in numbers.
-  </p>
+  <p class="animate-in">Eight tokens for thirteen words. Each one becomes a number.</p>
+  <p class="animate-in">A number on its own means nothing. Unless you give it a location.</p>
 </Scene>
 
-<Scene animation="heatmap" index={3}>
-  <h2 class="animate-in">Which words matter?</h2>
+<Scene animation="text-reveal" index={3}>
+  <h2 class="animate-in">Every token becomes a vector</h2>
   <p class="animate-in">
-    For every token, the model asks one question: which other tokens matter right now? This process is called <Term word="Attention" definition="A mechanism that lets every word look at every other word in the sentence and decide how much each one matters for understanding its own meaning. It runs on every single token, at the same time." analogy="The way you re-read the beginning of a sentence when a word near the end surprises you.">attention</Term>.
+    Each token gets converted into a long list of numbers called an <Term word="Embedding" definition="A list of hundreds of numbers that represents one token. Tokens with similar meanings end up with similar number patterns. The embedding is a coordinate in a vast space of meaning." analogy="GPS coordinates for words. Door and gate live in the same neighborhood. Door and tuesday live in different cities.">embedding</Term>.
   </p>
-  <p class="animate-in">
-    In "The bank was steep and muddy," the word "bank" attends most to "steep" and "muddy." That is how the model knows you mean a riverbank, not a financial institution.
-  </p>
+  <p class="animate-in">Door and gate sit close together in this space. Door and tuesday sit far apart.</p>
+  <p class="animate-in">The model has learned where every word lives.</p>
 </Scene>
 
-<Scene animation="qkv" index={4}>
-  <h2 class="animate-in">How attention works: Q, K, V</h2>
+<Scene animation="foundation" index={4}>
+  <h2 class="animate-in">The neural network</h2>
   <p class="animate-in">
-    Every token plays three roles at once. It sends out a <Term word="Query (Q)" definition="A question a token asks about what context it needs. The word 'bank' asks: am I near words about money, or words about nature?" analogy="Typing a search into Google — you are asking for specific information.">Query</Term>, broadcasts a <Term word="Key (K)" definition="A signal a token sends out about what it contains. The word 'steep' signals: I am about terrain, gradient, physical incline." analogy="The title of a book on a library shelf — it tells you what is inside without opening it.">Key</Term>, and holds a <Term word="Value (V)" definition="The actual information a token passes along when it is attended to. If 'steep' gets high attention from 'bank', its Value — its full meaning — flows into the output." analogy="The actual contents of the book, shared only when someone checks it out.">Value</Term>.
+    Those vectors flow upward through a stack of layers called a <Term word="Neural Network" definition="A stack of mathematical layers. Each layer takes numbers in, multiplies them by stored weights, and passes new numbers to the next layer. The transformer is one specific kind of neural network." analogy="An assembly line. Raw materials enter at the bottom. Each station reshapes them. The finished product comes out the top.">neural network</Term>.
   </p>
-  <p class="animate-in">Query finds what it needs. Key offers what it has. Value delivers the meaning.</p>
+  <p class="animate-in">Each layer reshapes the signal.</p>
+  <p class="animate-in">By the top, the network has produced a probability for every possible next word in its vocabulary.</p>
 </Scene>
 
-<Scene animation="dot-product" index={5}>
-  <h2 class="animate-in">Scoring similarity</h2>
+<Scene animation="parallel" index={5}>
+  <h2 class="animate-in">Tokens talk to each other</h2>
   <p class="animate-in">
-    The model measures how well a Query matches each Key using a <Term word="Dot Product" definition="A math operation that measures how similar two lists of numbers are. If two vectors point in the same direction, their dot product is high. If they point in opposite directions, it is near zero." analogy="Asking 'how much do you have in common?' Two people who both love jazz and hate mornings have a high dot product.">dot product</Term>.
+    Inside each layer, every token looks at every other token. Each one asks the same question. How much do you matter for understanding me? This is called <Term word="Attention" definition="A mechanism that lets every token in the sequence look at every other token and assign each one a weight. The weights decide whose meaning gets blended into whose. Attention runs simultaneously, in parallel, for every token." analogy="Re-reading the start of a sentence when a word near the end surprises you.">attention</Term>.
   </p>
-  <p class="animate-in">High score means strong match. Low score means ignore it. The model computes this for every pair of tokens simultaneously.</p>
+  <p class="animate-in">Some conversations are loud. Most are quiet.</p>
+  <p class="animate-in">Loud ones shape the next word more than quiet ones.</p>
 </Scene>
 
-<Scene animation="softmax" index={6}>
-  <h2 class="animate-in">Turning scores into weights</h2>
-  <p class="animate-in">
-    Raw scores get converted into probabilities by a function called <Term word="Softmax" definition="A math function that takes a list of raw scores and squashes them into probabilities that add up to exactly 1. The highest score gets the biggest share. Very low scores get nearly zero." analogy="Dividing a pizza based on how hungry everyone is. The hungriest person gets the biggest slice, but everyone gets something.">softmax</Term>.
-  </p>
-  <p class="animate-in">Now every token has a clear attention budget. It knows exactly how much of its focus to give each other word.</p>
+<Scene animation="heatmap" index={6}>
+  <h2 class="animate-in">The story stays consistent</h2>
+  <p class="animate-in">When Claude writes "she reached for the handle" eighty tokens later, it is still attending to door and closet from your original prompt.</p>
+  <p class="animate-in">That is how the character stays the same person from the first sentence to the last.</p>
+  <p class="animate-in">Door at token four still affects door at token eighty four.</p>
 </Scene>
 
-<Scene animation="weighted-sum" index={7}>
-  <h2 class="animate-in">Building the output</h2>
+<Scene animation="text-reveal" index={7}>
+  <h2 class="animate-in">The context window grows</h2>
   <p class="animate-in">
-    The final step is a <Term word="Weighted Sum" definition="Adding up the Values of all tokens, but multiplying each one by its attention weight first. Tokens with high attention contribute more to the output. Tokens with low attention barely register." analogy="Making a smoothie where the flavor of each fruit depends on how much you add. More mango = mango-forward smoothie.">weighted sum</Term> of all Values.
+    Every word Claude generates gets added to what it sees next time. By token ninety four, it is attending to the original prompt plus everything it has produced so far. This visible region is called the <Term word="Context Window" definition="Everything the model can see when it predicts the next token. It includes your prompt and all the text the model has generated so far. Modern models can hold hundreds of thousands of tokens in context." analogy="A whiteboard the model can read but not erase. Everything that goes on stays on, until the board fills up.">context window</Term>.
   </p>
-  <p class="animate-in">
-    "Bank" blends in a heavy dose of "river", "steep", and "muddy." The output is no longer just the word "bank." It carries the full context of being a riverbank.
-  </p>
+  <p class="animate-in">Nothing disappears. Nothing is forgotten.</p>
+  <p class="animate-in">But seeing something and understanding it are different things. What does the model actually do with ninety four tokens at once?</p>
 </Scene>
 
-<Scene animation="sequential" index={8}>
-  <h2 class="animate-in">How models used to work</h2>
-  <p class="animate-in">Before transformers, models read text one word at a time, left to right.</p>
-  <p class="animate-in">By the time they reached the end of a long sentence, they had forgotten the beginning.</p>
+<Scene animation="text-reveal" index={8}>
+  <h2 class="animate-in">What the network learned</h2>
+  <p class="animate-in">
+    The model read millions of stories during training. The phrase "girl finds mysterious door" activates deep patterns about adventure and discovery. Those patterns live in billions of stored numbers called <Term word="Weights" definition="The numbers inside a neural network that decide how each layer transforms the signal. Training adjusts these numbers, billions at a time, until the network's predictions match what humans actually wrote." analogy="The settings on a giant audio mixer. Training is the long process of getting every dial in exactly the right position.">weights</Term>.
+  </p>
+  <p class="animate-in">The model does not think. It pattern matches.</p>
+  <p class="animate-in">But if it always follows the most likely pattern, every story would be the same story. What stops that?</p>
 </Scene>
 
-<Scene animation="parallel" index={9}>
-  <h2 class="animate-in">Transformers read everything at once</h2>
-  <p class="animate-in">Every token runs attention against every other token simultaneously.</p>
-  <p class="animate-in">That parallel processing is why transformers are faster to train and better at remembering context across long documents.</p>
+<Scene animation="text-reveal" index={9}>
+  <h2 class="animate-in">Temperature</h2>
+  <p class="animate-in">
+    A setting called <Term word="Temperature" definition="A number that controls how often the model picks an unlikely token instead of the top one. At zero, the model is fully deterministic. At one, the model surprises itself. At two, the model gets weird." analogy="The wildness dial on a creative writing assistant. Low for safe. High for strange.">temperature</Term> introduces controlled randomness.
+  </p>
+  <p class="animate-in">At zero, Claude always picks the top word. At seven tenths, it sometimes picks a less likely one. At one and a half, it gets strange.</p>
+  <p class="animate-in">Tokens. Attention. Patterns. Randomness. All four pieces are now on the table.</p>
 </Scene>
 
 <Scene animation="text-reveal" index={10}>
-  <h2 class="animate-in">Why this matters to you</h2>
-  <p class="animate-in">The attention mechanism is why Claude can follow a 10,000-word document.</p>
-  <p class="animate-in">The model is not scanning through text. It is weighing relationships across the whole thing at once.</p>
-  <p class="animate-in">That is the transformer.</p>
+  <h2 class="animate-in">From one token to a paragraph</h2>
+  <p class="animate-in">Now run the whole thing.</p>
+  <p class="animate-in">Prompt in. Tokens. Vectors. Layers. Attention. One output token. Add to context. Run it again.</p>
+  <p class="animate-in">Ninety four times. That is your paragraph.</p>
+  <p class="animate-in">You typed thirteen words. Your words did more work than you think.</p>
 </Scene>
 
-<Scene animation="next" index={11}>
+<Scene animation="text-reveal" index={11}>
+  <h2 class="animate-in">What this means for your prompts</h2>
+  <p class="animate-in">The more specific your prompt, the more anchors the model has to grip.</p>
+  <p class="animate-in">"Write a story" gives Claude almost nothing. "Write a story about a girl who finds a door in her closet on her seventh birthday" gives it three strong keys it returns to throughout.</p>
+  <p class="animate-in">Tell it who. Tell it where. Tell it when.</p>
+</Scene>
+
+<Scene animation="next" index={12}>
   <p class="week-tag animate-in">Coming up</p>
   <h2 class="animate-in">Week 2: Training LLMs</h2>
-  <p class="animate-in">Now you have the architecture. Next week you get the engine. How these models learn from data, and what scale actually means.</p>
+  <p class="animate-in">You just saw the architecture. The neural network is built. The weights are loaded.</p>
+  <p class="animate-in">But how did those weights get there? Nobody typed them in by hand.</p>
+  <p class="animate-in">Next week. Where the weights come from.</p>
 </Scene>

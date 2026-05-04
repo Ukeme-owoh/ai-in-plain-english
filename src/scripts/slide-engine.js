@@ -190,18 +190,18 @@ const animations = {
 
   'heatmap': (scene, visual) => {
     if (!visual) return;
-    const tokens = ['The', 'river', 'bank', 'was', 'steep', 'and', 'muddy'];
-    // Attention weights for "bank" (row 2) attending to other tokens
+    const tokens = ['girl', 'who', 'finds', 'a', 'door', 'in', 'closet'];
+    // Attention weights for "door" (row 4) attending to other tokens
     const weights = tokens.map((_, col) => {
-      const row2weights = [0.04, 0.72, 1.0, 0.08, 0.81, 0.05, 0.68];
+      const row4weights = [0.85, 0.10, 0.78, 0.05, 1.0, 0.15, 0.92];
       const baseWeights = [
-        [1.0, 0.1, 0.05, 0.3, 0.05, 0.1, 0.05],
-        [0.1, 1.0, 0.4,  0.1, 0.3,  0.1, 0.3 ],
-        row2weights,
-        [0.3, 0.1, 0.05, 1.0, 0.1,  0.4, 0.1 ],
-        [0.05,0.35,0.7,  0.1, 1.0,  0.1, 0.4 ],
-        [0.1, 0.1, 0.05, 0.4, 0.1,  1.0, 0.2 ],
-        [0.05,0.3, 0.6,  0.1, 0.45, 0.2, 1.0 ],
+        [1.0, 0.15, 0.7,  0.1, 0.6,  0.1, 0.45],
+        [0.4, 1.0,  0.3,  0.1, 0.2,  0.1, 0.2 ],
+        [0.7, 0.2,  1.0,  0.1, 0.65, 0.1, 0.55],
+        [0.1, 0.05, 0.15, 1.0, 0.4,  0.2, 0.3 ],
+        row4weights,
+        [0.1, 0.05, 0.1,  0.2, 0.6,  1.0, 0.7 ],
+        [0.55,0.15, 0.5,  0.1, 0.85, 0.5, 1.0 ],
       ];
       return baseWeights.map(row => row[col]);
     });
@@ -213,7 +213,7 @@ const animations = {
     let svg = `<svg viewBox="0 0 ${svgW} ${svgH}" class="visual-svg heatmap-svg">`;
 
     // Title
-    svg += `<text x="${svgW / 2}" y="18" text-anchor="middle" font-size="10" fill="#555">Attention weights — which tokens each word focuses on</text>`;
+    svg += `<text x="${svgW / 2}" y="18" text-anchor="middle" font-size="10" fill="#555">Attention weights. Which tokens each word focuses on.</text>`;
 
     // Column headers
     tokens.forEach((t, i) => {
@@ -226,12 +226,12 @@ const animations = {
     tokens.forEach((t, row) => {
       const y = pad.top + row * cell;
       svg += `<text x="${pad.left - 8}" y="${y + cell / 2 + 4}" text-anchor="end" font-size="10"
-        fill="${row === 2 ? '#a78bfa' : '#666'}" font-weight="${row === 2 ? '700' : '400'}">${t}</text>`;
+        fill="${row === 4 ? '#a78bfa' : '#666'}" font-weight="${row === 4 ? '700' : '400'}">${t}</text>`;
 
       tokens.forEach((_, col) => {
         const w = weights[col][row];
-        const isHighlight = row === 2 && (col === 1 || col === 4 || col === 6);
-        const fillColor = isHighlight ? '#a78bfa' : row === 2 ? '#6ee7b7' : '#60a5fa';
+        const isHighlight = row === 4 && (col === 0 || col === 2 || col === 6);
+        const fillColor = isHighlight ? '#a78bfa' : row === 4 ? '#6ee7b7' : '#60a5fa';
         const opacity = 0.05 + w * 0.9;
         svg += `<rect class="hcell" x="${pad.left + col * cell + 1}" y="${y + 1}"
           width="${cell - 2}" height="${cell - 2}" rx="3"
@@ -252,7 +252,7 @@ const animations = {
     svg += `<text x="${lx + 90 + 10 * 14 + 4}" y="${ly}" font-size="9" fill="#444">High</text>`;
 
     svg += `</svg>
-    <p class="visual-caption">Row "bank" lights up strongly on "river", "steep", "muddy" — context shapes meaning</p>`;
+    <p class="visual-caption">Row "door" lights up strongly on "girl", "finds", "closet". Context shapes meaning.</p>`;
     visual.innerHTML = svg;
 
     const cells = visual.querySelectorAll('.hcell');
