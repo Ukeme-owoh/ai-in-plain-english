@@ -234,6 +234,11 @@
   max-width: 300px;
 }
 
+/* Neural network */
+.neural-svg {
+  max-width: 380px;
+}
+
 /* Navigation bar */
 
 .slide-nav {
