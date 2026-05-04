@@ -974,6 +974,162 @@ const animations = {
     tl.to('#dp-caption', { autoAlpha: 1, duration: 0.4 }, '+=0.3');
   },
 
+  'temperature': (scene, visual) => {
+    gsap.fromTo(scene.querySelectorAll('.animate-in'),
+      { y: 24, autoAlpha: 0 },
+      { y: 0, autoAlpha: 1, duration: 0.7, stagger: 0.12, ease: 'power2.out' }
+    );
+
+    if (!visual) return;
+
+    const tokens = ['door', 'handle', 'latch', 'brass knob', 'cold metal', 'shimmering portal'];
+    const distributions = {
+      0:   [0.97, 0.02, 0.01, 0.0,  0.0,  0.0 ],
+      0.7: [0.55, 0.20, 0.13, 0.08, 0.04, 0.0 ],
+      1.5: [0.28, 0.22, 0.18, 0.14, 0.11, 0.07],
+    };
+
+    const barW = 44;
+    const barGap = 6;
+    const startX = 12;
+    const baseY = 240;
+    const maxBarH = 130;
+    const trackY = 92;
+    const trackStartX = 60;
+    const trackEndX = 260;
+
+    const stops = [
+      { temp: 0,   x: trackStartX },
+      { temp: 0.7, x: trackStartX + (trackEndX - trackStartX) * (0.7 / 1.5) },
+      { temp: 1.5, x: trackEndX },
+    ];
+
+    let svg = `<svg viewBox="0 0 320 310" class="visual-svg temp-svg">
+      <!-- Temperature display -->
+      <text x="160" y="32" text-anchor="middle"
+        font-size="9" fill="#666" letter-spacing="1.5">TEMPERATURE</text>
+      <text id="temp-value" x="160" y="64" text-anchor="middle"
+        font-size="30" fill="#6ee7b7" font-weight="800">0.0</text>
+
+      <!-- Slider track -->
+      <line x1="${trackStartX}" y1="${trackY}" x2="${trackEndX}" y2="${trackY}"
+        stroke="#222" stroke-width="2" stroke-linecap="round"/>
+
+      <!-- Stops -->
+      ${stops.map(s => `
+        <circle cx="${s.x}" cy="${trackY}" r="3" fill="#333"/>
+        <text x="${s.x}" y="${trackY + 16}" text-anchor="middle"
+          font-size="9" fill="#666">${s.temp.toFixed(1)}</text>
+      `).join('')}
+
+      <!-- Slider knob -->
+      <circle id="temp-knob" cx="${stops[0].x}" cy="${trackY}" r="7"
+        fill="#6ee7b7" stroke="#0a0a0a" stroke-width="2"/>
+
+      <!-- Caption -->
+      <text id="temp-caption" x="160" y="${trackY + 36}" text-anchor="middle"
+        font-size="9.5" fill="#888">Always picks the top word. No surprises.</text>
+
+      <!-- Bars -->
+      ${tokens.map((t, i) => {
+        const x = startX + i * (barW + barGap);
+        const p = distributions[0][i];
+        const h = p * maxBarH;
+        const labelTrim = t.length > 8 ? t.substring(0, 8) + '…' : t;
+        return `
+          <rect class="temp-bar" data-i="${i}"
+            x="${x}" y="${baseY - h}" width="${barW}" height="${h}"
+            rx="3" fill="${i === 0 ? '#6ee7b7' : '#a78bfa'}"
+            opacity="${p > 0.005 ? 0.85 : 0.12}"/>
+          <text class="temp-bar-pct" data-i="${i}"
+            x="${x + barW / 2}" y="${baseY - h - 4}" text-anchor="middle"
+            font-size="9" fill="${i === 0 ? '#6ee7b7' : '#aaa'}"
+            opacity="${p > 0.005 ? 1 : 0}">${(p * 100).toFixed(0)}%</text>
+          <text class="temp-bar-label" data-i="${i}"
+            x="${x + barW / 2}" y="${baseY + 14}" text-anchor="middle"
+            font-size="8" fill="#777">${labelTrim}</text>
+        `;
+      }).join('')}
+
+      <!-- Prompt label below -->
+      <text x="160" y="${baseY + 38}" text-anchor="middle"
+        font-size="9" fill="#444">After "she reached for the…"</text>
+    </svg>
+    <p class="visual-caption">Same model. Same prompt. The temperature decides how often Claude picks something less likely.</p>`;
+
+    visual.innerHTML = svg;
+
+    const lerp = (a, b, t) => a + (b - a) * t;
+    const interpProbs = (from, to, t) =>
+      from.map((p, i) => lerp(p, to[i], t));
+
+    const renderProbs = (probs) => {
+      probs.forEach((p, i) => {
+        const h = p * maxBarH;
+        const y = baseY - h;
+        const bar = visual.querySelector(`.temp-bar[data-i="${i}"]`);
+        const pct = visual.querySelector(`.temp-bar-pct[data-i="${i}"]`);
+        if (!bar || !pct) return;
+        bar.setAttribute('y', y);
+        bar.setAttribute('height', h);
+        bar.style.opacity = p > 0.005 ? 0.85 : 0.12;
+        pct.setAttribute('y', y - 4);
+        pct.textContent = `${(p * 100).toFixed(0)}%`;
+        pct.style.opacity = p > 0.005 ? 1 : 0;
+      });
+    };
+
+    const setCaption = (text) => {
+      const el = visual.querySelector('#temp-caption');
+      if (!el) return;
+      gsap.to(el, {
+        opacity: 0,
+        duration: 0.2,
+        onComplete: () => {
+          el.textContent = text;
+          gsap.to(el, { opacity: 1, duration: 0.25 });
+        }
+      });
+    };
+
+    const captions = {
+      0:   'Always picks the top word. No surprises.',
+      0.7: 'Mostly the top word. Sometimes a creative pick.',
+      1.5: 'Strange options enter the running. The story can surprise you.',
+    };
+
+    const animateTo = (fromKey, toKey, duration = 1.0) => {
+      const tween = { t: 0 };
+      return gsap.to(tween, {
+        t: 1,
+        duration,
+        ease: 'power2.inOut',
+        onUpdate: () => {
+          const probs = interpProbs(distributions[fromKey], distributions[toKey], tween.t);
+          renderProbs(probs);
+          // Animate temperature value
+          const tempVal = lerp(fromKey, toKey, tween.t);
+          const tv = visual.querySelector('#temp-value');
+          if (tv) tv.textContent = tempVal.toFixed(1);
+          // Animate knob position
+          const fromX = stops.find(s => s.temp === fromKey).x;
+          const toX   = stops.find(s => s.temp === toKey).x;
+          const knob = visual.querySelector('#temp-knob');
+          if (knob) knob.setAttribute('cx', lerp(fromX, toX, tween.t));
+        }
+      });
+    };
+
+    const tl = gsap.timeline({ delay: 0.6 });
+    tl.to({}, { duration: 1.0 })  // pause at T=0
+      .add(animateTo(0, 0.7))
+      .call(setCaption, [captions[0.7]])
+      .to({}, { duration: 1.4 })  // hold
+      .add(animateTo(0.7, 1.5))
+      .call(setCaption, [captions[1.5]])
+      .to({}, { duration: 1.0 });  // hold at end
+  },
+
   'softmax': (scene, visual) => {
     if (!visual) return;
     const raw   = [8.4, 7.2, 6.8, 1.4, 0.9];

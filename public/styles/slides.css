@@ -254,6 +254,11 @@
   max-width: 380px;
 }
 
+/* Temperature */
+.temp-svg {
+  max-width: 420px;
+}
+
 /* Navigation bar */
 
 .slide-nav {
