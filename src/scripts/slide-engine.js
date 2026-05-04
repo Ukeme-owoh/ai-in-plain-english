@@ -130,6 +130,140 @@ const animations = {
       });
   },
 
+  'neural-net': (scene, visual) => {
+    // Run text reveal first
+    gsap.fromTo(scene.querySelectorAll('.animate-in'),
+      { y: 24, autoAlpha: 0 },
+      { y: 0, autoAlpha: 1, duration: 0.7, stagger: 0.12, ease: 'power2.out' }
+    );
+
+    if (!visual) return;
+
+    const layers = [
+      { label: 'Tokens',       color: '#60a5fa', y: 360 },
+      { label: 'Embedding',    color: '#6ee7b7', y: 305 },
+      { label: 'Attention',    color: '#a78bfa', y: 250 },
+      { label: 'Feed-Forward', color: '#f472b6', y: 195 },
+      { label: 'Attention',    color: '#a78bfa', y: 140 },
+      { label: 'Feed-Forward', color: '#f472b6', y: 85  },
+    ];
+    const xs = [70, 110, 150, 190];
+    const outputs = [
+      { word: 'Once',  prob: 0.42 },
+      { word: 'There', prob: 0.18 },
+      { word: 'A',     prob: 0.12 },
+      { word: 'It',    prob: 0.08 },
+      { word: 'In',    prob: 0.05 },
+    ];
+
+    let svg = `<svg viewBox="0 0 280 400" class="visual-svg neural-svg">`;
+
+    // Connections (drawn first, behind nodes)
+    for (let l = 0; l < layers.length - 1; l++) {
+      xs.forEach((x1) => {
+        xs.forEach((x2) => {
+          svg += `<line class="nn-line" data-from="${l}"
+            x1="${x1}" y1="${layers[l].y}"
+            x2="${x2}" y2="${layers[l + 1].y}"
+            stroke="#1f1f1f" stroke-width="0.6" opacity="0.5"/>`;
+        });
+      });
+    }
+
+    // Fan-out lines from top transformer layer to output bars
+    const outBaseY = 32;
+    const outSpacing = 42;
+    const outStartX = 40;
+    xs.forEach((x1) => {
+      outputs.forEach((_, j) => {
+        const x2 = outStartX + j * outSpacing + 16;
+        svg += `<line class="nn-fan"
+          x1="${x1}" y1="${layers[layers.length - 1].y}"
+          x2="${x2}" y2="${outBaseY + 32}"
+          stroke="#6ee7b7" stroke-width="0.5" opacity="0"/>`;
+      });
+    });
+
+    // Layer nodes + labels
+    layers.forEach((layer, i) => {
+      xs.forEach((x) => {
+        svg += `<circle class="nn-node" data-layer="${i}"
+          cx="${x}" cy="${layer.y}" r="6"
+          fill="${layer.color}" opacity="0.18"/>`;
+      });
+      svg += `<text class="nn-label" data-layer="${i}"
+        x="270" y="${layer.y + 4}" text-anchor="end"
+        font-size="9" fill="${layer.color}" opacity="0">${layer.label}</text>`;
+    });
+
+    // Output probability bars
+    outputs.forEach((o, i) => {
+      const x = outStartX + i * outSpacing;
+      const maxBarH = 28;
+      const h = o.prob / outputs[0].prob * maxBarH;
+      svg += `<rect class="prob-bar" data-i="${i}"
+        x="${x}" y="${outBaseY + 32 - h}" width="32" height="${h}"
+        rx="2" fill="#6ee7b7" opacity="0"/>`;
+      svg += `<text class="prob-word"
+        x="${x + 16}" y="${outBaseY + 46}" text-anchor="middle"
+        font-size="8.5" fill="#888" opacity="0">${o.word}</text>`;
+      svg += `<text class="prob-pct"
+        x="${x + 16}" y="${outBaseY + 32 - h - 4}" text-anchor="middle"
+        font-size="8" fill="${i === 0 ? '#6ee7b7' : '#555'}" opacity="0">${(o.prob * 100).toFixed(0)}%</text>`;
+    });
+
+    // Output label
+    svg += `<text x="270" y="${outBaseY + 36}" text-anchor="end"
+      font-size="9" fill="#6ee7b7" opacity="0" class="nn-out-label">Next-token probability</text>`;
+
+    svg += `</svg>
+    <p class="visual-caption">Each layer reshapes the signal. The top emits a probability for every possible next word.</p>`;
+
+    visual.innerHTML = svg;
+
+    // Animation timeline
+    const tl = gsap.timeline({ delay: 0.5 });
+    const layerStep = 0.45;
+
+    layers.forEach((layer, i) => {
+      const at = i * layerStep;
+      // Light up nodes
+      tl.to(`.nn-node[data-layer="${i}"]`,
+        { opacity: 1, duration: 0.25, ease: 'power2.out' }, at);
+      tl.to(`.nn-label[data-layer="${i}"]`,
+        { opacity: 0.85, duration: 0.2 }, at + 0.05);
+
+      // Pulse and brighten connections to next layer
+      if (i < layers.length - 1) {
+        tl.to(`.nn-line[data-from="${i}"]`, {
+          opacity: 0.55,
+          stroke: layer.color,
+          duration: 0.35,
+          stagger: { each: 0.005, from: 'random' }
+        }, at + 0.15);
+        // Decay back to baseline
+        tl.to(`.nn-line[data-from="${i}"]`, {
+          opacity: 0.18,
+          duration: 0.5
+        }, at + 0.55);
+      }
+    });
+
+    // Output reveal
+    const outDelay = layers.length * layerStep + 0.1;
+    tl.to('.nn-fan', { opacity: 0.4, duration: 0.4, stagger: 0.005 }, outDelay)
+      .to('.nn-out-label', { opacity: 0.85, duration: 0.3 }, outDelay + 0.2)
+      .to('.prob-bar', {
+        opacity: 1,
+        duration: 0.4,
+        stagger: 0.05,
+        ease: 'back.out(1.4)'
+      }, outDelay + 0.3)
+      .to('.prob-word', { opacity: 1, duration: 0.3, stagger: 0.04 }, outDelay + 0.5)
+      .to('.prob-pct',  { opacity: 1, duration: 0.3, stagger: 0.04 }, outDelay + 0.6)
+      .to('.nn-fan', { opacity: 0.18, duration: 0.6 }, outDelay + 0.9);
+  },
+
   'foundation': (scene, visual) => {
     if (!visual) return;
     visual.innerHTML = `
