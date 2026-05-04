@@ -1177,6 +1177,132 @@ const animations = {
     tl.to('#sm-caption', { autoAlpha: 1, duration: 0.4 }, '+=0.3');
   },
 
+  'prompt-comparison': (scene, visual) => {
+    gsap.fromTo(scene.querySelectorAll('.animate-in'),
+      { y: 24, autoAlpha: 0 },
+      { y: 0, autoAlpha: 1, duration: 0.7, stagger: 0.12, ease: 'power2.out' }
+    );
+
+    if (!visual) return;
+
+    const weakPrompt   = '"Write a story."';
+    const strongPrompt = '"Write a story about a girl who finds a door in her closet on her seventh birthday."';
+    const weakOutput   = "There was a man. He did some things. Then more things happened.";
+    const strongOutput = "Maya pressed her hand against the small wooden door at the back of her closet, her heart pounding…";
+
+    // Heatmap dimensions
+    const weakN = 3;
+    const weakCell = 20;
+    const weakStartX = 30;
+    const weakStartY = 145;
+
+    const strongN = 6;
+    const strongCell = 11;
+    const strongStartX = 195;
+    const strongStartY = 145;
+
+    let svg = `<svg viewBox="0 0 320 380" class="visual-svg compare-svg">
+      <!-- Headers -->
+      <text x="78"  y="20" text-anchor="middle" font-size="9" fill="#666" letter-spacing="1.5">VAGUE PROMPT</text>
+      <text x="240" y="20" text-anchor="middle" font-size="9" fill="#6ee7b7" letter-spacing="1.5">SPECIFIC PROMPT</text>
+
+      <!-- Vertical divider -->
+      <line x1="158" y1="6" x2="158" y2="372" stroke="#1a1a1a" stroke-width="1"/>
+
+      <!-- Prompts -->
+      <foreignObject x="8" y="30" width="142" height="90">
+        <div xmlns="http://www.w3.org/1999/xhtml" class="cmp-prompt cmp-weak" id="cmp-weak-prompt">${weakPrompt}</div>
+      </foreignObject>
+      <foreignObject x="170" y="30" width="142" height="90">
+        <div xmlns="http://www.w3.org/1999/xhtml" class="cmp-prompt cmp-strong" id="cmp-strong-prompt">${strongPrompt}</div>
+      </foreignObject>
+
+      <!-- Attention labels -->
+      <text x="78"  y="138" text-anchor="middle" font-size="8" fill="#555" id="cmp-attn-label-1" opacity="0">attention pattern</text>
+      <text x="240" y="138" text-anchor="middle" font-size="8" fill="#555" id="cmp-attn-label-2" opacity="0">attention pattern</text>
+    `;
+
+    // Weak heatmap (3x3 sparse)
+    for (let i = 0; i < weakN; i++) {
+      for (let j = 0; j < weakN; j++) {
+        const opacity = i === j ? 0.6 : 0.06;
+        svg += `<rect class="cmp-weak-cell"
+          x="${weakStartX + j * weakCell}" y="${weakStartY + i * weakCell}"
+          width="${weakCell - 1.5}" height="${weakCell - 1.5}" rx="1.5"
+          fill="#888" opacity="0" data-target="${opacity}"/>`;
+      }
+    }
+
+    // Strong heatmap (6x6 dense)
+    for (let i = 0; i < strongN; i++) {
+      for (let j = 0; j < strongN; j++) {
+        let opacity;
+        if (i === j) opacity = 0.95;
+        else opacity = 0.25 + Math.random() * 0.5;
+        svg += `<rect class="cmp-strong-cell"
+          x="${strongStartX + j * strongCell}" y="${strongStartY + i * strongCell}"
+          width="${strongCell - 1}" height="${strongCell - 1}" rx="1.5"
+          fill="#6ee7b7" opacity="0" data-target="${opacity.toFixed(2)}"/>`;
+      }
+    }
+
+    svg += `
+      <!-- Anchor counts -->
+      <text x="78"  y="240" text-anchor="middle"
+        font-size="11" fill="#888" opacity="0" id="cmp-weak-anchors">3 anchors</text>
+      <text x="240" y="240" text-anchor="middle"
+        font-size="11" fill="#6ee7b7" font-weight="700" opacity="0" id="cmp-strong-anchors">7+ anchors</text>
+
+      <!-- Output panels -->
+      <rect x="8"   y="258" width="142" height="100" fill="#0f0f0f" stroke="#1a1a1a" rx="5"/>
+      <text x="16"  y="272" font-size="7" fill="#555" letter-spacing="1.2">OUTPUT</text>
+      <foreignObject x="14" y="278" width="132" height="76">
+        <div xmlns="http://www.w3.org/1999/xhtml" class="cmp-output cmp-weak" id="cmp-weak-output">${weakOutput}</div>
+      </foreignObject>
+
+      <rect x="170" y="258" width="142" height="100" fill="#0f1a14" stroke="#2a4a3a" rx="5"/>
+      <text x="178" y="272" font-size="7" fill="#6ee7b7" letter-spacing="1.2">OUTPUT</text>
+      <foreignObject x="176" y="278" width="132" height="76">
+        <div xmlns="http://www.w3.org/1999/xhtml" class="cmp-output cmp-strong" id="cmp-strong-output">${strongOutput}</div>
+      </foreignObject>
+    </svg>
+    <p class="visual-caption">More specific prompt. Denser attention. More coherent story.</p>`;
+
+    visual.innerHTML = svg;
+
+    // Initial state
+    gsap.set('#cmp-weak-prompt, #cmp-strong-prompt', { opacity: 0 });
+    gsap.set('#cmp-weak-output, #cmp-strong-output',  { opacity: 0 });
+
+    const tl = gsap.timeline({ delay: 0.4 });
+
+    // Phase 1: prompts appear
+    tl.to('#cmp-weak-prompt',   { opacity: 1, duration: 0.5 })
+      .to('#cmp-strong-prompt', { opacity: 1, duration: 0.5 }, '<');
+
+    // Phase 2: heatmap labels and cells
+    tl.to('#cmp-attn-label-1', { opacity: 0.85, duration: 0.3 }, '+=0.3')
+      .to('#cmp-attn-label-2', { opacity: 0.85, duration: 0.3 }, '<')
+      .to('.cmp-weak-cell', {
+        opacity: (i, el) => parseFloat(el.dataset.target),
+        duration: 0.5,
+        stagger: 0.02
+      }, '<')
+      .to('.cmp-strong-cell', {
+        opacity: (i, el) => parseFloat(el.dataset.target),
+        duration: 0.5,
+        stagger: 0.012
+      }, '<');
+
+    // Phase 3: anchor counts
+    tl.to('#cmp-weak-anchors',   { opacity: 0.85, duration: 0.4 }, '+=0.3')
+      .to('#cmp-strong-anchors', { opacity: 1, duration: 0.4 }, '<');
+
+    // Phase 4: outputs
+    tl.to('#cmp-weak-output',   { opacity: 0.6, duration: 0.6 }, '+=0.3')
+      .to('#cmp-strong-output', { opacity: 1, duration: 0.6 }, '<');
+  },
+
   'pipeline': (scene, visual) => {
     gsap.fromTo(scene.querySelectorAll('.animate-in'),
       { y: 24, autoAlpha: 0 },
