@@ -249,6 +249,11 @@
   max-width: 460px;
 }
 
+/* Patterns / training memory */
+.patterns-svg {
+  max-width: 380px;
+}
+
 /* Navigation bar */
 
 .slide-nav {
