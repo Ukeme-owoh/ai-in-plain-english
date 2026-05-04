@@ -5,52 +5,54 @@ publishDate: 2024-01-07
 week: 1
 ---
 
-Every AI model you use today is built on the same foundation.
+import Scene from '../../components/Scene.astro';
 
-ChatGPT, Claude, Gemini. All of them.
+<Scene animation="title" index={0}>
+  <p class="week-tag animate-in">Week 1</p>
+  <h1 class="animate-in">How Transformers Work</h1>
+  <p class="animate-in">Every AI model you use today is built on the same foundation. This is it.</p>
+</Scene>
 
-It is called the transformer. Understanding it changes how you see everything else.
+<Scene animation="foundation" index={1}>
+  <h2 class="animate-in">One idea. Every model.</h2>
+  <p class="animate-in">ChatGPT, Claude, Gemini. All of them run on the same architecture.</p>
+  <p class="animate-in">It is called the transformer. Understanding it changes how you see everything else.</p>
+</Scene>
 
-## What is a token
+<Scene animation="tokens" index={2}>
+  <h2 class="animate-in">Text becomes numbers</h2>
+  <p class="animate-in">Before a model reads your words, it breaks them into pieces called tokens.</p>
+  <p class="animate-in">A token is roughly four characters. Models do not think in words. They think in numbers.</p>
+</Scene>
 
-Before a model reads your words, it breaks them into pieces called tokens.
+<Scene animation="heatmap" index={3}>
+  <h2 class="animate-in">Which words matter?</h2>
+  <p class="animate-in">For every token, the model asks one question: which other tokens matter right now?</p>
+  <p class="animate-in">In "The bank was steep and muddy," the word "bank" attends most to "steep" and "muddy." That is how it knows you mean a riverbank.</p>
+  <p class="animate-in">This process is called attention.</p>
+</Scene>
 
-A token is roughly four characters. "Hello" is one token. "transformer" is two.
+<Scene animation="sequential" index={4}>
+  <h2 class="animate-in">How models used to work</h2>
+  <p class="animate-in">Before transformers, models read text one word at a time, left to right.</p>
+  <p class="animate-in">By the time they reached the end of a long sentence, they had forgotten the beginning.</p>
+</Scene>
 
-This matters because models do not think in words. They think in numbers.
-Each token becomes a number, and the model works with those numbers.
+<Scene animation="parallel" index={5}>
+  <h2 class="animate-in">Transformers read everything at once</h2>
+  <p class="animate-in">Every token can attend to every other token simultaneously.</p>
+  <p class="animate-in">That parallel processing is why transformers are faster to train and better at remembering context across long documents.</p>
+</Scene>
 
-## What is attention
+<Scene animation="text-reveal" index={6}>
+  <h2 class="animate-in">Why this matters to you</h2>
+  <p class="animate-in">The attention mechanism is why Claude can follow a 10,000-word document.</p>
+  <p class="animate-in">The model is not scanning through text. It is weighing relationships across the whole thing at once.</p>
+  <p class="animate-in">That is the transformer.</p>
+</Scene>
 
-Here is the core idea behind transformers.
-
-When you read the sentence "The bank was steep and muddy," you know "bank" means a riverbank, not a financial institution.
-You know that because of the words around it. "Steep" and "muddy" give you context.
-
-Transformers do the same thing. For every token, the model asks one question: which other tokens matter most right now?
-
-That process is called attention.
-
-{/* Attention heatmap visualization goes here */}
-{/* Interactive D3 component showing how "bank" attends to "steep" and "muddy" */}
-
-## Why this was a breakthrough
-
-Before transformers, models read text left to right, one word at a time.
-They forgot earlier context by the time they reached the end of a long sentence.
-
-Transformers read the entire sequence at once.
-Every token can attend to every other token simultaneously.
-That parallel processing is why transformers are both more accurate and faster to train.
-
-## What this means in practice
-
-The attention mechanism is why Claude can follow a complex 10,000-word document.
-It is why a model can answer a question about something mentioned 50 paragraphs earlier.
-The model is not scanning through text. It is weighing relationships across the whole thing at once.
-
-## What comes next
-
-Week 2 covers how these models get trained.
-
-Right now you have the architecture. Next week you get the engine.
+<Scene animation="next" index={7}>
+  <p class="week-tag animate-in">Coming up</p>
+  <h2 class="animate-in">Week 2: Training LLMs</h2>
+  <p class="animate-in">Now you have the architecture. Next week you get the engine. How these models learn from data, and what scale actually means.</p>
+</Scene>
