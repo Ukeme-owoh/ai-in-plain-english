@@ -264,6 +264,47 @@
   max-width: 380px;
 }
 
+/* Prompt comparison */
+.compare-svg {
+  max-width: 440px;
+}
+
+.cmp-prompt {
+  font-size: 9.5px;
+  line-height: 1.45;
+  font-family: system-ui, sans-serif;
+  font-style: italic;
+  padding: 8px 10px;
+  border-radius: 5px;
+  border: 1px solid #1a1a1a;
+}
+
+.cmp-prompt.cmp-weak {
+  color: #888;
+  background: #111;
+}
+
+.cmp-prompt.cmp-strong {
+  color: #ddd;
+  background: #1a2a1f;
+  border-color: #2a4a3a;
+}
+
+.cmp-output {
+  font-size: 9px;
+  line-height: 1.5;
+  font-family: system-ui, sans-serif;
+}
+
+.cmp-output.cmp-weak {
+  color: #777;
+}
+
+.cmp-output.cmp-strong {
+  color: #cce8d8;
+  font-style: italic;
+}
+
 .pipe-story-text {
   font-size: 10px;
   color: #ddd;
