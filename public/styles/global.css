@@ -1,0 +1,139 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --color-bg: #0f0f0f;
+  --color-text: #e8e8e8;
+  --color-muted: #888;
+  --color-accent: #6ee7b7;
+  --font-sans: system-ui, -apple-system, sans-serif;
+  --font-mono: 'Fira Code', monospace;
+  --max-width: 720px;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: 1.125rem;
+  line-height: 1.7;
+  padding: 0 1.5rem;
+}
+
+header {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 2rem 0;
+  border-bottom: 1px solid #222;
+}
+
+header nav a {
+  color: var(--color-accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+main {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 4rem 0;
+}
+
+footer {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 2rem 0;
+  border-top: 1px solid #222;
+  color: var(--color-muted);
+  font-size: 0.875rem;
+}
+
+.hero h1 {
+  font-size: 2.5rem;
+  line-height: 1.2;
+  margin-bottom: 1.5rem;
+}
+
+.hero p {
+  color: var(--color-muted);
+  max-width: 60ch;
+}
+
+.posts {
+  margin-top: 4rem;
+}
+
+.posts h2 {
+  font-size: 1.25rem;
+  color: var(--color-muted);
+  margin-bottom: 1.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.posts ul {
+  list-style: none;
+}
+
+.posts li a {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 0.5rem 1rem;
+  padding: 1.25rem 0;
+  border-bottom: 1px solid #222;
+  text-decoration: none;
+  color: inherit;
+}
+
+.posts li a:hover .title {
+  color: var(--color-accent);
+}
+
+.week {
+  color: var(--color-accent);
+  font-size: 0.875rem;
+  padding-top: 0.2rem;
+}
+
+.title {
+  font-weight: 600;
+  grid-column: 2;
+}
+
+.description {
+  grid-column: 2;
+  color: var(--color-muted);
+  font-size: 0.9rem;
+}
+
+article header {
+  border-bottom: 1px solid #222;
+  margin-bottom: 3rem;
+  padding-bottom: 2rem;
+}
+
+.week-label {
+  color: var(--color-accent);
+  font-size: 0.875rem;
+  margin-bottom: 0.75rem;
+}
+
+article h1 {
+  font-size: 2rem;
+  line-height: 1.25;
+  margin-bottom: 1rem;
+}
+
+article time {
+  color: var(--color-muted);
+  font-size: 0.875rem;
+}
+
+article .description {
+  color: var(--color-muted);
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+}

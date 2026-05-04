@@ -1,0 +1,29 @@
+---
+import Base from './Base.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  week: number;
+  publishDate: Date;
+}
+
+const { title, description, week, publishDate } = Astro.props;
+const formattedDate = publishDate.toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+---
+
+<Base title={title} description={description}>
+  <article>
+    <header>
+      <p class="week-label">Week {week}</p>
+      <h1>{title}</h1>
+      <p class="description">{description}</p>
+      <time datetime={publishDate.toISOString()}>{formattedDate}</time>
+    </header>
+    <slot />
+  </article>
+</Base>
