@@ -259,6 +259,22 @@
   max-width: 420px;
 }
 
+/* Pipeline */
+.pipeline-svg {
+  max-width: 380px;
+}
+
+.pipe-story-text {
+  font-size: 10px;
+  color: #ddd;
+  line-height: 1.5;
+  font-family: system-ui, sans-serif;
+}
+
+.pipe-story-word {
+  display: inline;
+}
+
 /* Navigation bar */
 
 .slide-nav {
