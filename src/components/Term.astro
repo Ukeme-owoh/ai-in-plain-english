@@ -7,44 +7,44 @@ interface Props {
 const { word, definition, analogy } = Astro.props;
 ---
 
-<span class="term" role="button" tabindex="0" aria-label={`Definition of ${word}`}>
-  <slot />
-  <span class="term-card" role="tooltip">
-    <strong class="tc-word">{word}</strong>
-    <p class="tc-def">{definition}</p>
-    {analogy && <p class="tc-analogy">Think of it like: {analogy}</p>}
-  </span>
-</span>
+<span
+  class="term"
+  data-word={word}
+  data-def={definition}
+  data-analogy={analogy || ''}
+  role="button"
+  tabindex="0"
+  aria-label={`Definition of ${word}`}
+><slot /></span>
 
-<style>
+<style is:global>
   .term {
-    position: relative;
-    display: inline;
     border-bottom: 1.5px dotted #6ee7b7;
     color: #6ee7b7;
     cursor: help;
+    display: inline;
   }
 
-  .term-card {
-    position: absolute;
-    bottom: calc(100% + 10px);
-    left: 50%;
-    transform: translateX(-50%);
+  .term-tooltip {
+    position: fixed;
     width: 280px;
     background: #161616;
     border: 1px solid #2a2a2a;
     border-radius: 10px;
     padding: 0.9rem 1rem;
-    z-index: 200;
+    z-index: 1000;
     pointer-events: none;
     opacity: 0;
-    transition: opacity 0.18s ease, transform 0.18s ease;
-    transform: translateX(-50%) translateY(4px);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+    transition: opacity 0.15s ease;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.7);
+    transform: translateX(-50%);
   }
 
-  /* Arrow */
-  .term-card::after {
+  .term-tooltip.visible {
+    opacity: 1;
+  }
+
+  .term-tooltip::after {
     content: '';
     position: absolute;
     top: 100%;
@@ -56,7 +56,7 @@ const { word, definition, analogy } = Astro.props;
 
   .tc-word {
     display: block;
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: #6ee7b7;
@@ -65,56 +65,110 @@ const { word, definition, analogy } = Astro.props;
   }
 
   .tc-def {
-    font-size: 0.88rem;
+    font-size: 0.87rem;
     color: #bbb;
     line-height: 1.55;
     margin: 0;
   }
 
   .tc-analogy {
-    font-size: 0.82rem;
+    font-size: 0.81rem;
     color: #666;
     line-height: 1.5;
     margin-top: 0.5rem;
     padding-top: 0.5rem;
     border-top: 1px solid #222;
   }
-
-  /* Desktop: show on hover */
-  @media (hover: hover) {
-    .term:hover .term-card {
-      opacity: 1;
-      pointer-events: auto;
-      transform: translateX(-50%) translateY(0);
-    }
-  }
-
-  /* Mobile and touch: show when .active */
-  .term.active .term-card {
-    opacity: 1;
-    pointer-events: auto;
-    transform: translateX(-50%) translateY(0);
-  }
 </style>
 
 <script>
-  document.querySelectorAll('.term').forEach(term => {
-    term.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const isActive = term.classList.contains('active');
-      document.querySelectorAll('.term.active').forEach(t => t.classList.remove('active'));
-      if (!isActive) term.classList.add('active');
-    });
+  // One tooltip for the whole page — created once, repositioned per term
+  let tooltip = document.querySelector('.term-tooltip') as HTMLElement | null;
 
-    term.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        term.dispatchEvent(new Event('click', { bubbles: true }));
-      }
-    });
-  });
+  if (!tooltip) {
+    tooltip = document.createElement('div');
+    tooltip.className = 'term-tooltip';
+    tooltip.innerHTML = `
+      <strong class="tc-word"></strong>
+      <p class="tc-def"></p>
+      <p class="tc-analogy"></p>
+    `;
+    document.body.appendChild(tooltip);
+  }
 
-  document.addEventListener('click', () => {
-    document.querySelectorAll('.term.active').forEach(t => t.classList.remove('active'));
+  function show(term: Element) {
+    const rect = term.getBoundingClientRect();
+    const word    = (term as HTMLElement).dataset.word    || '';
+    const def     = (term as HTMLElement).dataset.def     || '';
+    const analogy = (term as HTMLElement).dataset.analogy || '';
+
+    tooltip!.querySelector('.tc-word')!.textContent = word;
+    tooltip!.querySelector('.tc-def')!.textContent  = def;
+
+    const analogyEl = tooltip!.querySelector('.tc-analogy') as HTMLElement;
+    if (analogy) {
+      analogyEl.textContent = `Think of it like: ${analogy}`;
+      analogyEl.style.display = 'block';
+    } else {
+      analogyEl.style.display = 'none';
+    }
+
+    // Position above the term, centered on it
+    const left = rect.left + rect.width / 2 + window.scrollX;
+    const top  = rect.top  + window.scrollY - 12;
+
+    tooltip!.style.left = `${left}px`;
+    tooltip!.style.top  = `${top}px`;
+    tooltip!.style.transform = 'translateX(-50%) translateY(-100%)';
+
+    // Flip below if too close to top of viewport
+    if (rect.top < 160) {
+      tooltip!.style.top       = `${rect.bottom + window.scrollY + 12}px`;
+      tooltip!.style.transform = 'translateX(-50%)';
+      (tooltip!.querySelector('::after') as HTMLElement | null);
+    }
+
+    tooltip!.classList.add('visible');
+  }
+
+  function hide() {
+    tooltip!.classList.remove('visible');
+  }
+
+  function attachHandlers() {
+    document.querySelectorAll('.term').forEach(term => {
+      if ((term as HTMLElement).dataset.bound) return;
+      (term as HTMLElement).dataset.bound = '1';
+
+      let isTouch = false;
+
+      // Hover — desktop only
+      term.addEventListener('mouseenter', () => { if (!isTouch) show(term); });
+      term.addEventListener('mouseleave', () => { if (!isTouch) hide(); });
+
+      // Click — mobile/touch
+      term.addEventListener('touchstart', () => { isTouch = true; }, { passive: true });
+      term.addEventListener('click', (e) => {
+        if (!isTouch) return;
+        e.stopPropagation();
+        tooltip!.classList.contains('visible') ? hide() : show(term);
+      });
+
+      // Keyboard
+      term.addEventListener('keydown', (e) => {
+        const ke = e as KeyboardEvent;
+        if (ke.key === 'Enter' || ke.key === ' ') {
+          e.preventDefault();
+          tooltip!.classList.contains('visible') ? hide() : show(term);
+        }
+        if (ke.key === 'Escape') hide();
+      });
+    });
+  }
+
+  // Attach on load and after any dynamic content changes
+  attachHandlers();
+  document.addEventListener('click', (e) => {
+    if (!(e.target as HTMLElement).closest('.term')) hide();
   });
 </script>
