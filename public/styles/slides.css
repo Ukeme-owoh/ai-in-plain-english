@@ -335,6 +335,83 @@
   50% { opacity: 1; }
 }
 
+/* Chat UI for Hero scene */
+.chat-ui {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  width: 100%;
+  max-width: 460px;
+}
+
+.chat-bubble {
+  border-radius: 14px;
+  padding: 0.85rem 1rem 0.95rem;
+  position: relative;
+}
+
+.chat-bubble.user {
+  background: rgba(110, 231, 183, 0.06);
+  border: 1px solid rgba(110, 231, 183, 0.25);
+}
+
+.chat-bubble.claude {
+  background: #161616;
+  border: 1px solid #2a2a2a;
+  min-height: 80px;
+}
+
+.bubble-label {
+  display: block;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #6ee7b7;
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+}
+
+.chat-bubble.user .bubble-label {
+  color: #6ee7b7;
+}
+
+.chat-bubble.claude .bubble-label {
+  color: #888;
+}
+
+.bubble-text {
+  font-size: 0.9rem;
+  color: #ddd;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.hero-word {
+  display: inline;
+}
+
+.typing-indicator {
+  display: inline-flex;
+  gap: 5px;
+  padding: 0.3rem 0;
+}
+
+.typing-indicator span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #666;
+  animation: typing-bounce 1.2s infinite ease-in-out;
+}
+
+.typing-indicator span:nth-child(2) { animation-delay: 0.15s; }
+.typing-indicator span:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes typing-bounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30%           { transform: translateY(-4px); opacity: 1; }
+}
+
 /* QKV cards */
 .qkv-grid {
   display: flex;
