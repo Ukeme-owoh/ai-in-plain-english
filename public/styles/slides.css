@@ -269,6 +269,11 @@
   max-width: 440px;
 }
 
+/* Empty network teaser */
+.empty-net-svg {
+  max-width: 360px;
+}
+
 .cmp-prompt {
   font-size: 9.5px;
   line-height: 1.45;

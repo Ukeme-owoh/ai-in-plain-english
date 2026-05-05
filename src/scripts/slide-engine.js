@@ -1462,6 +1462,141 @@ const animations = {
     );
   },
 
+  'empty-network': (scene, visual) => {
+    gsap.fromTo(scene.querySelectorAll('.animate-in'),
+      { y: 24, autoAlpha: 0 },
+      { y: 0, autoAlpha: 1, duration: 0.7, stagger: 0.12, ease: 'power2.out' }
+    );
+
+    if (!visual) return;
+
+    const layers = [
+      { label: 'Tokens',       color: '#60a5fa', y: 340 },
+      { label: 'Embedding',    color: '#6ee7b7', y: 290 },
+      { label: 'Attention',    color: '#a78bfa', y: 240 },
+      { label: 'Feed-Forward', color: '#f472b6', y: 190 },
+      { label: 'Attention',    color: '#a78bfa', y: 140 },
+      { label: 'Output',       color: '#6ee7b7', y: 90  },
+    ];
+    const xs = [70, 105, 140, 175, 210];
+
+    let svg = `<svg viewBox="0 0 280 400" class="visual-svg empty-net-svg">
+      <defs>
+        <linearGradient id="wave-gradient" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stop-color="#6ee7b7" stop-opacity="0"/>
+          <stop offset="50%"  stop-color="#6ee7b7" stop-opacity="0.5"/>
+          <stop offset="100%" stop-color="#6ee7b7" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+
+      <!-- Initial label (empty network) -->
+      <text x="140" y="36" text-anchor="middle"
+        font-size="9" fill="#555" letter-spacing="1.5" id="en-init-label">EMPTY NETWORK</text>
+      <text x="140" y="54" text-anchor="middle"
+        font-size="9" fill="#444" id="en-init-sub">No patterns. No knowledge. Yet.</text>
+
+      <!-- Connections (drawn first) -->
+      ${[0, 1, 2, 3, 4].flatMap(l =>
+        xs.flatMap((x1) =>
+          xs.map((x2) =>
+            `<line class="en-line" data-from="${l}"
+              x1="${x1}" y1="${layers[l].y}"
+              x2="${x2}" y2="${layers[l + 1].y}"
+              stroke="#1a1a1a" stroke-width="0.5" opacity="0.4"/>`
+          )
+        )
+      ).join('')}
+
+      <!-- Nodes (start dim) -->
+      ${layers.flatMap((layer, i) =>
+        xs.map((x) =>
+          `<circle class="en-node" data-layer="${i}"
+            cx="${x}" cy="${layer.y}" r="5.5"
+            fill="#141414" stroke="#262626" stroke-width="1" opacity="0.6"/>`
+        )
+      ).join('')}
+
+      <!-- Layer labels -->
+      ${layers.map((layer, i) =>
+        `<text class="en-label" data-layer="${i}"
+          x="270" y="${layer.y + 4}" text-anchor="end"
+          font-size="9" fill="${layer.color}" opacity="0">${layer.label}</text>`
+      ).join('')}
+
+      <!-- Activation wave (sweeps upward) -->
+      <rect id="en-wave" x="40" y="380" width="200" height="20"
+        fill="url(#wave-gradient)" opacity="0"/>
+
+      <!-- Final label (Week 2 teaser) -->
+      <text x="140" y="36" text-anchor="middle"
+        font-size="9" fill="#6ee7b7" letter-spacing="1.5" id="en-next-label" opacity="0">NEXT WEEK</text>
+      <text x="140" y="60" text-anchor="middle"
+        font-size="16" fill="#e8e8e8" font-weight="800" id="en-next-title" opacity="0">Training LLMs</text>
+    </svg>
+    <p class="visual-caption">Same network you saw in Scene 5. Now imagine where the weights actually come from.</p>`;
+
+    visual.innerHTML = svg;
+
+    const tl = gsap.timeline({ delay: 0.5 });
+
+    // Phase 1: Hold the empty state
+    tl.to({}, { duration: 1.0 });
+
+    // Phase 2: Hide initial label, start the wave
+    tl.to(['#en-init-label', '#en-init-sub'], { opacity: 0, duration: 0.4 })
+      .to('#en-wave', { opacity: 1, duration: 0.2 }, '-=0.1')
+      .to('#en-wave', {
+        attr: { y: 60 },
+        duration: 2.4,
+        ease: 'power1.inOut'
+      }, '<');
+
+    // Phase 3: As wave passes each layer, activate that layer
+    layers.forEach((layer, i) => {
+      // Wave starts at y=380, ends at y=60
+      // Layer i is at y=layers[i].y
+      // Wave reaches layer at progress = (380 - layers[i].y) / (380 - 60)
+      const waveProgress = (380 - layer.y) / (380 - 60);
+      const waveTime = 1.4 + waveProgress * 2.4;  // delay 1.4 + duration 2.4
+
+      tl.to(`.en-node[data-layer="${i}"]`, {
+        fill: layer.color,
+        stroke: layer.color,
+        opacity: 1,
+        duration: 0.5,
+        stagger: 0.04,
+        ease: 'power2.out'
+      }, waveTime);
+
+      tl.to(`.en-label[data-layer="${i}"]`, {
+        opacity: 0.8, duration: 0.3
+      }, waveTime + 0.05);
+
+      if (i < layers.length - 1) {
+        tl.to(`.en-line[data-from="${i}"]`, {
+          stroke: layer.color,
+          opacity: 0.45,
+          duration: 0.4,
+          stagger: 0.005
+        }, waveTime + 0.1);
+      }
+    });
+
+    // Phase 4: Wave fades, Next Week label appears
+    tl.to('#en-wave', { opacity: 0, duration: 0.4 }, '+=0.3')
+      .to('#en-next-label', { opacity: 1, duration: 0.4 }, '+=0.2')
+      .to('#en-next-title', { opacity: 1, y: 0, duration: 0.5 }, '+=0.1');
+
+    // Phase 5: Subtle pulse on lit network to keep attention
+    tl.to('.en-node', {
+      opacity: 0.7,
+      duration: 1.2,
+      yoyo: true,
+      repeat: -1,
+      ease: 'sine.inOut'
+    }, '+=0.5');
+  },
+
   'next': (scene) => {
     gsap.fromTo(scene.querySelectorAll('.animate-in'),
       { scale: 0.9, autoAlpha: 0 },
