@@ -2,8 +2,6 @@ import gsap from 'gsap';
 
 const COLORS = ['#6ee7b7', '#60a5fa', '#f472b6', '#fb923c', '#a78bfa', '#34d399', '#fbbf24', '#e879f9'];
 
-const loopTimers = new WeakMap();
-
 export function initSlides() {
   const scenes = [...document.querySelectorAll('[data-scene]')];
   const totalEl = document.getElementById('scene-total');
@@ -41,12 +39,6 @@ export function initSlides() {
     const outScene = scenes[current];
     const inScene = scenes[index];
 
-    // Cancel the loop for the scene being left
-    if (loopTimers.has(outScene)) {
-      clearTimeout(loopTimers.get(outScene));
-      loopTimers.delete(outScene);
-    }
-
     gsap.set(inScene, { x: direction * 100 + '%', autoAlpha: 1 });
     gsap.timeline({
       onComplete() { current = index; busy = false; updateUI(); runAnimation(inScene); }
@@ -76,22 +68,7 @@ export function initSlides() {
 function runAnimation(scene) {
   const type = scene.dataset.animation;
   const visual = scene.querySelector('.scene-visual');
-
-  // Cancel any pending loop for this scene
-  if (loopTimers.has(scene)) {
-    clearTimeout(loopTimers.get(scene));
-    loopTimers.delete(scene);
-  }
-
-  if (!type || !animations[type]) return;
-
-  // Kill lingering visual tweens from the previous run
-  if (visual) gsap.killTweensOf([...visual.querySelectorAll('*')]);
-
-  animations[type](scene, visual);
-
-  // Schedule the next loop (9 s gives every animation time to finish + a pause)
-  loopTimers.set(scene, setTimeout(() => runAnimation(scene), 9000));
+  if (type && animations[type]) animations[type](scene, visual);
 }
 
 const animations = {
@@ -139,7 +116,7 @@ const animations = {
     gsap.set('#hero-claude', { autoAlpha: 0, y: 14 });
     gsap.set(visual.querySelectorAll('.hero-word'), { autoAlpha: 0 });
 
-    const tl = gsap.timeline({ delay: 0.6 });
+    const tl = gsap.timeline({ delay: 0.6, repeat: -1, repeatDelay: 2 });
     tl.to('#hero-user',   { autoAlpha: 1, y: 0, duration: 0.5, ease: 'power2.out' })
       .to({}, { duration: 0.5 })
       .to('#hero-claude', { autoAlpha: 1, y: 0, duration: 0.4, ease: 'power2.out' })
@@ -246,7 +223,7 @@ const animations = {
     visual.innerHTML = svg;
 
     // Animation timeline
-    const tl = gsap.timeline({ delay: 0.5 });
+    const tl = gsap.timeline({ delay: 0.5, repeat: -1, repeatDelay: 1.5 });
     const layerStep = 0.45;
 
     layers.forEach((layer, i) => {
@@ -379,7 +356,7 @@ const animations = {
     gsap.set('.tw-word', { opacity: 0 });
     gsap.set('#tw-arrow', { opacity: 0 });
 
-    const tl = gsap.timeline({ delay: 0.5 });
+    const tl = gsap.timeline({ delay: 0.5, repeat: -1, repeatDelay: 2 });
     const wordDuration = 0.11;
 
     words.forEach((_, i) => {
@@ -465,7 +442,7 @@ const animations = {
       </svg>
       <p class="visual-caption">Door and gate live in the same neighborhood. Door and tuesday live in different cities.</p>`;
 
-    const tl = gsap.timeline({ delay: 0.5 });
+    const tl = gsap.timeline({ delay: 0.5, repeat: -1, repeatDelay: 1.5 });
 
     // Phase 1: word and numbers
     tl.to('#emb-word-init', { opacity: 1, duration: 0.5, ease: 'power2.out' })
@@ -540,7 +517,7 @@ const animations = {
         </div>
       </div>`;
 
-    const tl = gsap.timeline();
+    const tl = gsap.timeline({ repeat: -1, repeatDelay: 1.5 });
     tl.fromTo('#tok-original', { y: 10, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.5 })
       .to('#tok-split-arrow', { autoAlpha: 1, duration: 0.4 }, '+=0.3')
       .to('#tok-row', { autoAlpha: 1, duration: 0.2 })
@@ -621,16 +598,16 @@ const animations = {
 
     const cells = visual.querySelectorAll('.hcell');
     const vals = visual.querySelectorAll('.hval');
-    gsap.to(cells, {
+    const caption = visual.querySelector('.visual-caption');
+    const tl = gsap.timeline({ repeat: -1, repeatDelay: 2 });
+    tl.to(cells, {
       opacity: (i) => parseFloat(cells[i].dataset.o),
       duration: 0.25,
       stagger: { amount: 1.2, from: 'start', grid: [tokens.length, tokens.length] },
       ease: 'power1.out'
-    });
-    gsap.to(vals, { autoAlpha: 1, duration: 0.3, delay: 1.4, stagger: 0.05 });
-    gsap.fromTo(visual.querySelector('.visual-caption'),
-      { autoAlpha: 0, y: 6 }, { autoAlpha: 1, y: 0, duration: 0.4, delay: 2 }
-    );
+    })
+    .to(vals, { autoAlpha: 1, duration: 0.3, stagger: 0.05 }, '+=1.1')
+    .fromTo(caption, { autoAlpha: 0, y: 6 }, { autoAlpha: 1, y: 0, duration: 0.4 }, '+=0.3');
   },
 
   'context-window': (scene, visual) => {
@@ -709,7 +686,7 @@ const animations = {
       if (el) el.textContent = Math.round(counter.val);
     };
 
-    const tl = gsap.timeline({ delay: 0.4 });
+    const tl = gsap.timeline({ delay: 0.4, repeat: -1, repeatDelay: 1.5 });
 
     // Phase 1: prompt tokens
     tl.to('.ctx-prompt',      { opacity: 1, duration: 0.25, stagger: 0.04 })
@@ -883,7 +860,7 @@ const animations = {
 
     visual.innerHTML = svg;
 
-    const tl = gsap.timeline({ delay: 0.4 });
+    const tl = gsap.timeline({ delay: 0.4, repeat: -1, repeatDelay: 1.5 });
 
     // Phase 1: scroll training data upward
     tl.fromTo('#scroll-content',
@@ -1000,11 +977,12 @@ const animations = {
       </div>
       <p class="visual-caption" id="qkv-caption" style="opacity:0">Every token computes all three simultaneously, for every other token in the sequence.</p>`;
 
-    gsap.fromTo('.qkv-card',
+    const tl = gsap.timeline({ repeat: -1, repeatDelay: 1.5 });
+    tl.fromTo('.qkv-card',
       { y: 30, autoAlpha: 0 },
       { y: 0, autoAlpha: 1, duration: 0.55, stagger: 0.2, ease: 'power3.out' }
-    );
-    gsap.to('#qkv-caption', { autoAlpha: 1, duration: 0.4, delay: 1 });
+    )
+    .to('#qkv-caption', { autoAlpha: 1, duration: 0.4 }, '+=0.4');
   },
 
   'dot-product': (scene, visual) => {
@@ -1036,7 +1014,7 @@ const animations = {
         <p class="visual-caption" id="dp-caption" style="opacity:0">Higher score = stronger match = more attention. "bank" cares most about terrain words.</p>
       </div>`;
 
-    const tl = gsap.timeline();
+    const tl = gsap.timeline({ repeat: -1, repeatDelay: 1.5 });
     tl.fromTo('#dp-rows', { autoAlpha: 0, y: 10 }, { autoAlpha: 1, y: 0, duration: 0.4 });
 
     pairs.forEach((_, i) => {
@@ -1193,7 +1171,7 @@ const animations = {
       });
     };
 
-    const tl = gsap.timeline({ delay: 0.6 });
+    const tl = gsap.timeline({ delay: 0.6, repeat: -1, repeatDelay: 1 });
     tl.to({}, { duration: 1.0 })  // pause at T=0
       .add(animateTo(0, 0.7))
       .call(setCaption, [captions[0.7]])
@@ -1234,7 +1212,7 @@ const animations = {
         <p class="visual-caption" id="sm-caption" style="opacity:0">All weights sum to 100%. "river" gets 52% of bank's attention.</p>
       </div>`;
 
-    const tl = gsap.timeline();
+    const tl = gsap.timeline({ repeat: -1, repeatDelay: 1.5 });
     tl.fromTo('.sm-row', { autoAlpha: 0, x: -10 }, { autoAlpha: 1, x: 0, duration: 0.3, stagger: 0.08 })
       .to({}, { duration: 0.6 })
       .to('#sm-raw-title', { autoAlpha: 0, duration: 0.3 })
@@ -1347,7 +1325,7 @@ const animations = {
     gsap.set('#cmp-weak-prompt, #cmp-strong-prompt', { opacity: 0 });
     gsap.set('#cmp-weak-output, #cmp-strong-output',  { opacity: 0 });
 
-    const tl = gsap.timeline({ delay: 0.4 });
+    const tl = gsap.timeline({ delay: 0.4, repeat: -1, repeatDelay: 2 });
 
     // Phase 1: prompts appear
     tl.to('#cmp-weak-prompt',   { opacity: 1, duration: 0.5 })
@@ -1457,28 +1435,30 @@ const animations = {
     // Hide all words initially
     gsap.set('.pipe-story-word', { opacity: 0 });
 
-    // Pipeline signal cycles continuously
     const cycleDuration = 0.16;
-    const pipeTl = gsap.timeline({ repeat: wordCount - 1 });
-    pipeTl.set('#pipe-signal', { attr: { cx: stages[0].x }, opacity: 1 })
-          .to('#pipe-signal', {
-            attr: { cx: stages[3].x },
-            duration: cycleDuration * 0.7,
-            ease: 'power1.inOut'
-          })
-          .to('#pipe-signal', { opacity: 0, duration: cycleDuration * 0.1 })
-          .to({}, { duration: cycleDuration * 0.2 });
 
-    // Word reveal + counter update
-    const wordTl = gsap.timeline({ delay: 0.5 });
+    // Master timeline — both signal and word reveal loop in sync
+    const masterTl = gsap.timeline({ repeat: -1, repeatDelay: 2 });
+
+    // Signal sub-timeline: one sweep per word
+    const signalTl = gsap.timeline({ repeat: wordCount - 1 });
+    signalTl
+      .set('#pipe-signal', { attr: { cx: stages[0].x }, opacity: 1 })
+      .to('#pipe-signal', { attr: { cx: stages[3].x }, duration: cycleDuration * 0.7, ease: 'power1.inOut' })
+      .to('#pipe-signal', { opacity: 0, duration: cycleDuration * 0.1 })
+      .to({}, { duration: cycleDuration * 0.2 });
+
+    masterTl.add(signalTl, 0);
+
+    // Word reveal + counter at +0.5 s offset to sync with signal
     words.forEach((_, i) => {
-      const at = i * cycleDuration;
-      wordTl.to(`.pipe-story-word[data-i="${i}"]`, {
+      const at = 0.5 + i * cycleDuration;
+      masterTl.to(`.pipe-story-word[data-i="${i}"]`, {
         opacity: 1,
         duration: cycleDuration * 0.4,
         ease: 'power2.out'
       }, at + cycleDuration * 0.6);
-      wordTl.call(() => {
+      masterTl.call(() => {
         const counter = visual.querySelector('#pipe-counter');
         if (counter) counter.textContent = `Token ${i + 1} of ${wordCount}`;
       }, [], at + cycleDuration * 0.5);
@@ -1516,7 +1496,7 @@ const animations = {
         <p class="visual-caption" id="ws-caption" style="opacity:0">This enriched representation flows into the feed-forward layer, and then the next token's attention, and so on.</p>
       </div>`;
 
-    const tl = gsap.timeline();
+    const tl = gsap.timeline({ repeat: -1, repeatDelay: 1.5 });
     tl.fromTo('#ws-blend', { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.3 });
 
     contributors.forEach((_, i) => {
@@ -1610,7 +1590,7 @@ const animations = {
 
     visual.innerHTML = svg;
 
-    const tl = gsap.timeline({ delay: 0.5 });
+    const tl = gsap.timeline({ delay: 0.5, repeat: -1, repeatDelay: 1.5 });
 
     // Phase 1: Hold the empty state
     tl.to({}, { duration: 1.0 });
@@ -1660,12 +1640,12 @@ const animations = {
       .to('#en-next-label', { opacity: 1, duration: 0.4 }, '+=0.2')
       .to('#en-next-title', { opacity: 1, y: 0, duration: 0.5 }, '+=0.1');
 
-    // Phase 5: Subtle pulse on lit network to keep attention
+    // Phase 5: Subtle pulse (finite so the outer repeat: -1 can restart cleanly)
     tl.to('.en-node', {
       opacity: 0.7,
       duration: 1.2,
       yoyo: true,
-      repeat: -1,
+      repeat: 3,
       ease: 'sine.inOut'
     }, '+=0.5');
   },
