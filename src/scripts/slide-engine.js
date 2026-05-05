@@ -2,6 +2,8 @@ import gsap from 'gsap';
 
 const COLORS = ['#6ee7b7', '#60a5fa', '#f472b6', '#fb923c', '#a78bfa', '#34d399', '#fbbf24', '#e879f9'];
 
+const loopTimers = new WeakMap();
+
 export function initSlides() {
   const scenes = [...document.querySelectorAll('[data-scene]')];
   const totalEl = document.getElementById('scene-total');
@@ -38,6 +40,13 @@ export function initSlides() {
     const direction = index > current ? 1 : -1;
     const outScene = scenes[current];
     const inScene = scenes[index];
+
+    // Cancel the loop for the scene being left
+    if (loopTimers.has(outScene)) {
+      clearTimeout(loopTimers.get(outScene));
+      loopTimers.delete(outScene);
+    }
+
     gsap.set(inScene, { x: direction * 100 + '%', autoAlpha: 1 });
     gsap.timeline({
       onComplete() { current = index; busy = false; updateUI(); runAnimation(inScene); }
@@ -67,7 +76,22 @@ export function initSlides() {
 function runAnimation(scene) {
   const type = scene.dataset.animation;
   const visual = scene.querySelector('.scene-visual');
-  if (type && animations[type]) animations[type](scene, visual);
+
+  // Cancel any pending loop for this scene
+  if (loopTimers.has(scene)) {
+    clearTimeout(loopTimers.get(scene));
+    loopTimers.delete(scene);
+  }
+
+  if (!type || !animations[type]) return;
+
+  // Kill lingering visual tweens from the previous run
+  if (visual) gsap.killTweensOf([...visual.querySelectorAll('*')]);
+
+  animations[type](scene, visual);
+
+  // Schedule the next loop (9 s gives every animation time to finish + a pause)
+  loopTimers.set(scene, setTimeout(() => runAnimation(scene), 9000));
 }
 
 const animations = {

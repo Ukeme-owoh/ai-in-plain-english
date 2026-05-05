@@ -38,7 +38,7 @@ import Term from '../../components/Term.astro';
     Each token gets converted into a long list of numbers called an <Term word="Embedding" definition="A list of hundreds of numbers that represents one token. Tokens with similar meanings end up with similar number patterns. The embedding is a coordinate in a vast space of meaning." analogy="GPS coordinates for words. Door and gate live in the same neighborhood. Door and tuesday live in different cities.">embedding</Term>.
   </p>
   <p class="animate-in">Door and gate sit close together in this space. Door and tuesday sit far apart.</p>
-  <p class="animate-in">The model has learned where every word lives.</p>
+  <p class="animate-in">The model has learned where every word lives. But location alone is not meaning. Tokens still have to talk to each other. How does the model make that happen?</p>
 </Scene>
 
 <Scene animation="neural-net" index={4}>
@@ -48,6 +48,7 @@ import Term from '../../components/Term.astro';
   </p>
   <p class="animate-in">Each layer reshapes the signal.</p>
   <p class="animate-in">By the top, the network has produced a probability for every possible next word in its vocabulary.</p>
+  <p class="animate-in">One problem remains. A stack of layers reads tokens without knowing what surrounds them. "Bank" near "river" means something different than "bank" near "loan." Something has to let every token see every other token at the same time.</p>
 </Scene>
 
 <Scene animation="parallel" index={5}>
@@ -56,14 +57,14 @@ import Term from '../../components/Term.astro';
     Inside each layer, every token looks at every other token. Each one asks the same question. How much do you matter for understanding me? This is called <Term word="Attention" definition="A mechanism that lets every token in the sequence look at every other token and assign each one a weight. The weights decide whose meaning gets blended into whose. Attention runs simultaneously, in parallel, for every token." analogy="Re-reading the start of a sentence when a word near the end surprises you.">attention</Term>.
   </p>
   <p class="animate-in">Some conversations are loud. Most are quiet.</p>
-  <p class="animate-in">Loud ones shape the next word more than quiet ones.</p>
+  <p class="animate-in">Loud ones shape the next word more than quiet ones. But which ones? Every token scores every other. There is a specific calculation behind each connection.</p>
 </Scene>
 
 <Scene animation="heatmap" index={6}>
   <h2 class="animate-in">The story stays consistent</h2>
   <p class="animate-in">When Claude writes "she reached for the handle" eighty tokens later, it is still attending to door and closet from your original prompt.</p>
   <p class="animate-in">That is how the character stays the same person from the first sentence to the last.</p>
-  <p class="animate-in">Door at token four still affects door at token eighty four.</p>
+  <p class="animate-in">Door at token four still affects door at token eighty four. But every new word Claude generates gets added to the list. How large does that list get before something has to give?</p>
 </Scene>
 
 <Scene animation="context-window" index={7}>
@@ -90,7 +91,7 @@ import Term from '../../components/Term.astro';
     A setting called <Term word="Temperature" definition="A number that controls how often the model picks an unlikely token instead of the top one. At zero, the model is fully deterministic. At one, the model surprises itself. At two, the model gets weird." analogy="The wildness dial on a creative writing assistant. Low for safe. High for strange.">temperature</Term> introduces controlled randomness.
   </p>
   <p class="animate-in">At zero, Claude always picks the top word. At seven tenths, it sometimes picks a less likely one. At one and a half, it gets strange.</p>
-  <p class="animate-in">Tokens. Attention. Patterns. Randomness. All four pieces are now on the table.</p>
+  <p class="animate-in">Tokens. Attention. Patterns. Randomness. All four pieces on the table. Now watch them run ninety four times in a row.</p>
 </Scene>
 
 <Scene animation="pipeline" index={10}>
@@ -98,7 +99,7 @@ import Term from '../../components/Term.astro';
   <p class="animate-in">Now run the whole thing.</p>
   <p class="animate-in">Prompt in. Tokens. Vectors. Layers. Attention. One output token. Add to context. Run it again.</p>
   <p class="animate-in">Ninety four times. That is your paragraph.</p>
-  <p class="animate-in">You typed thirteen words. Your words did more work than you think.</p>
+  <p class="animate-in">You typed thirteen words. Your words did more work than you think. The next question is what you can do with that knowledge.</p>
 </Scene>
 
 <Scene animation="prompt-comparison" index={11}>

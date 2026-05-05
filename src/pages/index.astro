@@ -41,15 +41,20 @@ const base = import.meta.env.BASE_URL;
 </Base>
 
 <style>
+  /* Widen the page layout beyond the default 720px blog column */
+  :global(main) {
+    max-width: 1200px;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
   .home {
     min-height: 100vh;
-    padding: 0 2rem 6rem;
-    max-width: 1200px;
-    margin: 0 auto;
+    padding: 0 0 4rem;
   }
 
   .home-header {
-    padding: 6rem 0 4rem;
+    padding: 5rem 0 3.5rem;
     max-width: 680px;
   }
 
@@ -151,5 +156,18 @@ const base = import.meta.env.BASE_URL;
     color: #555;
     margin-top: 0.5rem;
     transition: color 0.2s;
+  }
+
+  @media (max-width: 600px) {
+    .home-header {
+      padding: 3rem 0 2rem;
+    }
+    .home-eyebrow {
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+    }
+    .home-title {
+      font-size: clamp(1.75rem, 8vw, 2.5rem);
+    }
   }
 </style>
