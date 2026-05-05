@@ -326,6 +326,55 @@ const animations = {
     tl.to('#arch-attn rect', { stroke: '#c4b5fd', strokeWidth: 3, duration: 0.4, repeat: 2, yoyo: true, ease: 'sine.inOut' }, '+=0.3');
   },
 
+  'typewriter': (scene, visual) => {
+    gsap.fromTo(scene.querySelectorAll('.animate-in'),
+      { y: 24, autoAlpha: 0 },
+      { y: 0, autoAlpha: 1, duration: 0.7, stagger: 0.12, ease: 'power2.out' }
+    );
+
+    if (!visual) return;
+
+    const story = "Once upon a time, there was a curious girl named Maya. On her seventh birthday, she discovered a small wooden door at the back of her closet. It was no bigger than a book. When she pressed her hand against it, the door creaked open.";
+    const words = story.split(' ');
+
+    visual.innerHTML = `
+      <div class="tw-wrap">
+        <div class="tw-counter-row">
+          <span class="tw-counter-label">Token</span>
+          <span class="tw-counter" id="tw-counter">1</span>
+          <span class="tw-counter-of">of ${words.length}</span>
+        </div>
+        <div class="tw-text" id="tw-text">
+          ${words.map((w, i) =>
+            `<span class="tw-word" data-i="${i}">${w}${i < words.length - 1 ? ' ' : ''}</span>`
+          ).join('')}
+        </div>
+        <div class="tw-arrow" id="tw-arrow">↑ next prediction</div>
+      </div>`;
+
+    gsap.set('.tw-word', { opacity: 0 });
+    gsap.set('#tw-arrow', { opacity: 0 });
+
+    const tl = gsap.timeline({ delay: 0.5 });
+    const wordDuration = 0.11;
+
+    words.forEach((_, i) => {
+      const at = i * wordDuration;
+      tl.to(`.tw-word[data-i="${i}"]`, {
+        opacity: 1,
+        duration: wordDuration * 0.5,
+        ease: 'none'
+      }, at);
+      tl.call(() => {
+        const counter = visual.querySelector('#tw-counter');
+        if (counter) counter.textContent = i + 1;
+      }, [], at);
+    });
+
+    // After all words, show the arrow + caption
+    tl.to('#tw-arrow', { opacity: 0.8, y: -4, duration: 0.4 }, '+=0.3');
+  },
+
   'embeddings': (scene, visual) => {
     gsap.fromTo(scene.querySelectorAll('.animate-in'),
       { y: 24, autoAlpha: 0 },

@@ -274,6 +274,61 @@
   max-width: 360px;
 }
 
+/* Typewriter (Scene 2) */
+.tw-wrap {
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.tw-counter-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  font-family: monospace;
+}
+
+.tw-counter-label {
+  font-size: 0.7rem;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.tw-counter {
+  font-size: 1.6rem;
+  color: #6ee7b7;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.tw-counter-of {
+  font-size: 0.85rem;
+  color: #555;
+}
+
+.tw-text {
+  font-size: 0.95rem;
+  color: #ddd;
+  line-height: 1.7;
+  padding: 1rem 1.1rem;
+  border: 1px solid #1a1a1a;
+  background: #0f0f0f;
+  border-radius: 8px;
+}
+
+.tw-word {
+  display: inline;
+}
+
+.tw-arrow {
+  font-size: 0.8rem;
+  color: #6ee7b7;
+  text-align: center;
+}
+
 .cmp-prompt {
   font-size: 9.5px;
   line-height: 1.45;
