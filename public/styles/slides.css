@@ -776,9 +776,13 @@
     padding: 0;
   }
 
+  /* On mobile, scene content can be taller than viewport — start
+     content at the top so the header isn't centered above the
+     scroll origin and clipped. */
   .scene {
-    padding: 2rem 1.25rem 7rem;
+    padding: 1.5rem 1.25rem 6rem;
     overflow-y: auto;
+    align-items: flex-start;
   }
 
   .scene-text h1 { font-size: 2rem; }
