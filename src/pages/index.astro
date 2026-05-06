@@ -64,30 +64,76 @@ const emptyPlaceholders = 6;
 
     <section class="post-grid">
       {techPosts.map((post) => (
-        <a href={`${base}/posts/${post.slug}`} class="post-card" data-category="tech">
-          <span class="card-week">Week {post.data.week}</span>
-          <h2 class="card-title">{post.data.title}</h2>
-          <p class="card-desc">{post.data.description}</p>
-          <span class="card-cta">Read →</span>
+        <a
+          href={`${base}/posts/${post.slug}`}
+          class={`post-card theme-${post.data.theme ?? 'lavender'}`}
+          data-category="tech"
+        >
+          <div class="card-preview">
+            <div class="card-meta">
+              <span class="card-status">
+                <span class="card-dot"></span>
+                {post.data.previewLabel ?? 'article.read()'}
+              </span>
+              <span class="card-week">Week {post.data.week}</span>
+            </div>
+            <div class="card-figure">
+              <div class="card-icon-ring">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true">
+                  <rect x="2" y="9" width="6" height="6" rx="1.5" />
+                  <rect x="9" y="9" width="6" height="6" rx="1.5" />
+                  <rect x="16" y="9" width="6" height="6" rx="1.5" />
+                </svg>
+              </div>
+              <span class="card-figure-label">{post.data.previewCaption ?? 'Article'}</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <h2 class="card-title">{post.data.title}</h2>
+            <p class="card-desc">{post.data.description}</p>
+          </div>
         </a>
       ))}
 
       {Array.from({ length: techPlaceholders }).map((_, i) => (
         <div class="post-card post-card--coming" data-category="tech">
-          <span class="card-week">Week {techPosts.length + i + 1}</span>
-          <h2 class="card-title coming-title">Coming soon</h2>
+          <div class="card-preview">
+            <div class="card-meta">
+              <span class="card-week">Week {techPosts.length + i + 1}</span>
+            </div>
+            <div class="card-figure">
+              <div class="card-icon-ring card-icon-ring--empty"></div>
+            </div>
+          </div>
+          <div class="card-body">
+            <h2 class="card-title coming-title">Coming soon</h2>
+          </div>
         </div>
       ))}
 
       {Array.from({ length: emptyPlaceholders }).map((_, i) => (
         <div class="post-card post-card--coming" data-category="strategy">
-          <h2 class="card-title coming-title">Coming soon</h2>
+          <div class="card-preview">
+            <div class="card-figure">
+              <div class="card-icon-ring card-icon-ring--empty"></div>
+            </div>
+          </div>
+          <div class="card-body">
+            <h2 class="card-title coming-title">Coming soon</h2>
+          </div>
         </div>
       ))}
 
       {Array.from({ length: emptyPlaceholders }).map((_, i) => (
         <div class="post-card post-card--coming" data-category="policy">
-          <h2 class="card-title coming-title">Coming soon</h2>
+          <div class="card-preview">
+            <div class="card-figure">
+              <div class="card-icon-ring card-icon-ring--empty"></div>
+            </div>
+          </div>
+          <div class="card-body">
+            <h2 class="card-title coming-title">Coming soon</h2>
+          </div>
         </div>
       ))}
     </section>
@@ -236,43 +282,130 @@ const emptyPlaceholders = 6;
   .post-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1px;
-    border: 1px solid #1a1a1a;
+    gap: 1rem;
     margin-inline: var(--gutter);
   }
+
+  /* Pastel theme palette */
+  .theme-lavender { --theme-color: #c4b5fd; }
+  .theme-sky      { --theme-color: #7dd3fc; }
+  .theme-coral    { --theme-color: #fda4af; }
+  .theme-amber    { --theme-color: #fcd34d; }
+  .theme-mint     { --theme-color: #86efac; }
+  .theme-magenta  { --theme-color: #f0abfc; }
 
   .post-card {
     display: flex;
     flex-direction: column;
-    gap: 0.6rem;
-    padding: 2rem;
     border: 1px solid #1a1a1a;
+    border-radius: 14px;
+    overflow: hidden;
     text-decoration: none;
     color: inherit;
     background: #0f0f0f;
-    transition: background 0.2s;
+    transition: border-color 0.2s, transform 0.2s;
     position: relative;
   }
 
   .post-card:hover {
-    background: #131313;
-  }
-
-  .post-card:hover .card-cta {
-    color: #6ee7b7;
+    border-color: color-mix(in srgb, var(--theme-color, #333) 40%, #1a1a1a);
+    transform: translateY(-2px);
   }
 
   .post-card--coming {
-    opacity: 0.3;
+    opacity: 0.45;
     pointer-events: none;
   }
 
+  /* Top zone — themed preview */
+  .card-preview {
+    position: relative;
+    min-height: 200px;
+    padding: 1rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    background-color: color-mix(in srgb, var(--theme-color, #2a2a2a) 5%, #0f0f0f);
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+    background-size: 22px 22px;
+    border-bottom: 1px solid #1a1a1a;
+  }
+
+  .card-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.72rem;
+  }
+
+  .card-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-family: 'Fira Code', ui-monospace, SFMono-Regular, monospace;
+    color: var(--theme-color, #888);
+  }
+
+  .card-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--theme-color, #888);
+    box-shadow: 0 0 6px var(--theme-color, transparent);
+  }
+
   .card-week {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: #6ee7b7;
+    letter-spacing: 0.12em;
+    color: #555;
     font-weight: 600;
+  }
+
+  .card-figure {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.65rem;
+  }
+
+  .card-icon-ring {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.45);
+    border: 2px solid var(--theme-color, #2a2a2a);
+    box-shadow:
+      0 0 0 4px color-mix(in srgb, var(--theme-color, transparent) 18%, transparent),
+      0 0 22px color-mix(in srgb, var(--theme-color, transparent) 50%, transparent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--theme-color, #555);
+  }
+
+  .card-icon-ring--empty {
+    border-color: #2a2a2a;
+    box-shadow: none;
+    background: rgba(0, 0, 0, 0.25);
+  }
+
+  .card-figure-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #e8e8e8;
+    letter-spacing: 0.01em;
+  }
+
+  /* Bottom zone — content */
+  .card-body {
+    padding: 1.1rem 1.25rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
   }
 
   .card-title {
@@ -287,17 +420,9 @@ const emptyPlaceholders = 6;
   }
 
   .card-desc {
-    font-size: 0.9rem;
-    color: #666;
-    line-height: 1.6;
-    flex: 1;
-  }
-
-  .card-cta {
-    font-size: 0.85rem;
-    color: #555;
-    margin-top: 0.5rem;
-    transition: color 0.2s;
+    font-size: 0.88rem;
+    color: #777;
+    line-height: 1.55;
   }
 
   @media (max-width: 600px) {

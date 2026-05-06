@@ -8,6 +8,9 @@ const posts = defineCollection({
     publishDate: z.date(),
     week: z.number(),
     category: z.enum(['tech', 'strategy', 'policy']),
+    theme: z.enum(['lavender', 'sky', 'coral', 'amber', 'mint', 'magenta']).optional(),
+    previewLabel: z.string().optional(),
+    previewCaption: z.string().optional(),
   }),
 });
 
