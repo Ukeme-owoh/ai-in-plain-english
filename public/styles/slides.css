@@ -381,7 +381,8 @@
 .slide-back-bar {
   display: flex;
   align-items: center;
-  padding: 0.75rem clamp(1rem, 4vw, 2.5rem);
+  /* Align link's left edge with the centered scene-layout (max-width 1100px) */
+  padding: 0.75rem max(2rem, calc((100vw - 1100px) / 2));
   border-bottom: 1px solid #1a1a1a;
   background: #0a0a0a;
   z-index: 10;
@@ -401,7 +402,7 @@
 .slide-nav {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 1rem;
   padding: 0.75rem 2rem;
   border-top: 1px solid #1a1a1a;
   background: #0a0a0a;
@@ -426,9 +427,11 @@
 }
 
 .nav-center {
+  flex: 1;
   display: flex;
   align-items: center;
   gap: 1rem;
+  min-width: 0;
 }
 
 .nav-btn {
@@ -452,9 +455,11 @@
 }
 
 .progress-dots {
+  flex: 1;
   display: flex;
-  gap: 6px;
   align-items: center;
+  justify-content: space-between;
+  min-width: 0;
 }
 
 .dot {
@@ -809,9 +814,12 @@
   .scene-text h2 { font-size: 1.5rem; }
 
   .slide-back-bar {
-    padding: 0.5rem clamp(1rem, 4vw, 2.5rem);
+    padding: 0.5rem 1.25rem;
   }
   .slide-back {
     font-size: 0.78rem;
+  }
+  .slide-nav {
+    padding: 0.5rem 1rem;
   }
 }
