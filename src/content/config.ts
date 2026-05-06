@@ -7,6 +7,7 @@ const posts = defineCollection({
     description: z.string(),
     publishDate: z.date(),
     week: z.number(),
+    category: z.enum(['tech', 'strategy', 'policy']),
   }),
 });
 

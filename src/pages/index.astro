@@ -4,9 +4,28 @@ import { getCollection } from 'astro:content';
 
 const posts = (await getCollection('posts')).sort((a, b) => a.data.week - b.data.week);
 const base = import.meta.env.BASE_URL;
+
+const TABS = [
+  { slug: 'tech', label: 'Tech' },
+  { slug: 'strategy', label: 'Strategy' },
+  { slug: 'policy', label: 'Policy' },
+];
+
+const techPosts = posts.filter((p) => p.data.category === 'tech');
+const techPlaceholders = Math.max(0, 12 - techPosts.length);
+const emptyPlaceholders = 6;
 ---
 
 <Base title="Home">
+  <script is:inline>
+    (function () {
+      var valid = ['tech', 'strategy', 'policy'];
+      var params = new URLSearchParams(location.search);
+      var t = params.get('tab');
+      document.documentElement.dataset.activeTab = valid.indexOf(t) >= 0 ? t : 'tech';
+    })();
+  </script>
+
   <div class="home">
 
     <header class="home-header">
@@ -29,11 +48,23 @@ const base = import.meta.env.BASE_URL;
           </svg>
         </a>
       </p>
+
+      <nav class="home-tabs" aria-label="Article categories">
+        {TABS.map((t) => (
+          <a
+            href={t.slug === 'tech' ? `${base}/` : `${base}/?tab=${t.slug}`}
+            class="home-tab"
+            data-tab={t.slug}
+          >
+            {t.label}
+          </a>
+        ))}
+      </nav>
     </header>
 
     <section class="post-grid">
-      {posts.map((post) => (
-        <a href={`${base}/posts/${post.slug}`} class="post-card">
+      {techPosts.map((post) => (
+        <a href={`${base}/posts/${post.slug}`} class="post-card" data-category="tech">
           <span class="card-week">Week {post.data.week}</span>
           <h2 class="card-title">{post.data.title}</h2>
           <p class="card-desc">{post.data.description}</p>
@@ -41,9 +72,21 @@ const base = import.meta.env.BASE_URL;
         </a>
       ))}
 
-      {Array.from({ length: Math.max(0, 12 - posts.length) }).map((_, i) => (
-        <div class="post-card post-card--coming">
-          <span class="card-week">Week {posts.length + i + 1}</span>
+      {Array.from({ length: techPlaceholders }).map((_, i) => (
+        <div class="post-card post-card--coming" data-category="tech">
+          <span class="card-week">Week {techPosts.length + i + 1}</span>
+          <h2 class="card-title coming-title">Coming soon</h2>
+        </div>
+      ))}
+
+      {Array.from({ length: emptyPlaceholders }).map((_, i) => (
+        <div class="post-card post-card--coming" data-category="strategy">
+          <h2 class="card-title coming-title">Coming soon</h2>
+        </div>
+      ))}
+
+      {Array.from({ length: emptyPlaceholders }).map((_, i) => (
+        <div class="post-card post-card--coming" data-category="policy">
           <h2 class="card-title coming-title">Coming soon</h2>
         </div>
       ))}
@@ -51,6 +94,37 @@ const base = import.meta.env.BASE_URL;
 
   </div>
 </Base>
+
+<script is:inline>
+  (function () {
+    var valid = ['tech', 'strategy', 'policy'];
+
+    function getTab() {
+      var t = new URLSearchParams(location.search).get('tab');
+      return valid.indexOf(t) >= 0 ? t : 'tech';
+    }
+
+    function applyTab(tab, push) {
+      document.documentElement.dataset.activeTab = tab;
+      if (push) {
+        var url = new URL(location.pathname, location.origin);
+        if (tab !== 'tech') url.searchParams.set('tab', tab);
+        history.pushState({ tab: tab }, '', url);
+      }
+    }
+
+    document.querySelectorAll('.home-tab').forEach(function (el) {
+      el.addEventListener('click', function (e) {
+        e.preventDefault();
+        applyTab(el.dataset.tab, true);
+      });
+    });
+
+    window.addEventListener('popstate', function () {
+      applyTab(getTab(), false);
+    });
+  })();
+</script>
 
 <style>
   /* Home page owns its own spacing — --gutter is the single source of truth */
@@ -82,7 +156,7 @@ const base = import.meta.env.BASE_URL;
     max-width: none;
     margin: 0;
     border-bottom: none;
-    padding: 2rem var(--gutter) 3rem;
+    padding: 2rem var(--gutter) 2rem;
   }
 
   .home-title {
@@ -120,6 +194,41 @@ const base = import.meta.env.BASE_URL;
 
   .home-linkedin:hover {
     color: #6ee7b7;
+  }
+
+  .home-tabs {
+    display: flex;
+    gap: 1.75rem;
+    margin-top: 2rem;
+  }
+
+  .home-tab {
+    color: #777;
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid transparent;
+    transition: color 0.2s, border-color 0.2s;
+  }
+
+  .home-tab:hover {
+    color: #6ee7b7;
+  }
+
+  /* Active tab — driven by html[data-active-tab] */
+  :global(html[data-active-tab='tech']) .home-tab[data-tab='tech'],
+  :global(html[data-active-tab='strategy']) .home-tab[data-tab='strategy'],
+  :global(html[data-active-tab='policy']) .home-tab[data-tab='policy'] {
+    color: #6ee7b7;
+    border-bottom-color: #6ee7b7;
+  }
+
+  /* Hide cards that don't match the active tab */
+  :global(html[data-active-tab='tech']) .post-card:not([data-category='tech']),
+  :global(html[data-active-tab='strategy']) .post-card:not([data-category='strategy']),
+  :global(html[data-active-tab='policy']) .post-card:not([data-category='policy']) {
+    display: none;
   }
 
   .post-grid {
@@ -191,7 +300,7 @@ const base = import.meta.env.BASE_URL;
 
   @media (max-width: 600px) {
     .home-header {
-      padding: 1.5rem var(--gutter) 2rem;
+      padding: 1.5rem var(--gutter) 1.5rem;
     }
     .home-title {
       font-size: clamp(1.75rem, 8vw, 2.5rem);
