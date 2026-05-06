@@ -400,9 +400,9 @@
 }
 
 .slide-nav {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  gap: 1rem;
   padding: 0.75rem 2rem;
   border-top: 1px solid #1a1a1a;
   background: #0a0a0a;
@@ -427,11 +427,10 @@
 }
 
 .nav-center {
-  flex: 1;
+  grid-column: 2;
   display: flex;
   align-items: center;
   gap: 1rem;
-  min-width: 0;
 }
 
 .nav-btn {
@@ -455,11 +454,9 @@
 }
 
 .progress-dots {
-  flex: 1;
   display: flex;
+  gap: 6px;
   align-items: center;
-  justify-content: space-between;
-  min-width: 0;
 }
 
 .dot {
@@ -479,6 +476,8 @@
 }
 
 .nav-counter {
+  grid-column: 3;
+  justify-self: end;
   font-size: 0.8rem;
   color: #444;
   font-variant-numeric: tabular-nums;
