@@ -10,7 +10,6 @@ const base = import.meta.env.BASE_URL;
   <div class="home">
 
     <header class="home-header">
-      <p class="home-eyebrow">AI in Plain English</p>
       <h1 class="home-title">Modern AI, explained.</h1>
       <p class="home-sub">
         One visual post a week. Transformers. Reasoning models. Agents. Evals.
@@ -58,17 +57,12 @@ const base = import.meta.env.BASE_URL;
     padding: 0 0 4rem;
   }
 
+  /* Override the global `header` rule (720px centered, bottom border) */
   .home-header {
-    padding: 5rem var(--gutter) 3.5rem;
-  }
-
-  .home-eyebrow {
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: #6ee7b7;
-    font-weight: 600;
-    margin-bottom: 1.25rem;
+    max-width: none;
+    margin: 0;
+    border-bottom: none;
+    padding: 2rem var(--gutter) 3rem;
   }
 
   .home-title {
@@ -164,11 +158,7 @@ const base = import.meta.env.BASE_URL;
 
   @media (max-width: 600px) {
     .home-header {
-      padding: 3rem var(--gutter) 2rem;
-    }
-    .home-eyebrow {
-      font-size: 0.7rem;
-      letter-spacing: 0.08em;
+      padding: 1.5rem var(--gutter) 2rem;
     }
     .home-title {
       font-size: clamp(1.75rem, 8vw, 2.5rem);
