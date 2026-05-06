@@ -15,6 +15,10 @@ const base = import.meta.env.BASE_URL;
 <Base title={title} description={description}>
   <div class="slide-post">
 
+    <header class="slide-back-bar">
+      <a href={base} class="slide-back">← View all articles</a>
+    </header>
+
     <div id="slides-wrapper" class="slides-wrapper">
       <slot />
       <section class="scene" data-scene="questions" data-animation="text-reveal">
