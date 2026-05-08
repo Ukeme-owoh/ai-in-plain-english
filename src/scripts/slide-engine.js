@@ -2426,5 +2426,193 @@ const animations = {
 
     const after = barEls.length * 0.2 + 0.5;
     tl.to(caption, { autoAlpha: 1, y: 0, duration: 0.4 }, after);
+  },
+
+  'interactive-model': (scene, visual) => {
+    gsap.fromTo(scene.querySelectorAll('.animate-in'),
+      { y: 24, autoAlpha: 0 },
+      { y: 0, autoAlpha: 1, duration: 0.7, stagger: 0.12, ease: 'power2.out' }
+    );
+    if (!visual) return;
+
+    // ── Formula ─────────────────────────────────────────────────
+    function compute(unwind, lockIn, tpw, demand) {
+      const ue = (10 - unwind) * 2;
+      const li = (lockIn / 100) * 30;
+      const ee = (tpw - 1) * 5;
+      const de = (demand - 1) * 3;
+      const end2030 = Math.round(100 + ue + li - ee + de);
+
+      // 5-pt trajectory 2026–2030 (peak 2028, then eases)
+      const peakBonus = Math.round(ue * 0.15);
+      const peak = end2030 + peakBonus;
+      const traj = [
+        100,
+        Math.round(100 + (peak - 100) * 0.45),
+        peak,
+        Math.round(peak - (peak - end2030) * 0.5),
+        end2030
+      ];
+      return { end2030, peak, traj };
+    }
+
+    // ── Presets ──────────────────────────────────────────────────
+    const presets = [
+      { lbl:'My view',       unwind:5, lockIn:55, tpw:4.0, demand:3.0 },
+      { lbl:'Deflation wins',unwind:8, lockIn:20, tpw:8.0, demand:2.0 },
+      { lbl:'Lock-in wins',  unwind:3, lockIn:90, tpw:2.0, demand:4.0 },
+      { lbl:'Power glut',    unwind:7, lockIn:30, tpw:10,  demand:2.0 },
+    ];
+
+    // ── SVG chart helper ─────────────────────────────────────────
+    const CL=34,CR=220,CT=8,CB=70, CIW=CR-CL, CIH=CB-CT;
+    const years = [2026,2027,2028,2029,2030];
+
+    function buildChartPath(traj) {
+      const yMin = 60, yMax = 200;
+      const clamp = v => Math.max(yMin, Math.min(yMax, v));
+      const px = i => CL + (i/4)*CIW;
+      const py = v => CB - ((clamp(v) - yMin)/(yMax - yMin))*CIH;
+      return traj.map((v,i)=>`${i?'L':'M'}${px(i).toFixed(1)},${py(v).toFixed(1)}`).join(' ');
+    }
+
+    function buildChart(traj, end2030) {
+      const yMin=60,yMax=200,step=(yMax-yMin)/4;
+      const py = v => CB - ((Math.max(yMin,Math.min(yMax,v))-yMin)/(yMax-yMin))*CIH;
+      const px = i => CL + (i/4)*CIW;
+      const gridLines = [80,100,120,140,160,180,200].filter(v=>v>=yMin&&v<=yMax).map(v=>`
+        <line x1="${CL}" y1="${py(v).toFixed(1)}" x2="${CR}" y2="${py(v).toFixed(1)}"
+              stroke="#1a1a1a" stroke-width="${v===100?'1.2':'0.5'}" stroke-dasharray="${v===100?'':'3,4'}"/>
+        <text x="${CL-3}" y="${(py(v)+3.5).toFixed(1)}" text-anchor="end" font-size="7" fill="#555">${v}</text>`).join('');
+      const xLabels = years.map((yr,i)=>`
+        <text x="${px(i).toFixed(1)}" y="${CB+10}" text-anchor="middle" font-size="7" fill="#555">'${String(yr).slice(2)}</text>`).join('');
+      const dotX = px(4).toFixed(1), dotY = py(end2030).toFixed(1);
+      return `<svg viewBox="0 0 240 90" style="width:100%;display:block">
+        <line x1="${CL}" y1="${CT}" x2="${CL}" y2="${CB}" stroke="#333" stroke-width="0.8"/>
+        <line x1="${CL}" y1="${CB}" x2="${CR}" y2="${CB}" stroke="#333" stroke-width="0.8"/>
+        ${gridLines}${xLabels}
+        <path d="${buildChartPath(traj)}" fill="none" stroke="#c05a52" stroke-width="2" stroke-linejoin="round"/>
+        <circle cx="${dotX}" cy="${dotY}" r="3.5" fill="#c05a52"/>
+      </svg>`;
+    }
+
+    // ── Layout ───────────────────────────────────────────────────
+    visual.innerHTML = `
+      <div style="width:100%;font-family:inherit;color:#e0e0e0">
+
+        <!-- chart -->
+        <div id="im-chart" style="margin-bottom:8px"></div>
+
+        <!-- output boxes 2×2 -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px">
+          <div style="border:1px solid #333;border-radius:6px;padding:8px 10px">
+            <div style="font-size:0.62rem;text-transform:uppercase;letter-spacing:.05em;color:#666">2030 token price</div>
+            <div id="im-end" style="font-size:1.6rem;font-weight:700;line-height:1.1;color:#e0e0e0">—</div>
+            <div id="im-end-sub" style="font-size:0.68rem;color:#555">vs today (100)</div>
+          </div>
+          <div style="border:1px solid #333;border-radius:6px;padding:8px 10px">
+            <div style="font-size:0.62rem;text-transform:uppercase;letter-spacing:.05em;color:#666">peak (when)</div>
+            <div id="im-peak" style="font-size:1.6rem;font-weight:700;line-height:1.1;color:#e0e0e0">—</div>
+            <div style="font-size:0.68rem;color:#555">in 2028</div>
+          </div>
+          <div style="border:1px solid #c05a5233;border-radius:6px;padding:8px 10px;background:#c05a5208">
+            <div style="font-size:0.62rem;text-transform:uppercase;letter-spacing:.05em;color:#c05a52">today's $20 plan in 2030</div>
+            <div id="im-20" style="font-size:1.6rem;font-weight:700;line-height:1.1;color:#c05a52">—</div>
+            <div style="font-size:0.68rem;color:#555">if price tracks the curve</div>
+          </div>
+          <div style="border:1px solid #c05a5233;border-radius:6px;padding:8px 10px;background:#c05a5208">
+            <div style="font-size:0.62rem;text-transform:uppercase;letter-spacing:.05em;color:#c05a52">today's $200 plan in 2030</div>
+            <div id="im-200" style="font-size:1.6rem;font-weight:700;line-height:1.1;color:#c05a52">—</div>
+            <div style="font-size:0.68rem;color:#555">if price tracks the curve</div>
+          </div>
+        </div>
+
+        <!-- sliders 2×2 -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:0.7rem;color:#888;margin-bottom:2px">
+              <span>Subsidy unwind speed</span><span id="im-lbl-unwind" style="color:#e0e0e0;font-weight:600"></span>
+            </div>
+            <input id="im-unwind" type="range" min="1" max="10" step="1" value="5" style="width:100%;accent-color:#c05a52"/>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:0.7rem;color:#888;margin-bottom:2px">
+              <span>Lock-in pricing power</span><span id="im-lbl-lockin" style="color:#e0e0e0;font-weight:600"></span>
+            </div>
+            <input id="im-lockin" type="range" min="0" max="100" step="5" value="55" style="width:100%;accent-color:#c05a52"/>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:0.7rem;color:#888;margin-bottom:2px">
+              <span>Tokens-per-watt growth</span><span id="im-lbl-tpw" style="color:#e0e0e0;font-weight:600"></span>
+            </div>
+            <input id="im-tpw" type="range" min="1" max="12" step="0.5" value="4" style="width:100%;accent-color:#c05a52"/>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:0.7rem;color:#888;margin-bottom:2px">
+              <span>Token demand growth</span><span id="im-lbl-demand" style="color:#e0e0e0;font-weight:600"></span>
+            </div>
+            <input id="im-demand" type="range" min="1" max="6" step="0.5" value="3" style="width:100%;accent-color:#c05a52"/>
+          </div>
+        </div>
+
+        <!-- preset buttons -->
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          ${presets.map((p,i)=>`
+            <button id="im-preset-${i}" data-i="${i}"
+              style="font-size:0.68rem;padding:4px 10px;border-radius:4px;cursor:pointer;
+                     background:${i===0?'#c05a52':'transparent'};
+                     color:${i===0?'#fff':'#888'};
+                     border:1px solid ${i===0?'#c05a52':'#333'};
+                     transition:all .2s">${p.lbl}</button>`).join('')}
+        </div>
+      </div>`;
+
+    // ── Update function ──────────────────────────────────────────
+    function update() {
+      const unwind = parseFloat(visual.querySelector('#im-unwind').value);
+      const lockIn = parseFloat(visual.querySelector('#im-lockin').value);
+      const tpw    = parseFloat(visual.querySelector('#im-tpw').value);
+      const demand = parseFloat(visual.querySelector('#im-demand').value);
+
+      const { end2030, peak, traj } = compute(unwind, lockIn, tpw, demand);
+
+      visual.querySelector('#im-end').textContent  = end2030;
+      visual.querySelector('#im-end-sub').textContent = `${end2030>100?'+':''}${end2030-100} vs today (100)`;
+      visual.querySelector('#im-peak').textContent = peak;
+      visual.querySelector('#im-20').textContent   = `$${(20 * end2030 / 100).toFixed(2)}`;
+      visual.querySelector('#im-200').textContent  = `$${(200 * end2030 / 100).toFixed(0)}`;
+
+      visual.querySelector('#im-lbl-unwind').textContent = `${unwind} yrs`;
+      visual.querySelector('#im-lbl-lockin').textContent = `${lockIn}%`;
+      visual.querySelector('#im-lbl-tpw').textContent    = `${tpw}×/gen`;
+      visual.querySelector('#im-lbl-demand').textContent = `${demand}×/yr`;
+
+      visual.querySelector('#im-chart').innerHTML = buildChart(traj, end2030);
+    }
+
+    // ── Wire inputs ──────────────────────────────────────────────
+    ['#im-unwind','#im-lockin','#im-tpw','#im-demand'].forEach(id => {
+      visual.querySelector(id).addEventListener('input', update);
+    });
+
+    presets.forEach((p, i) => {
+      visual.querySelector(`#im-preset-${i}`).addEventListener('click', () => {
+        visual.querySelector('#im-unwind').value = p.unwind;
+        visual.querySelector('#im-lockin').value = p.lockIn;
+        visual.querySelector('#im-tpw').value    = p.tpw;
+        visual.querySelector('#im-demand').value = p.demand;
+
+        presets.forEach((_,j) => {
+          const btn = visual.querySelector(`#im-preset-${j}`);
+          const active = j === i;
+          btn.style.background = active ? '#c05a52' : 'transparent';
+          btn.style.color      = active ? '#fff' : '#888';
+          btn.style.borderColor = active ? '#c05a52' : '#333';
+        });
+        update();
+      });
+    });
+
+    update();
   }
 };
