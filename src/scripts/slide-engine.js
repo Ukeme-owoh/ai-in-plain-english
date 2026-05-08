@@ -1715,5 +1715,280 @@ const animations = {
       .to(gapS, { opacity: 1, duration: 0.3 })
       .fromTo(caption, { autoAlpha: 0, y: 6 }, { autoAlpha: 1, y: 0, duration: 0.4 })
       .to(gapX, { opacity: 0.5, duration: 1.0, yoyo: true, repeat: 3, ease: 'sine.inOut' }, '+=1.0');
+  },
+
+  'price-table': (scene, visual) => {
+    gsap.fromTo(scene.querySelectorAll('.animate-in'),
+      { y: 24, autoAlpha: 0 },
+      { y: 0, autoAlpha: 1, duration: 0.7, stagger: 0.12, ease: 'power2.out' }
+    );
+    if (!visual) return;
+
+    const rows = [
+      { market: 'Consumer API rate',       arrow: '↓', dir: 'Falling',          color: '#6ee7b7' },
+      { market: 'Consumer subscription',   arrow: '→', dir: 'Flat / unclear',    color: '#888'    },
+      { market: 'Enterprise sticker rate', arrow: '→', dir: 'Flat',              color: '#888'    },
+      { market: 'Enterprise invoice',      arrow: '↑', dir: 'Rising near-term',  color: '#fda4af' },
+      { market: 'Cost per task',           arrow: '→', dir: 'Unclear',           color: '#888'    },
+      { market: 'Provider unit cost',      arrow: '↓', dir: 'Falling',           color: '#6ee7b7' },
+    ];
+
+    visual.innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:5px;padding:10px 6px;width:100%">
+        ${rows.map(r => `
+          <div class="pt-row" style="display:flex;align-items:center;
+            padding:8px 10px;background:#111;border-radius:6px;border:1px solid #1e1e1e">
+            <span style="font-size:0.78rem;color:#999;flex:1;min-width:0">${r.market}</span>
+            <span style="font-size:1rem;color:${r.color};margin:0 10px;flex-shrink:0">${r.arrow}</span>
+            <span style="font-size:0.72rem;color:${r.color};width:110px;text-align:right;flex-shrink:0">${r.dir}</span>
+          </div>`).join('')}
+      </div>
+      <p class="visual-caption">Six markets. They do not move together.</p>`;
+
+    const ptRows = visual.querySelectorAll('.pt-row');
+    gsap.set(ptRows, { autoAlpha: 0, x: -20 });
+    gsap.set(visual.querySelector('.visual-caption'), { autoAlpha: 0, y: 6 });
+
+    const tl = gsap.timeline({ repeat: -1, repeatDelay: 2.5 });
+    tl
+      .to(ptRows, { autoAlpha: 1, x: 0, duration: 0.4, stagger: 0.14, ease: 'power2.out' })
+      .fromTo(visual.querySelector('.visual-caption'),
+        { autoAlpha: 0, y: 6 }, { autoAlpha: 1, y: 0, duration: 0.4 }, '-=0.1');
+  },
+
+  'price-timeline': (scene, visual) => {
+    gsap.fromTo(scene.querySelectorAll('.animate-in'),
+      { y: 24, autoAlpha: 0 },
+      { y: 0, autoAlpha: 1, duration: 0.7, stagger: 0.12, ease: 'power2.out' }
+    );
+    if (!visual) return;
+
+    // Y: $0–$260. Plot: x 50→285, y 25→225
+    const L = 50, R = 285, T = 25, B = 225;
+    const H = B - T;   // 200
+    const W = R - L;   // 235
+    const maxY = 260;
+    const py = (v) => B - (v / maxY) * H;
+
+    // X: 2023.0–2026.5
+    const xRange = 3.5;
+    const px = (yr) => L + ((yr - 2023) / xRange) * W;
+
+    const y20 = py(20);
+
+    // Tier entries: label, value, launch year (approximate decimal)
+    const tiers = [
+      { label: '$200', val: 200, xr: 2024.92, color: '#fda4af' },
+      { label: '$100', xr: 2025.33, val: 100, color: '#f472b6' },
+      { label: '$250', xr: 2026.0,  val: 250, color: '#a78bfa' },
+    ];
+
+    let svg = `<svg viewBox="0 0 310 260" class="visual-svg">`;
+
+    // Axis lines
+    svg += `<line x1="${L}" y1="${B}" x2="${R}" y2="${B}" stroke="#2a2a2a" stroke-width="1"/>`;
+    svg += `<line x1="${L}" y1="${T}" x2="${L}" y2="${B}" stroke="#2a2a2a" stroke-width="1"/>`;
+
+    // X tick labels
+    [2023, 2024, 2025, 2026].forEach(yr => {
+      svg += `<text x="${px(yr)}" y="${B + 14}" text-anchor="middle" font-size="9" fill="#444">${yr}</text>`;
+    });
+
+    // Y tick labels
+    [0, 100, 200].forEach(v => {
+      svg += `<text x="${L - 4}" y="${py(v) + 3}" text-anchor="end" font-size="9" fill="#444">$${v}</text>`;
+      svg += `<line x1="${L}" y1="${py(v)}" x2="${R}" y2="${py(v)}" stroke="#1a1a1a" stroke-width="0.5"/>`;
+    });
+
+    // $20 flat line
+    svg += `<line class="line-20" x1="${L}" y1="${y20}" x2="${L}" y2="${y20}"
+      stroke="#6ee7b7" stroke-width="2.5" stroke-linecap="round"/>`;
+    svg += `<text class="lbl-20" x="${L + 4}" y="${y20 - 5}" font-size="10" fill="#6ee7b7" opacity="0">$20</text>`;
+    svg += `<text class="flat-note" x="${px(2025)}" y="${y20 - 5}" text-anchor="middle"
+      font-size="9" fill="#6ee7b7" opacity="0">flat since 2023</text>`;
+
+    // Tier marks
+    tiers.forEach((t, i) => {
+      const tx = px(t.xr);
+      const ty = py(t.val);
+      svg += `<line class="tier-line tier-${i}" x1="${tx}" y1="${ty}" x2="${tx}" y2="${ty}"
+        stroke="${t.color}" stroke-width="2" stroke-linecap="round" opacity="0"/>`;
+      svg += `<circle class="tier-dot tier-dot-${i}" cx="${tx}" cy="${ty}" r="4"
+        fill="${t.color}" opacity="0"/>`;
+      svg += `<text class="tier-lbl tier-lbl-${i}" x="${tx + 6}" y="${ty + 4}"
+        font-size="10" fill="${t.color}" opacity="0">${t.label}</text>`;
+    });
+
+    svg += `</svg>
+    <p class="visual-caption">The floor has not moved. Only the ceiling rose.</p>`;
+    visual.innerHTML = svg;
+
+    const line20   = visual.querySelector('.line-20');
+    const lbl20    = visual.querySelector('.lbl-20');
+    const flatNote = visual.querySelector('.flat-note');
+    const caption  = visual.querySelector('.visual-caption');
+    gsap.set(caption, { autoAlpha: 0, y: 6 });
+
+    const tl = gsap.timeline({ repeat: -1, repeatDelay: 2.5 });
+
+    // $20 flat line draws across
+    tl.to(line20, { attr: { x2: R }, duration: 1.6, ease: 'power1.inOut' })
+      .to([lbl20, flatNote], { opacity: 1, duration: 0.3 }, '-=0.5');
+
+    // Tiers pop in one by one
+    tiers.forEach((t, i) => {
+      const tx = px(t.xr);
+      tl
+        .to(`.tier-dot-${i}`, { opacity: 1, duration: 0.01 }, '+=0.25')
+        .fromTo(`.tier-line-${i}`,
+          { attr: { x1: tx - 28, x2: tx - 28 } },
+          { attr: { x1: tx - 28, x2: tx + 28 }, opacity: 1, duration: 0.35, ease: 'power2.out' }, '<')
+        .to(`.tier-lbl-${i}`, { opacity: 1, duration: 0.25 }, '-=0.1');
+    });
+
+    tl.fromTo(caption, { autoAlpha: 0, y: 6 }, { autoAlpha: 1, y: 0, duration: 0.4 });
+  },
+
+  'shrinkflation': (scene, visual) => {
+    gsap.fromTo(scene.querySelectorAll('.animate-in'),
+      { y: 24, autoAlpha: 0 },
+      { y: 0, autoAlpha: 1, duration: 0.7, stagger: 0.12, ease: 'power2.out' }
+    );
+    if (!visual) return;
+
+    const L = 44, R = 284, T = 24, B = 214;
+    const H = B - T;  // 190
+    const W = R - L;  // 240
+
+    // 6 quarterly data points indexed to Q1 2024 = 100
+    const pts = [
+      { q: "Q1'24", v: 100 },
+      { q: "Q3'24", v: 95  },
+      { q: "Q1'25", v: 80  },
+      { q: "Q3'25", v: 70  },
+      { q: "Q1'26", v: 55  },
+      { q: "Q2'26", v: 45  },
+    ];
+    const maxV = 110;
+    const py = (v) => B - (v / maxV) * H;
+    const px = (i) => L + (i / (pts.length - 1)) * W;
+
+    const coords = pts.map((p, i) => ({ x: px(i), y: py(p.v), ...p }));
+    const polyPts = coords.map(c => `${c.x},${c.y}`).join(' ');
+
+    let svg = `<svg viewBox="0 0 310 250" class="visual-svg">`;
+
+    // Axes
+    svg += `<line x1="${L}" y1="${B}" x2="${R}" y2="${B}" stroke="#2a2a2a" stroke-width="1"/>`;
+    svg += `<line x1="${L}" y1="${T}" x2="${L}" y2="${B}" stroke="#2a2a2a" stroke-width="1"/>`;
+
+    // Y grid + labels
+    [0, 50, 100].forEach(v => {
+      svg += `<line x1="${L}" y1="${py(v)}" x2="${R}" y2="${py(v)}" stroke="#1a1a1a" stroke-width="0.5"/>`;
+      svg += `<text x="${L - 4}" y="${py(v) + 4}" text-anchor="end" font-size="9" fill="#444">${v}</text>`;
+    });
+
+    // X tick labels
+    coords.forEach(c => {
+      svg += `<text x="${c.x}" y="${B + 14}" text-anchor="middle" font-size="8" fill="#444">${c.q}</text>`;
+    });
+
+    // Y axis label
+    svg += `<text x="${L - 28}" y="${T + H / 2}" text-anchor="middle" font-size="8" fill="#555"
+      transform="rotate(-90,${L - 28},${T + H / 2})">Included usage (Q1 2024 = 100)</text>`;
+
+    // The declining line (starts with 0 width via clipPath)
+    svg += `<defs>
+      <clipPath id="sfclip">
+        <rect class="sf-clip-rect" x="${L}" y="0" width="0" height="${B + 20}"/>
+      </clipPath>
+    </defs>`;
+    svg += `<polyline points="${polyPts}" fill="none"
+      stroke="#fda4af" stroke-width="2.5" stroke-linejoin="round" clip-path="url(#sfclip)"/>`;
+
+    // Dots at each point
+    coords.forEach((c, i) => {
+      svg += `<circle class="sf-dot sf-dot-${i}" cx="${c.x}" cy="${c.y}" r="4"
+        fill="#fda4af" opacity="0"/>`;
+      svg += `<text class="sf-val sf-val-${i}" x="${c.x}" y="${c.y - 9}"
+        text-anchor="middle" font-size="9" fill="#fda4af" opacity="0">${c.v}</text>`;
+    });
+
+    // Annotation
+    const lastC = coords[coords.length - 1];
+    svg += `<text class="sf-tag" x="${lastC.x - 4}" y="${lastC.y + 18}"
+      text-anchor="end" font-size="9" fill="#666" opacity="0">AI shrinkflation</text>`;
+
+    svg += `</svg>
+    <p class="visual-caption">Same price. Roughly half the usage. Across all three major labs.</p>`;
+    visual.innerHTML = svg;
+
+    const clipRect = visual.querySelector('.sf-clip-rect');
+    const caption  = visual.querySelector('.visual-caption');
+    gsap.set(caption, { autoAlpha: 0, y: 6 });
+
+    const tl = gsap.timeline({ repeat: -1, repeatDelay: 2.5 });
+
+    // Draw line by expanding clip rect
+    tl.to(clipRect, { attr: { width: W }, duration: 2.0, ease: 'power1.inOut' });
+
+    // Dots and labels pop in as line reaches each point
+    coords.forEach((_, i) => {
+      const delay = (i / (coords.length - 1)) * 1.8;
+      tl.to(`.sf-dot-${i}`,  { opacity: 1, duration: 0.01 }, delay)
+        .to(`.sf-val-${i}`,   { opacity: 1, duration: 0.2 }, delay + 0.1);
+    });
+
+    tl.to('.sf-tag', { opacity: 1, duration: 0.35 }, '+=0.2')
+      .fromTo(caption, { autoAlpha: 0, y: 6 }, { autoAlpha: 1, y: 0, duration: 0.4 });
+  },
+
+  'billing-phases': (scene, visual) => {
+    gsap.fromTo(scene.querySelectorAll('.animate-in'),
+      { y: 24, autoAlpha: 0 },
+      { y: 0, autoAlpha: 1, duration: 0.7, stagger: 0.12, ease: 'power2.out' }
+    );
+    if (!visual) return;
+
+    const phases = [
+      { num: '1', label: 'Pure API',    sub: 'Pay per token',         color: '#6ee7b7', year: '2023'    },
+      { num: '2', label: 'Flat seats',  sub: 'Fixed monthly fee',     color: '#60a5fa', year: '2023–24' },
+      { num: '3', label: 'Hybrid',      sub: 'Seat + consumption',    color: '#f472b6', year: '2024–25' },
+      { num: '4', label: 'Usage-based', sub: 'Full metered billing',  color: '#fda4af', year: '2026+'   },
+    ];
+
+    visual.innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:8px;padding:16px 8px;width:100%">
+        ${phases.map(p => `
+          <div class="ph-row" style="display:flex;align-items:center;gap:10px">
+            <div style="width:28px;height:28px;border-radius:50%;background:${p.color}22;
+              border:1.5px solid ${p.color};display:flex;align-items:center;justify-content:center;
+              flex-shrink:0">
+              <span style="font-size:0.75rem;font-weight:700;color:${p.color}">${p.num}</span>
+            </div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:0.82rem;font-weight:600;color:#e0e0e0">${p.label}</div>
+              <div style="font-size:0.72rem;color:#555">${p.sub}</div>
+            </div>
+            <div style="font-size:0.7rem;color:#444;white-space:nowrap">${p.year}</div>
+          </div>`).join('')}
+        <div class="ph-now" style="margin-top:4px;padding:6px 10px;border:1px solid #fda4af33;
+          border-radius:6px;background:#fda4af08;text-align:center">
+          <span style="font-size:0.75rem;color:#fda4af;font-weight:600">◉ You are here — phases 3 and 4 simultaneously</span>
+        </div>
+      </div>
+      <p class="visual-caption">Each phase still exists. The bill is assembled from all four.</p>`;
+
+    const phRows = visual.querySelectorAll('.ph-row');
+    const phNow  = visual.querySelector('.ph-now');
+    const caption = visual.querySelector('.visual-caption');
+    gsap.set(phRows, { autoAlpha: 0, x: -16 });
+    gsap.set([phNow, caption], { autoAlpha: 0, y: 6 });
+
+    const tl = gsap.timeline({ repeat: -1, repeatDelay: 2.5 });
+    tl
+      .to(phRows, { autoAlpha: 1, x: 0, duration: 0.4, stagger: 0.18, ease: 'power2.out' })
+      .to(phNow,  { autoAlpha: 1, y: 0, duration: 0.4 }, '+=0.2')
+      .to(caption, { autoAlpha: 1, y: 0, duration: 0.35 });
   }
 };
