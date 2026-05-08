@@ -2030,91 +2030,88 @@ const animations = {
     );
     if (!visual) return;
 
-    const L = 44, R = 284, T = 24, B = 214;
-    const H = B - T;  // 190
-    const W = R - L;  // 240
+    const VW = 520, VH = 270;
+    const L = 44, R = 490, T = 52, B = 220;
+    const IW = R - L, IH = B - T;
 
-    // 6 quarterly data points indexed to Q1 2024 = 100
-    const pts = [
-      { q: "Q1'24", v: 100 },
-      { q: "Q3'24", v: 95  },
-      { q: "Q1'25", v: 80  },
-      { q: "Q3'25", v: 70  },
-      { q: "Q1'26", v: 55  },
-      { q: "Q2'26", v: 45  },
+    const bars = [
+      { q:"Q1 '24", v:100, red:false },
+      { q:"Q3 '24", v:95,  red:false },
+      { q:"Q1 '25", v:80,  red:false },
+      { q:"Q3 '25", v:70,  red:false },
+      { q:"Q1 '26", v:55,  red:false },
+      { q:"Q2 '26", v:45,  red:true  },
     ];
+
     const maxV = 110;
-    const py = (v) => B - (v / maxV) * H;
-    const px = (i) => L + (i / (pts.length - 1)) * W;
+    const n = bars.length;
+    const slot = IW / n;
+    const BW   = slot * 0.62;
+    const py   = v => B - (v / maxV) * IH;
 
-    const coords = pts.map((p, i) => ({ x: px(i), y: py(p.v), ...p }));
-    const polyPts = coords.map(c => `${c.x},${c.y}`).join(' ');
+    // Y grid
+    const yGrid = [0, 50, 100].map(v => `
+      <line x1="${L}" y1="${py(v).toFixed(1)}" x2="${R}" y2="${py(v).toFixed(1)}"
+            stroke="#1e1e1e" stroke-width="0.6"/>
+      <text x="${L-4}" y="${(py(v)+3.5).toFixed(1)}" text-anchor="end"
+            font-size="9" fill="#555">${v}</text>`).join('');
 
-    let svg = `<svg viewBox="0 0 310 250" class="visual-svg">`;
+    const barsHTML = bars.map((b, i) => {
+      const cx  = L + i * slot + slot / 2;
+      const bh  = (b.v / maxV) * IH;
+      const by  = B - bh;
+      const col = b.red ? '#c05a52' : '#5b8fd4';
+      const valCol = b.red ? '#c05a52' : '#93bbf0';
+      return `
+        <rect class="sf-bar" id="sf-bar-${i}"
+              x="${(cx-BW/2).toFixed(1)}" y="${B}" width="${BW.toFixed(1)}" height="0"
+              fill="${col}" rx="3"
+              data-by="${by.toFixed(1)}" data-bh="${bh.toFixed(1)}"/>
+        <text id="sf-val-${i}" x="${cx.toFixed(1)}" y="${(by-6).toFixed(1)}"
+              text-anchor="middle" font-size="11" font-weight="700"
+              fill="${valCol}" opacity="0">${b.v}</text>
+        <text x="${cx.toFixed(1)}" y="${B+15}" text-anchor="middle"
+              font-size="9" fill="#666">${b.q}</text>`;
+    }).join('');
 
-    // Axes
-    svg += `<line x1="${L}" y1="${B}" x2="${R}" y2="${B}" stroke="#2a2a2a" stroke-width="1"/>`;
-    svg += `<line x1="${L}" y1="${T}" x2="${L}" y2="${B}" stroke="#2a2a2a" stroke-width="1"/>`;
+    // "AI shrinkflation" annotation at top-right
+    const tagX = (R - 10).toFixed(1);
+    const tagY = (T - 10).toFixed(1);
 
-    // Y grid + labels
-    [0, 50, 100].forEach(v => {
-      svg += `<line x1="${L}" y1="${py(v)}" x2="${R}" y2="${py(v)}" stroke="#1a1a1a" stroke-width="0.5"/>`;
-      svg += `<text x="${L - 4}" y="${py(v) + 4}" text-anchor="end" font-size="9" fill="#444">${v}</text>`;
-    });
+    visual.innerHTML = `
+      <svg viewBox="0 0 ${VW} ${VH}" style="width:100%;max-width:${VW}px">
+        <!-- title -->
+        <text x="${((L+R)/2).toFixed(1)}" y="16" text-anchor="middle"
+              font-size="10" font-weight="600" fill="#888">Included usage at a $20 plan, indexed (Q1 2024 = 100)</text>
+        <!-- grid + axes -->
+        <line x1="${L}" y1="${B}" x2="${R}" y2="${B}" stroke="#333" stroke-width="1"/>
+        ${yGrid}
+        ${barsHTML}
+        <!-- AI shrinkflation tag -->
+        <text id="sf-tag1" x="${tagX}" y="${tagY}" text-anchor="end"
+              font-size="10" font-weight="700" fill="#c05a52" opacity="0">"AI shrinkflation"</text>
+        <text id="sf-tag2" x="${tagX}" y="${(parseFloat(tagY)+13).toFixed(1)}" text-anchor="end"
+              font-size="9" fill="#888" opacity="0">went viral, April 2026</text>
+      </svg>
+      <p class="visual-caption">Same price. Roughly half the usage. Across all three major labs.</p>`;
 
-    // X tick labels
-    coords.forEach(c => {
-      svg += `<text x="${c.x}" y="${B + 14}" text-anchor="middle" font-size="8" fill="#444">${c.q}</text>`;
-    });
-
-    // Y axis label
-    svg += `<text x="${L - 28}" y="${T + H / 2}" text-anchor="middle" font-size="8" fill="#555"
-      transform="rotate(-90,${L - 28},${T + H / 2})">Included usage (Q1 2024 = 100)</text>`;
-
-    // The declining line (starts with 0 width via clipPath)
-    svg += `<defs>
-      <clipPath id="sfclip">
-        <rect class="sf-clip-rect" x="${L}" y="0" width="0" height="${B + 20}"/>
-      </clipPath>
-    </defs>`;
-    svg += `<polyline points="${polyPts}" fill="none"
-      stroke="#fda4af" stroke-width="2.5" stroke-linejoin="round" clip-path="url(#sfclip)"/>`;
-
-    // Dots at each point
-    coords.forEach((c, i) => {
-      svg += `<circle class="sf-dot sf-dot-${i}" cx="${c.x}" cy="${c.y}" r="4"
-        fill="#fda4af" opacity="0"/>`;
-      svg += `<text class="sf-val sf-val-${i}" x="${c.x}" y="${c.y - 9}"
-        text-anchor="middle" font-size="9" fill="#fda4af" opacity="0">${c.v}</text>`;
-    });
-
-    // Annotation
-    const lastC = coords[coords.length - 1];
-    svg += `<text class="sf-tag" x="${lastC.x - 4}" y="${lastC.y + 18}"
-      text-anchor="end" font-size="9" fill="#666" opacity="0">AI shrinkflation</text>`;
-
-    svg += `</svg>
-    <p class="visual-caption">Same price. Roughly half the usage. Across all three major labs.</p>`;
-    visual.innerHTML = svg;
-
-    const clipRect = visual.querySelector('.sf-clip-rect');
-    const caption  = visual.querySelector('.visual-caption');
+    const barEls  = [...visual.querySelectorAll('.sf-bar')];
+    const caption = visual.querySelector('.visual-caption');
     gsap.set(caption, { autoAlpha: 0, y: 6 });
 
     const tl = gsap.timeline({ repeat: -1, repeatDelay: 2.5 });
 
-    // Draw line by expanding clip rect
-    tl.to(clipRect, { attr: { width: W }, duration: 2.0, ease: 'power1.inOut' });
-
-    // Dots and labels pop in as line reaches each point
-    coords.forEach((_, i) => {
-      const delay = (i / (coords.length - 1)) * 1.8;
-      tl.to(`.sf-dot-${i}`,  { opacity: 1, duration: 0.01 }, delay)
-        .to(`.sf-val-${i}`,   { opacity: 1, duration: 0.2 }, delay + 0.1);
+    barEls.forEach((bar, i) => {
+      const bh = parseFloat(bar.dataset.bh);
+      const by = parseFloat(bar.dataset.by);
+      tl.to(bar,           { attr: { y: by, height: bh }, duration: 0.38, ease: 'power2.out' }, i * 0.15);
+      tl.to(`#sf-val-${i}`,{ opacity: 1, duration: 0.25 }, i * 0.15 + 0.25);
     });
 
-    tl.to('.sf-tag', { opacity: 1, duration: 0.35 }, '+=0.2')
-      .fromTo(caption, { autoAlpha: 0, y: 6 }, { autoAlpha: 1, y: 0, duration: 0.4 });
+    const after = barEls.length * 0.15 + 0.4;
+    tl
+      .to(['#sf-tag1','#sf-tag2'], { opacity: 1, duration: 0.35, stagger: 0.1 }, after)
+      .to(caption, { autoAlpha: 1, y: 0, duration: 0.4 }, after + 0.4);
   },
 
   'billing-phases': (scene, visual) => {
