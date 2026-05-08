@@ -1769,125 +1769,127 @@ const animations = {
 
     if (!visual) return;
 
-    // Log-normal: μ=4.8, σ=0.9 → mode≈$54, median≈$121, ~27% of users cost >$200
-    const MU = 4.8, SIG = 0.9;
-    const lnPDF = (x) => {
-      const z = (Math.log(x) - MU) / SIG;
-      return (1 / (x * SIG * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * z * z);
-    };
+    // Chart geometry
+    const W = 560, H = 290;
+    const L = 52, R = 516, T = 42, B = 230;
+    const IW = R - L, IH = B - T;  // 464 × 188
+    const MAX_BAR_H = IH * 0.78;   // ~147px — reserves ~41px above tallest bar for labels
 
-    // Plot area inside SVG viewBox 0 0 310 250
-    const L = 42, R = 295, T = 20, B = 200;
-    const PW = R - L, PH = B - T;
-    const toPx = (x) => L + ((Math.log10(x) - 1) / 4) * PW;  // log-scale x→svg x
+    // Log-scale x mapper  ($5 → L,  $35k → R)
+    const logMin = Math.log10(5), logRange = Math.log10(35000) - logMin;
+    const xS = v => L + ((Math.log10(v) - logMin) / logRange) * IW;
 
-    // Sample 80 points log-spaced $10–$100k
-    const pts = Array.from({ length: 81 }, (_, i) => {
-      const x = Math.pow(10, 1 + (i / 80) * 4);
-      return { x, y: lnPDF(x) };
-    });
-    const maxY = Math.max(...pts.map(p => p.y));
-    const svgPts = pts.map(p => ({
-      sx: toPx(p.x),
-      sy: T + PH - (p.y / maxY) * PH * 0.88
-    }));
+    // 7 histogram bins + 1 outlier dot
+    const bins = [
+      { lbl:'$5',   v:5,     h:0.62, blue:true  },
+      { lbl:'$20',  v:20,    h:0.88, blue:true  },
+      { lbl:'$80',  v:80,    h:1.00, blue:true  },
+      { lbl:'$300', v:300,   h:0.72, blue:false },
+      { lbl:'$1K',  v:1000,  h:0.52, blue:false },
+      { lbl:'$5K',  v:5000,  h:0.35, blue:false },
+      { lbl:'$20K', v:20000, h:0.22, blue:false },
+    ];
 
-    const curveD = svgPts.map((p, i) => (i === 0 ? `M${p.sx.toFixed(1)},${p.sy.toFixed(1)}`
-      : `L${p.sx.toFixed(1)},${p.sy.toFixed(1)}`)).join(' ');
+    const BW = 34;  // bar width px
 
-    // Subsidized fill: region under curve to the right of $200
-    const px200 = toPx(200);
-    const rightPts = svgPts.filter(p => p.sx >= px200);
-    const fillD = rightPts.length
-      ? `M${px200.toFixed(1)},${B} L${px200.toFixed(1)},${rightPts[0].sy.toFixed(1)} `
-        + rightPts.map(p => `L${p.sx.toFixed(1)},${p.sy.toFixed(1)}`).join(' ')
-        + ` L${rightPts[rightPts.length - 1].sx.toFixed(1)},${B} Z`
-      : '';
+    const barsHTML = bins.map((b, i) => {
+      const cx  = xS(b.v);
+      const bh  = b.h * MAX_BAR_H;
+      const by  = B - bh;
+      const col = b.blue ? '#5b8fd4' : '#c05a52';
+      return `
+        <rect class="ud-bar" id="ud-bar-${i}"
+              x="${(cx - BW/2).toFixed(1)}" y="${B}" width="${BW}" height="0"
+              fill="${col}" rx="2"
+              data-by="${by.toFixed(1)}" data-bh="${bh.toFixed(1)}"/>
+        <text x="${cx.toFixed(1)}" y="${B + 16}" text-anchor="middle"
+              font-size="9.5" fill="#777">${b.lbl}</text>`;
+    }).join('');
 
-    const px35k = toPx(35000);
-    const subsidyCx = ((px200 + R) / 2).toFixed(1);
+    // Geometry for annotations
+    const x200    = xS(200);
+    const x35k    = xS(35000);
+    const dotY    = B - 0.08 * MAX_BAR_H;              // tiny stub + dot
+    const midBlue = ((xS(5) + x200) / 2).toFixed(1);
+    const midRed  = ((x200 + xS(20000)) / 2).toFixed(1);
 
-    let svg = `<svg viewBox="0 0 310 250" class="visual-svg">`;
+    visual.innerHTML = `
+      <svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:${W}px">
+        <!-- y-axis label rotated -->
+        <text transform="rotate(-90,14,${((T+B)/2).toFixed(1)})"
+              x="14" y="${((T+B)/2+4).toFixed(1)}"
+              text-anchor="middle" font-size="9" fill="#666">share of subscribers</text>
 
-    // Baseline axis
-    svg += `<line x1="${L}" y1="${B}" x2="${R}" y2="${B}" stroke="#222" stroke-width="1"/>`;
+        <!-- baseline -->
+        <line x1="${L}" y1="${B}" x2="${R}" y2="${B}" stroke="#444" stroke-width="1"/>
 
-    // X tick marks (log scale)
-    [[10,'$10'],[100,'$100'],[1000,'$1k'],[10000,'$10k'],[100000,'$100k']].forEach(([v,lbl]) => {
-      const tx = toPx(v).toFixed(1);
-      svg += `<line x1="${tx}" y1="${B}" x2="${tx}" y2="${B + 4}" stroke="#2a2a2a" stroke-width="1"/>`;
-      svg += `<text x="${tx}" y="${B + 14}" text-anchor="middle" font-size="8.5" fill="#3a3a3a">${lbl}</text>`;
-    });
+        <!-- x-axis label -->
+        <text x="${((L+R)/2).toFixed(1)}" y="${H-6}" text-anchor="middle"
+              font-size="9" fill="#555">monthly compute consumed (retail API equivalent, log scale)</text>
 
-    // Subsidy fill (behind curve)
-    if (fillD) svg += `<path class="subsidy-fill" d="${fillD}" fill="#fda4af" opacity="0"/>`;
+        <!-- histogram bars -->
+        ${barsHTML}
 
-    // Curve via clip rect
-    svg += `<defs>
-      <clipPath id="distclip">
-        <rect class="dist-clip" x="${L}" y="${T - 2}" width="0" height="${PH + 10}"/>
-      </clipPath>
-    </defs>`;
-    svg += `<path d="${curveD}" fill="none" stroke="#ccc" stroke-width="2"
-      stroke-linejoin="round" clip-path="url(#distclip)"/>`;
+        <!-- $200 dashed line -->
+        <line id="ud-pline" x1="${x200.toFixed(1)}" y1="${T}"
+              x2="${x200.toFixed(1)}" y2="${B}"
+              stroke="#e2e8f0" stroke-width="1.5" stroke-dasharray="5,3" opacity="0"/>
+        <text id="ud-plbl1" x="${x200.toFixed(1)}" y="${T - 4}"
+              text-anchor="middle" font-size="9" font-weight="600"
+              fill="#e2e8f0" opacity="0">|$200 paid</text>
+        <text id="ud-plbl2" x="${x200.toFixed(1)}" y="${T + 7}"
+              text-anchor="middle" font-size="8.5" fill="#9ca3af" opacity="0">monthly subscription</text>
 
-    // $200 flat-price line
-    svg += `<line class="price-line" x1="${px200.toFixed(1)}" y1="${T}"
-      x2="${px200.toFixed(1)}" y2="${B}" stroke="#6ee7b7" stroke-width="1.5"
-      stroke-dasharray="4,3" opacity="0"/>`;
-    svg += `<text class="price-lbl" x="${(px200 - 5).toFixed(1)}" y="${T + 11}"
-      text-anchor="end" font-size="8.5" fill="#6ee7b7" opacity="0">$200 flat price</text>`;
+        <!-- Cross-subsidy pool label -->
+        <text id="ud-blbl1" x="${midBlue}" y="${T + 16}"
+              text-anchor="middle" font-size="9.5" font-weight="600"
+              fill="#5b8fd4" opacity="0">Cross-subsidy pool</text>
+        <text id="ud-blbl2" x="${midBlue}" y="${T + 28}"
+              text-anchor="middle" font-size="8.5" fill="#9ca3af" opacity="0">most users, well below $200</text>
 
-    // Subsidized zone label
-    svg += `<text class="subsidy-lbl" x="${subsidyCx}" y="${T + 55}"
-      text-anchor="middle" font-size="8.5" fill="#fda4af" opacity="0">subsidized</text>`;
-    svg += `<text class="subsidy-lbl2" x="${subsidyCx}" y="${T + 67}"
-      text-anchor="middle" font-size="8.5" fill="#fda4af" opacity="0">zone</text>`;
+        <!-- Margin-eating tail label -->
+        <text id="ud-rlbl1" x="${midRed}" y="${T + 16}"
+              text-anchor="middle" font-size="9.5" font-weight="600"
+              fill="#c05a52" opacity="0">Margin-eating tail</text>
+        <text id="ud-rlbl2" x="${midRed}" y="${T + 28}"
+              text-anchor="middle" font-size="8.5" fill="#9ca3af" opacity="0">small minority, far above $200</text>
 
-    // $35k outlier
-    svg += `<line class="outlier-tick" x1="${px35k.toFixed(1)}" y1="${B - 10}"
-      x2="${px35k.toFixed(1)}" y2="${B}" stroke="#fda4af" stroke-width="1.5" opacity="0"/>`;
-    svg += `<circle class="outlier-dot" cx="${px35k.toFixed(1)}" cy="${B - 10}" r="3.5"
-      fill="#fda4af" opacity="0"/>`;
-    svg += `<text class="outlier-lbl" x="${px35k.toFixed(1)}" y="${B - 17}"
-      text-anchor="middle" font-size="7.5" fill="#666" opacity="0">$35k (extreme)</text>`;
+        <!-- $35K outlier dot -->
+        <circle id="ud-dot" cx="${x35k.toFixed(1)}" cy="${dotY.toFixed(1)}"
+                r="5" fill="#c05a52" opacity="0"/>
+        <text id="ud-dlbl1" x="${(x35k + 10).toFixed(1)}" y="${(dotY - 5).toFixed(1)}"
+              font-size="8.5" fill="#c05a52" opacity="0">~99th percentile</text>
+        <text id="ud-dlbl2" x="${(x35k + 10).toFixed(1)}" y="${(dotY + 6).toFixed(1)}"
+              font-size="8.5" fill="#c05a52" opacity="0">$35K user</text>
+      </svg>
+      <p class="visual-caption">Illustrative. Anthropic has not published its actual usage distribution.</p>`;
 
-    svg += `</svg>
-    <p class="visual-caption">Distribution is illustrative. Flat price, long cost tail — documented across every major lab.</p>`;
-
-    visual.innerHTML = svg;
-
-    const clipRect     = visual.querySelector('.dist-clip');
-    const subsidyFill  = visual.querySelector('.subsidy-fill');
-    const priceLine    = visual.querySelector('.price-line');
-    const priceLbl     = visual.querySelector('.price-lbl');
-    const subsidyLbl   = visual.querySelector('.subsidy-lbl');
-    const subsidyLbl2  = visual.querySelector('.subsidy-lbl2');
-    const outlierTick  = visual.querySelector('.outlier-tick');
-    const outlierDot   = visual.querySelector('.outlier-dot');
-    const outlierLbl   = visual.querySelector('.outlier-lbl');
-    const caption      = visual.querySelector('.visual-caption');
+    const barEls  = [...visual.querySelectorAll('.ud-bar')];
+    const caption = visual.querySelector('.visual-caption');
     gsap.set(caption, { autoAlpha: 0, y: 6 });
 
     const tl = gsap.timeline({ repeat: -1, repeatDelay: 2.5 });
+
+    // Bars grow up left-to-right, staggered
+    barEls.forEach((bar, i) => {
+      const bh = parseFloat(bar.dataset.bh);
+      const by = parseFloat(bar.dataset.by);
+      tl.to(bar, { attr: { y: by, height: bh }, duration: 0.38, ease: 'power2.out' }, i * 0.13);
+    });
+
+    const after = barEls.length * 0.13 + 0.42;
+
     tl
-      // Curve draws left to right
-      .to(clipRect, { attr: { width: PW }, duration: 2.4, ease: 'power1.inOut' })
-
-      // Price line and fill appear as curve passes $200 (≈33% into the draw)
-      .to(priceLine, { opacity: 1, duration: 0.4 }, 0.8)
-      .to(priceLbl, { opacity: 1, duration: 0.3 }, 1.0)
-      .to(subsidyFill, { opacity: 0.18, duration: 0.7, ease: 'power2.out' }, 1.1)
-      .to([subsidyLbl, subsidyLbl2], { opacity: 1, duration: 0.3, stagger: 0.1 }, 1.5)
-
-      // Outlier appears after curve is done
-      .to([outlierTick, outlierDot], { opacity: 1, duration: 0.3 }, '+=0.3')
-      .to(outlierLbl, { opacity: 1, duration: 0.35 })
-      .fromTo(caption, { autoAlpha: 0, y: 6 }, { autoAlpha: 1, y: 0, duration: 0.4 })
-
-      // Brief pulse on outlier dot
-      .to(outlierDot, { attr: { r: 5.5 }, opacity: 0.6, duration: 0.5,
-        yoyo: true, repeat: 3, ease: 'sine.inOut' }, '+=0.5');
+      // $200 line
+      .to(['#ud-pline','#ud-plbl1','#ud-plbl2'], { opacity: 1, duration: 0.4 }, after)
+      // Annotation labels
+      .to(['#ud-blbl1','#ud-blbl2'], { opacity: 1, duration: 0.35, stagger: 0.1 }, after + 0.3)
+      .to(['#ud-rlbl1','#ud-rlbl2'], { opacity: 1, duration: 0.35, stagger: 0.1 }, after + 0.5)
+      // Outlier dot
+      .to(['#ud-dot','#ud-dlbl1','#ud-dlbl2'], { opacity: 1, duration: 0.35 }, after + 0.8)
+      .to(caption, { autoAlpha: 1, y: 0, duration: 0.4 }, after + 1.1)
+      // Pulse dot (finite)
+      .to('#ud-dot', { attr: { r: 8 }, duration: 0.5, yoyo: true, repeat: 3, ease: 'sine.inOut' }, after + 1.3);
   },
 
   'price-table': (scene, visual) => {
