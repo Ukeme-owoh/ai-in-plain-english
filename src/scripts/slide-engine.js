@@ -2288,43 +2288,48 @@ const animations = {
       <text x="${L+229}"   y="${T-2}"  font-size="9" fill="#4ade80">Supply (4-yr lag)</text>`;
 
     visual.innerHTML = `
-      <svg viewBox="0 0 ${VW} ${VH}" style="width:100%;max-width:${VW}px">
-        <defs>
-          <clipPath id="${clipId}">
-            <rect id="cc-clip-rect" x="${L}" y="${T-4}" width="0" height="${IH+8}"/>
-          </clipPath>
-        </defs>
+      <div class="chart-frame">
+        <div class="chart-header">The commodity supply cycle, applied to AI compute</div>
+        <svg viewBox="0 0 ${VW} ${VH}" style="width:100%;max-width:${VW}px">
+          <defs>
+            <clipPath id="${clipId}">
+              <rect id="cc-clip-rect" x="${L}" y="${T-4}" width="0" height="${IH+8}"/>
+            </clipPath>
+          </defs>
 
-        <!-- axes + ticks -->
-        <line x1="${L}" y1="${B}" x2="${R}" y2="${B}" stroke="#333" stroke-width="1"/>
-        ${xTicks}${dividers}${phaseBands}${legend}
+          <!-- axes + ticks -->
+          <line x1="${L}" y1="${B}" x2="${R}" y2="${B}" stroke="#333" stroke-width="1"/>
+          ${xTicks}${dividers}${phaseBands}${legend}
 
-        <!-- three curves, clipped -->
-        <path d="${toPath(tokenPts)}"  fill="none" stroke="#ef4444" stroke-width="2.2" stroke-linejoin="round" clip-path="url(#${clipId})"/>
-        <path d="${toPath(capexPts)}"  fill="none" stroke="#1e40af" stroke-width="2.2" stroke-linejoin="round" clip-path="url(#${clipId})"/>
-        <path d="${toPath(supplyPts)}" fill="none" stroke="#4ade80" stroke-width="2"   stroke-linejoin="round" stroke-dasharray="6,4" clip-path="url(#${clipId})"/>
+          <!-- three curves, clipped -->
+          <path d="${toPath(tokenPts)}"  fill="none" stroke="#ef4444" stroke-width="2.2" stroke-linejoin="round" clip-path="url(#${clipId})"/>
+          <path d="${toPath(capexPts)}"  fill="none" stroke="#1e40af" stroke-width="2.2" stroke-linejoin="round" clip-path="url(#${clipId})"/>
+          <path d="${toPath(supplyPts)}" fill="none" stroke="#4ade80" stroke-width="2"   stroke-linejoin="round" stroke-dasharray="6,4" clip-path="url(#${clipId})"/>
 
-        <!-- annotation: capex peak -->
-        <line id="cc-ann-cap-l" x1="${capexPeakX}" y1="${py(.94).toFixed(1)}" x2="${capexPeakX}" y2="${py(1.05).toFixed(1)}"
-              stroke="#1e40af" stroke-width="1" stroke-dasharray="3,2" opacity="0"/>
-        <text id="cc-ann-cap-t1" x="${capexPeakX}" y="${py(1.12).toFixed(1)}" text-anchor="middle"
-              font-size="9" font-weight="600" fill="#3b82f6" opacity="0">Capex peaks</text>
-        <text id="cc-ann-cap-t2" x="${capexPeakX}" y="${py(1.12+0.08).toFixed(1)}" text-anchor="middle"
-              font-size="8.5" fill="#555" opacity="0">2025-26</text>
+          <!-- annotation: capex peak -->
+          <line id="cc-ann-cap-l" x1="${capexPeakX}" y1="${py(.94).toFixed(1)}" x2="${capexPeakX}" y2="${py(1.05).toFixed(1)}"
+                stroke="#1e40af" stroke-width="1" stroke-dasharray="3,2" opacity="0"/>
+          <text id="cc-ann-cap-t1" x="${capexPeakX}" y="${py(1.12).toFixed(1)}" text-anchor="middle"
+                font-size="9" font-weight="600" fill="#3b82f6" opacity="0">Capex peaks</text>
+          <text id="cc-ann-cap-t2" x="${capexPeakX}" y="${py(1.12+0.08).toFixed(1)}" text-anchor="middle"
+                font-size="8.5" fill="#555" opacity="0">2025-26</text>
 
-        <!-- annotation: supply peak -->
-        <line id="cc-ann-sup-l" x1="${supplyPeakX}" y1="${py(.98).toFixed(1)}" x2="${supplyPeakX}" y2="${py(1.1).toFixed(1)}"
-              stroke="#4ade80" stroke-width="1" stroke-dasharray="3,2" opacity="0"/>
-        <text id="cc-ann-sup-t1" x="${supplyPeakX}" y="${py(1.17).toFixed(1)}" text-anchor="middle"
-              font-size="9" font-weight="600" fill="#4ade80" opacity="0">Supply hits</text>
-        <text id="cc-ann-sup-t2" x="${supplyPeakX}" y="${py(1.17+0.08).toFixed(1)}" text-anchor="middle"
-              font-size="8.5" fill="#555" opacity="0">~2029-30</text>
-      </svg>
-      <p class="visual-caption">Commodity markets with multi-year supply lags oscillate. They do not reach equilibrium.</p>`;
+          <!-- annotation: supply peak -->
+          <line id="cc-ann-sup-l" x1="${supplyPeakX}" y1="${py(.98).toFixed(1)}" x2="${supplyPeakX}" y2="${py(1.1).toFixed(1)}"
+                stroke="#4ade80" stroke-width="1" stroke-dasharray="3,2" opacity="0"/>
+          <text id="cc-ann-sup-t1" x="${supplyPeakX}" y="${py(1.17).toFixed(1)}" text-anchor="middle"
+                font-size="9" font-weight="600" fill="#4ade80" opacity="0">Supply hits</text>
+          <text id="cc-ann-sup-t2" x="${supplyPeakX}" y="${py(1.17+0.08).toFixed(1)}" text-anchor="middle"
+                font-size="8.5" fill="#555" opacity="0">~2029-30</text>
+        </svg>
+        <p class="chart-caption">Capex peaking in 2025-26 plus a roughly four-year build cycle for power and data center capacity points to supply hitting around 2029-30. The price trough follows by a year or two. The right panel of any oil refinery cycle looks similar.</p>
+        <p class="chart-source"><strong>Sources.</strong> Morgan Stanley AI capex forecasts, Sightline Climate (transformer lead times), Tom's Hardware (delayed builds). Cobweb model from commodity economics literature.</p>
+      </div>`;
 
     const clipRect = visual.querySelector('#cc-clip-rect');
-    const caption  = visual.querySelector('.visual-caption');
-    gsap.set(caption, { autoAlpha: 0, y: 6 });
+    const captionItalic = visual.querySelector('.chart-caption');
+    const sourceLine = visual.querySelector('.chart-source');
+    gsap.set([captionItalic, sourceLine], { autoAlpha: 0, y: 6 });
 
     const tl = gsap.timeline({ repeat: -1, repeatDelay: 2 });
     tl
@@ -2343,7 +2348,8 @@ const animations = {
       // Supply annotation near the end
       .to(['#cc-ann-sup-l','#cc-ann-sup-t1','#cc-ann-sup-t2'], { opacity: 1, duration: 0.4, stagger: 0.1 }, 2.2)
 
-      .to(caption, { autoAlpha: 1, y: 0, duration: 0.4 }, '+=0.3');
+      .to(captionItalic, { autoAlpha: 1, y: 0, duration: 0.4 }, '+=0.3')
+      .to(sourceLine, { autoAlpha: 1, y: 0, duration: 0.4 }, '-=0.2');
   },
 
   'tokens-per-watt': (scene, visual) => {
@@ -2408,33 +2414,34 @@ const animations = {
     }).join('');
 
     visual.innerHTML = `
-      <svg viewBox="0 0 ${VW} ${VH}" style="width:100%;max-width:${VW}px">
-        <!-- chart title -->
-        <text x="${((L+R)/2).toFixed(1)}" y="14" text-anchor="middle"
-              font-size="10" font-weight="600" fill="#888">Inference efficiency by GPU generation, log scale</text>
+      <div class="chart-frame">
+        <div class="chart-header">Inference efficiency by GPU generation, log scale</div>
+        <svg viewBox="0 0 ${VW} ${VH}" style="width:100%;max-width:${VW}px">
+          <!-- axes -->
+          <line x1="${L}" y1="${T}" x2="${L}" y2="${B}" stroke="#444" stroke-width="1"/>
+          <line x1="${L}" y1="${B}" x2="${R}" y2="${B}" stroke="#444" stroke-width="1"/>
+          ${yTicks}
 
-        <!-- axes -->
-        <line x1="${L}" y1="${T}" x2="${L}" y2="${B}" stroke="#444" stroke-width="1"/>
-        <line x1="${L}" y1="${B}" x2="${R}" y2="${B}" stroke="#444" stroke-width="1"/>
-        ${yTicks}
+          <!-- y-axis label -->
+          <text transform="rotate(-90,14,${((T+B)/2).toFixed(1)})"
+                x="14" y="${((T+B)/2+4).toFixed(1)}" text-anchor="middle"
+                font-size="9" fill="#666">tokens / watt</text>
 
-        <!-- y-axis label -->
-        <text transform="rotate(-90,14,${((T+B)/2).toFixed(1)})"
-              x="14" y="${((T+B)/2+4).toFixed(1)}" text-anchor="middle"
-              font-size="9" fill="#666">tokens / watt</text>
+          ${barsHTML}
 
-        ${barsHTML}
-
-        <!-- Projected note -->
-        <rect x="${(R-88).toFixed(1)}" y="${T+2}" width="86" height="16" fill="#86efac22" rx="3"/>
-        <text x="${(R-44).toFixed(1)}" y="${T+13}" text-anchor="middle"
-              font-size="8.5" fill="#86efac">* projected</text>
-      </svg>
-      <p class="visual-caption">Eight years, roughly 110× more efficient. V100 to Rubin.</p>`;
+          <!-- Projected note -->
+          <rect x="${(R-88).toFixed(1)}" y="${T+2}" width="86" height="16" fill="#86efac22" rx="3"/>
+          <text x="${(R-44).toFixed(1)}" y="${T+13}" text-anchor="middle"
+                font-size="8.5" fill="#86efac">* projected</text>
+        </svg>
+        <p class="chart-caption">Eight years, roughly 110 times more efficient. NVIDIA's published gain from Hopper to Blackwell is roughly 10×, with up to 50× cited for specific workloads (vendor-reported). Rubin is projected from public roadmap commentary.</p>
+        <p class="chart-source"><strong>Source.</strong> NVIDIA developer blog ("Scaling token factory revenue", 2026). Generation-by-generation values are order-of-magnitude indicative.</p>
+      </div>`;
 
     const barEls  = [...visual.querySelectorAll('.tpw-bar')];
-    const caption = visual.querySelector('.visual-caption');
-    gsap.set(caption, { autoAlpha: 0, y: 6 });
+    const captionItalic = visual.querySelector('.chart-caption');
+    const sourceLine = visual.querySelector('.chart-source');
+    gsap.set([captionItalic, sourceLine], { autoAlpha: 0, y: 6 });
 
     const tl = gsap.timeline({ repeat: -1, repeatDelay: 2 });
 
@@ -2447,7 +2454,8 @@ const animations = {
     });
 
     const after = barEls.length * 0.2 + 0.5;
-    tl.to(caption, { autoAlpha: 1, y: 0, duration: 0.4 }, after);
+    tl.to(captionItalic, { autoAlpha: 1, y: 0, duration: 0.4 }, after)
+      .to(sourceLine, { autoAlpha: 1, y: 0, duration: 0.4 }, after + 0.3);
   },
 
   'interactive-model': (scene, visual) => {
@@ -2458,21 +2466,21 @@ const animations = {
     if (!visual) return;
 
     // ── Formula ─────────────────────────────────────────────────
+    // Calibrated so My view (unwind=5, lockIn=55, tpw=4, demand=3)
+    // lands at end2030 ≈ 111, peak ≈ 116. Matches PDF.
     function compute(unwind, lockIn, tpw, demand) {
-      const ue = (10 - unwind) * 2;
-      const li = (lockIn / 100) * 30;
-      const ee = (tpw - 1) * 5;
-      const de = (demand - 1) * 3;
+      const ue = (10 - unwind) * 2;            // slower unwind → flatter near term
+      const li = (lockIn / 100) * 18;          // lock-in raises the ceiling
+      const ee = (tpw - 1) * 5;                // tokens/watt growth lowers it
+      const de = (demand - 1) * 3;             // demand growth pushes it up
       const end2030 = Math.round(100 + ue + li - ee + de);
+      const peak = end2030 + (10 - unwind);    // peak overshoot matches unwind speed
 
-      // 5-pt trajectory 2026–2030 (peak 2028, then eases)
-      const peakBonus = Math.round(ue * 0.15);
-      const peak = end2030 + peakBonus;
       const traj = [
         100,
-        Math.round(100 + (peak - 100) * 0.45),
+        Math.round(100 + (peak - 100) * 0.75),
         peak,
-        Math.round(peak - (peak - end2030) * 0.5),
+        end2030 - 1,
         end2030
       ];
       return { end2030, peak, traj };
@@ -2491,7 +2499,7 @@ const animations = {
     const years = [2026,2027,2028,2029,2030];
 
     function buildChartPath(traj) {
-      const yMin = 60, yMax = 200;
+      const yMin = 40, yMax = 200;
       const clamp = v => Math.max(yMin, Math.min(yMax, v));
       const px = i => CL + (i/4)*CIW;
       const py = v => CB - ((clamp(v) - yMin)/(yMax - yMin))*CIH;
@@ -2499,58 +2507,68 @@ const animations = {
     }
 
     function buildChart(traj, end2030) {
-      const yMin=60,yMax=200,step=(yMax-yMin)/4;
+      const yMin=40,yMax=200;
       const py = v => CB - ((Math.max(yMin,Math.min(yMax,v))-yMin)/(yMax-yMin))*CIH;
       const px = i => CL + (i/4)*CIW;
-      const gridLines = [80,100,120,140,160,180,200].filter(v=>v>=yMin&&v<=yMax).map(v=>`
+      // Y grid every 20: 40, 60, 80, 100, 120, ... 200
+      const ticks = [40,60,80,100,120,140,160,180,200];
+      const gridLines = ticks.map(v=>`
         <line x1="${CL}" y1="${py(v).toFixed(1)}" x2="${CR}" y2="${py(v).toFixed(1)}"
-              stroke="#1a1a1a" stroke-width="${v===100?'1.2':'0.5'}" stroke-dasharray="${v===100?'':'3,4'}"/>
+              stroke="#1a1a1a" stroke-width="${v===100?'1':'0.5'}" stroke-dasharray="${v===100?'4,3':''}"/>
         <text x="${CL-3}" y="${(py(v)+3.5).toFixed(1)}" text-anchor="end" font-size="7" fill="#555">${v}</text>`).join('');
       const xLabels = years.map((yr,i)=>`
-        <text x="${px(i).toFixed(1)}" y="${CB+10}" text-anchor="middle" font-size="7" fill="#555">'${String(yr).slice(2)}</text>`).join('');
-      const dotX = px(4).toFixed(1), dotY = py(end2030).toFixed(1);
+        <text x="${px(i).toFixed(1)}" y="${CB+10}" text-anchor="middle" font-size="7" fill="#666">${yr}</text>`).join('');
+      const dots = traj.map((v,i)=>`
+        <circle cx="${px(i).toFixed(1)}" cy="${py(v).toFixed(1)}" r="2.6"
+                fill="${i===traj.length-1?'#c05a52':'#0e0e0e'}"
+                stroke="#c05a52" stroke-width="1.5"/>`).join('');
+      // light coral fill under the curve
+      const areaPath = buildChartPath(traj) +
+        ` L ${px(4).toFixed(1)},${py(yMin).toFixed(1)} L ${px(0).toFixed(1)},${py(yMin).toFixed(1)} Z`;
       return `<svg viewBox="0 0 240 90" style="width:100%;display:block">
         <line x1="${CL}" y1="${CT}" x2="${CL}" y2="${CB}" stroke="#333" stroke-width="0.8"/>
         <line x1="${CL}" y1="${CB}" x2="${CR}" y2="${CB}" stroke="#333" stroke-width="0.8"/>
         ${gridLines}${xLabels}
+        <path d="${areaPath}" fill="#c05a5212" stroke="none"/>
         <path d="${buildChartPath(traj)}" fill="none" stroke="#c05a52" stroke-width="2" stroke-linejoin="round"/>
-        <circle cx="${dotX}" cy="${dotY}" r="3.5" fill="#c05a52"/>
+        ${dots}
       </svg>`;
     }
 
     // ── Layout ───────────────────────────────────────────────────
     visual.innerHTML = `
-      <div style="width:100%;font-family:inherit;color:#e0e0e0">
+      <div class="chart-frame" style="font-family:inherit;color:#e0e0e0">
+        <div style="font-size:0.62rem;letter-spacing:0.1em;color:#c05a52;font-weight:700">TRY IT YOURSELF</div>
 
         <!-- chart -->
-        <div id="im-chart" style="margin-bottom:8px"></div>
+        <div id="im-chart" style="margin:0 -2px"></div>
 
         <!-- output boxes 2×2 -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px">
-          <div style="border:1px solid #333;border-radius:6px;padding:8px 10px">
-            <div style="font-size:0.62rem;text-transform:uppercase;letter-spacing:.05em;color:#666">2030 token price</div>
-            <div id="im-end" style="font-size:1.6rem;font-weight:700;line-height:1.1;color:#e0e0e0">—</div>
-            <div id="im-end-sub" style="font-size:0.68rem;color:#555">vs today (100)</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+          <div style="border:1px solid #2a2a2a;border-radius:6px;padding:8px 10px">
+            <div style="font-size:0.6rem;text-transform:uppercase;letter-spacing:.07em;color:#666">2030 token price</div>
+            <div id="im-end" style="font-size:1.55rem;font-weight:700;line-height:1.1;color:#e0e0e0">—</div>
+            <div id="im-end-sub" style="font-size:0.66rem;color:#555">vs today (100)</div>
           </div>
-          <div style="border:1px solid #333;border-radius:6px;padding:8px 10px">
-            <div style="font-size:0.62rem;text-transform:uppercase;letter-spacing:.05em;color:#666">peak (when)</div>
-            <div id="im-peak" style="font-size:1.6rem;font-weight:700;line-height:1.1;color:#e0e0e0">—</div>
-            <div style="font-size:0.68rem;color:#555">in 2028</div>
-          </div>
-          <div style="border:1px solid #c05a5233;border-radius:6px;padding:8px 10px;background:#c05a5208">
-            <div style="font-size:0.62rem;text-transform:uppercase;letter-spacing:.05em;color:#c05a52">today's $20 plan in 2030</div>
-            <div id="im-20" style="font-size:1.6rem;font-weight:700;line-height:1.1;color:#c05a52">—</div>
-            <div style="font-size:0.68rem;color:#555">if price tracks the curve</div>
+          <div style="border:1px solid #2a2a2a;border-radius:6px;padding:8px 10px">
+            <div style="font-size:0.6rem;text-transform:uppercase;letter-spacing:.07em;color:#666">peak (when)</div>
+            <div id="im-peak" style="font-size:1.55rem;font-weight:700;line-height:1.1;color:#e0e0e0">—</div>
+            <div style="font-size:0.66rem;color:#555">in 2028</div>
           </div>
           <div style="border:1px solid #c05a5233;border-radius:6px;padding:8px 10px;background:#c05a5208">
-            <div style="font-size:0.62rem;text-transform:uppercase;letter-spacing:.05em;color:#c05a52">today's $200 plan in 2030</div>
-            <div id="im-200" style="font-size:1.6rem;font-weight:700;line-height:1.1;color:#c05a52">—</div>
-            <div style="font-size:0.68rem;color:#555">if price tracks the curve</div>
+            <div style="font-size:0.6rem;text-transform:uppercase;letter-spacing:.07em;color:#c05a52">today's $20 plan in 2030</div>
+            <div id="im-20" style="font-size:1.55rem;font-weight:700;line-height:1.1;color:#c05a52">—</div>
+            <div style="font-size:0.66rem;color:#555">if effective price tracks the curve</div>
+          </div>
+          <div style="border:1px solid #c05a5233;border-radius:6px;padding:8px 10px;background:#c05a5208">
+            <div style="font-size:0.6rem;text-transform:uppercase;letter-spacing:.07em;color:#c05a52">today's $200 plan in 2030</div>
+            <div id="im-200" style="font-size:1.55rem;font-weight:700;line-height:1.1;color:#c05a52">—</div>
+            <div style="font-size:0.66rem;color:#555">if effective price tracks the curve</div>
           </div>
         </div>
 
         <!-- sliders 2×2 -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 14px">
           <div>
             <div style="display:flex;justify-content:space-between;font-size:0.7rem;color:#888;margin-bottom:2px">
               <span>Subsidy unwind speed</span><span id="im-lbl-unwind" style="color:#e0e0e0;font-weight:600"></span>
@@ -2578,15 +2596,18 @@ const animations = {
         </div>
 
         <!-- preset buttons -->
-        <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:2px">
           ${presets.map((p,i)=>`
             <button id="im-preset-${i}" data-i="${i}"
-              style="font-size:0.68rem;padding:4px 10px;border-radius:4px;cursor:pointer;
+              style="font-size:0.66rem;letter-spacing:0.04em;text-transform:uppercase;
+                     padding:6px 10px;border-radius:4px;cursor:pointer;
                      background:${i===0?'#c05a52':'transparent'};
                      color:${i===0?'#fff':'#888'};
                      border:1px solid ${i===0?'#c05a52':'#333'};
                      transition:all .2s">${p.lbl}</button>`).join('')}
         </div>
+
+        <p class="chart-caption" style="margin:0">The model compresses several mechanisms into four levers. Each assumption is named, so you can see exactly which inputs drive the output. The 2030 endpoint is a directional projection. Uncertainty grows with horizon.</p>
       </div>`;
 
     // ── Update function ──────────────────────────────────────────
