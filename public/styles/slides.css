@@ -184,6 +184,139 @@
   font-weight: 600;
 }
 
+/* losses-grid */
+.lg-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.lg-tile {
+  border: 1px solid #1e1e1e;
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: #0b0b0b;
+}
+
+.lg-co {
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #888;
+  font-weight: 600;
+}
+
+.lg-metric {
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1.15;
+  margin: 4px 0 2px;
+}
+
+.lg-sub {
+  font-size: 0.72rem;
+  color: #888;
+  line-height: 1.4;
+}
+
+.lg-src {
+  font-size: 0.6rem;
+  color: #555;
+  margin-top: 4px;
+}
+
+/* forecast-quote card */
+.quote-card {
+  width: 100%;
+  border-left: 3px solid #c05a52;
+  background: #c05a5208;
+  padding: 14px 16px;
+  border-radius: 0 8px 8px 0;
+}
+
+.quote-eyebrow {
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  color: #c05a52;
+  font-weight: 700;
+}
+
+.quote-headline {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #e0e0e0;
+  line-height: 1.35;
+  margin-top: 0.3rem;
+}
+
+.quote-stats {
+  display: flex;
+  gap: 1.25rem;
+  margin-top: 0.4rem;
+}
+
+.quote-stats > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.qs-num {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #c05a52;
+  line-height: 1.15;
+  display: inline-block;
+}
+
+.qs-lbl {
+  font-size: 0.7rem;
+  color: #888;
+}
+
+/* audience cards */
+.ac-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.ac-card {
+  background: #0b0b0b;
+  border: 1px solid #1e1e1e;
+  padding: 10px 14px;
+  border-radius: 0 8px 8px 0;
+}
+
+.ac-tag {
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+}
+
+.ac-action {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #e0e0e0;
+  margin-top: 0.2rem;
+}
+
+.ac-sub {
+  font-size: 0.78rem;
+  color: #888;
+  line-height: 1.5;
+  margin-top: 0.25rem;
+}
+
+.ac-closer {
+  font-size: 0.92rem;
+  color: #ddd;
+  font-style: italic;
+  padding-top: 0.4rem;
+  border-top: 1px solid #1e1e1e;
+  margin-top: 0.4rem;
+}
+
 .scene-text .week-tag {
   font-size: 0.8rem;
   text-transform: uppercase;

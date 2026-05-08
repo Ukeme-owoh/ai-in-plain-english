@@ -2657,5 +2657,197 @@ const animations = {
     });
 
     update();
+  },
+
+  'losses-grid': (scene, visual) => {
+    gsap.fromTo(scene.querySelectorAll('.animate-in'),
+      { y: 24, autoAlpha: 0 },
+      { y: 0, autoAlpha: 1, duration: 0.7, stagger: 0.12, ease: 'power2.out' }
+    );
+    if (!visual) return;
+
+    const tiles = [
+      { co:'OpenAI',    metric:'-$5B',     sub:'lost on <$4B revenue', src:'AI Automation Global, 2024',     col:'#c05a52' },
+      { co:'Anthropic', metric:'-$10K+/mo',sub:'on heaviest Max users',src:'CNBC, Mar 2026',                  col:'#c05a52' },
+      { co:'Notion',    metric:'-10pp',    sub:'gross margins, post-AI',src:'Artefact',                       col:'#d97706' },
+      { co:'Replit',    metric:'+36% → -14%', sub:'gross margin swing', src:'Aakash Gupta',                    col:'#c05a52' },
+    ];
+
+    visual.innerHTML = `
+      <div class="chart-frame">
+        <div class="chart-header">Every major lab is pricing inference below cost</div>
+        <div class="lg-grid">
+          ${tiles.map((t,i)=>`
+            <div class="lg-tile" id="lg-tile-${i}">
+              <div class="lg-co">${t.co}</div>
+              <div class="lg-metric" style="color:${t.col}">${t.metric}</div>
+              <div class="lg-sub">${t.sub}</div>
+              <div class="lg-src">${t.src}</div>
+            </div>`).join('')}
+        </div>
+        <p class="chart-caption">Cross-subsidy can absorb a fat tail. It cannot absorb the entire pricing model.</p>
+        <p class="chart-source"><strong>Sources.</strong> AI Automation Global (2024), CNBC reporting (March 2026), Artefact analysis, Aakash Gupta on Replit margins.</p>
+      </div>`;
+
+    const tileEls = visual.querySelectorAll('.lg-tile');
+    const captionItalic = visual.querySelector('.chart-caption');
+    const sourceLine = visual.querySelector('.chart-source');
+    gsap.set([...tileEls, captionItalic, sourceLine], { autoAlpha: 0, y: 14 });
+
+    const tl = gsap.timeline({ repeat: -1, repeatDelay: 2.5 });
+    tl.to(tileEls, { autoAlpha: 1, y: 0, duration: 0.45, stagger: 0.18, ease: 'power2.out' })
+      .to(captionItalic, { autoAlpha: 1, y: 0, duration: 0.4 }, '+=0.2')
+      .to(sourceLine, { autoAlpha: 1, y: 0, duration: 0.4 }, '-=0.2')
+      // Subtle pulse on each metric (finite)
+      .to('.lg-metric', { scale: 1.04, transformOrigin: 'left center', duration: 0.4, yoyo: true, repeat: 1, stagger: 0.1, ease: 'sine.inOut' }, '+=0.4');
+  },
+
+  'forecast-quote': (scene, visual) => {
+    gsap.fromTo(scene.querySelectorAll('.animate-in'),
+      { y: 24, autoAlpha: 0 },
+      { y: 0, autoAlpha: 1, duration: 0.7, stagger: 0.12, ease: 'power2.out' }
+    );
+    if (!visual) return;
+
+    const W = 360, H = 90, CL = 16, CR = 344, CT = 14, CB = 78;
+    const traj = [100, 112, 116, 110, 111];
+    const yMin = 90, yMax = 122;
+    const px = i => CL + (i/4)*(CR - CL);
+    const py = v => CB - ((Math.max(yMin,Math.min(yMax,v))-yMin)/(yMax-yMin))*(CB - CT);
+    const pathD = traj.map((v,i)=>`${i?'L':'M'}${px(i).toFixed(1)},${py(v).toFixed(1)}`).join(' ');
+    const dots = traj.map((v,i)=>`<circle cx="${px(i).toFixed(1)}" cy="${py(v).toFixed(1)}" r="3.5" fill="${i===2?'#c05a52':'#0e0e0e'}" stroke="#c05a52" stroke-width="1.4"/>`).join('');
+    const xLabels = [2026,2027,2028,2029,2030].map((yr,i)=>`<text x="${px(i).toFixed(1)}" y="${CB+8}" text-anchor="middle" font-size="7" fill="#666">${yr}</text>`).join('');
+    const areaPath = pathD + ` L ${px(4).toFixed(1)},${py(yMin).toFixed(1)} L ${px(0).toFixed(1)},${py(yMin).toFixed(1)} Z`;
+
+    visual.innerHTML = `
+      <div class="quote-card">
+        <div class="quote-eyebrow">MY VIEW</div>
+        <div class="quote-headline">Enterprise effective prices rise modestly through 2028, plateau, then drift back down.</div>
+        <svg id="fq-chart" viewBox="0 0 ${W} ${H}" style="width:100%;display:block;margin-top:0.6rem">
+          <path id="fq-area" d="${areaPath}" fill="#c05a5215" stroke="none" opacity="0"/>
+          <path id="fq-path" d="${pathD}" fill="none" stroke="#c05a52" stroke-width="2.4"
+                stroke-linejoin="round" stroke-linecap="round"
+                stroke-dasharray="600" stroke-dashoffset="600"/>
+          <g id="fq-dots" opacity="0">${dots}</g>
+          ${xLabels}
+          <text id="fq-peak" x="${px(2).toFixed(1)}" y="${(py(116)-7).toFixed(1)}"
+                text-anchor="middle" font-size="8" font-weight="700" fill="#c05a52" opacity="0">peak +16%</text>
+        </svg>
+        <div class="quote-stats">
+          <div><span class="qs-num">+16%</span><span class="qs-lbl">peak in 2028</span></div>
+          <div><span class="qs-num">+11%</span><span class="qs-lbl">at 2030</span></div>
+        </div>
+      </div>`;
+
+    const tl = gsap.timeline({ repeat: -1, repeatDelay: 2.5 });
+    tl.to('#fq-area', { opacity: 1, duration: 0.5 }, 0.2)
+      .to('#fq-path', { strokeDashoffset: 0, duration: 1.6, ease: 'power1.inOut' }, 0.3)
+      .to('#fq-dots', { opacity: 1, duration: 0.4 }, '-=0.4')
+      .to('#fq-peak', { opacity: 1, y: -2, duration: 0.4, ease: 'power2.out' }, '+=0.1')
+      .to('.qs-num', { scale: 1.08, transformOrigin: 'left center', duration: 0.4, yoyo: true, repeat: 1, stagger: 0.15, ease: 'sine.inOut' }, '+=0.3');
+  },
+
+  'audience-cards': (scene, visual) => {
+    gsap.fromTo(scene.querySelectorAll('.animate-in'),
+      { y: 24, autoAlpha: 0 },
+      { y: 0, autoAlpha: 1, duration: 0.7, stagger: 0.12, ease: 'power2.out' }
+    );
+    if (!visual) return;
+
+    const cards = [
+      { tag:'IF YOU BUILD WITH AI',  col:'#3b82f6',
+        action:'Routing layers and exit optionality.',
+        sub:'Not three-year price-locked contracts. The cost line is becoming its own bill.' },
+      { tag:'IF YOU RUN FINANCE',     col:'#d97706',
+        action:'Consumption budgets are the new governance.',
+        sub:'Gartner: 40% of enterprises will exceed AI budgets by 2× by 2027.' },
+      { tag:'IF YOU WATCH POLICY',   col:'#c05a52',
+        action:'Interoperability and fair pricing, now.',
+        sub:'Consolidation follows the bust. The digestion phase decides who wins.' },
+    ];
+
+    visual.innerHTML = `
+      <div class="ac-stack">
+        ${cards.map((c,i)=>`
+          <div class="ac-card" id="ac-card-${i}" style="border-left:3px solid ${c.col}">
+            <div class="ac-tag" style="color:${c.col}">${c.tag}</div>
+            <div class="ac-action">${c.action}</div>
+            <div class="ac-sub">${c.sub}</div>
+          </div>`).join('')}
+        <div class="ac-closer" id="ac-closer">Tokens cost too little today. Tomorrow, the question will be who pays.</div>
+      </div>`;
+
+    const cardEls = visual.querySelectorAll('.ac-card');
+    const closer  = visual.querySelector('#ac-closer');
+    gsap.set([...cardEls, closer], { autoAlpha: 0, x: -16 });
+
+    const tl = gsap.timeline({ repeat: -1, repeatDelay: 2.5 });
+    tl.to(cardEls, { autoAlpha: 1, x: 0, duration: 0.45, stagger: 0.22, ease: 'power2.out' })
+      .to(closer, { autoAlpha: 1, x: 0, duration: 0.5 }, '+=0.3');
+  },
+
+  'next-week-teaser': (scene, visual) => {
+    gsap.fromTo(scene.querySelectorAll('.animate-in'),
+      { y: 24, autoAlpha: 0 },
+      { y: 0, autoAlpha: 1, duration: 0.7, stagger: 0.12, ease: 'power2.out' }
+    );
+    if (!visual) return;
+
+    const W = 360, H = 240;
+    const CX = 60, CY = H/2;          // user origin
+    const AX = 200, AY = H/2;         // agent
+    const RX = 320;                    // inference column
+    const N = 7;                       // visible inference call lines
+
+    const lines = Array.from({length:N}, (_, i) => {
+      const yy = 30 + i * ((H - 60) / (N - 1));
+      return `<line class="nw-call" id="nw-call-${i}"
+                x1="${AX}" y1="${AY}" x2="${RX}" y2="${yy.toFixed(1)}"
+                stroke="#c05a52" stroke-width="1.4" stroke-linecap="round"
+                stroke-dasharray="160" stroke-dashoffset="160" opacity="0.85"/>
+              <circle id="nw-tok-${i}" cx="${RX}" cy="${yy.toFixed(1)}" r="3.6"
+                      fill="#c05a52" opacity="0"/>`;
+    }).join('');
+
+    visual.innerHTML = `
+      <div class="chart-frame">
+        <div class="chart-header">One question. Many calls.</div>
+        <svg viewBox="0 0 ${W} ${H}" style="width:100%;display:block;max-width:${W}px">
+          <!-- user node -->
+          <circle cx="${CX}" cy="${CY}" r="22" fill="#3b82f6" opacity="0.18"/>
+          <circle cx="${CX}" cy="${CY}" r="14" fill="#3b82f6"/>
+          <text x="${CX}" y="${CY+38}" text-anchor="middle" font-size="9" fill="#888">you</text>
+          <text x="${CX}" y="${CY+50}" text-anchor="middle" font-size="8" fill="#555">1 question</text>
+
+          <!-- arrow user → agent -->
+          <line id="nw-link" x1="${CX+18}" y1="${CY}" x2="${AX-18}" y2="${AY}"
+                stroke="#888" stroke-width="1.2"
+                stroke-dasharray="160" stroke-dashoffset="160"/>
+
+          <!-- agent node -->
+          <circle cx="${AX}" cy="${AY}" r="22" fill="#c05a52" opacity="0.2"/>
+          <circle cx="${AX}" cy="${AY}" r="14" fill="#c05a52"/>
+          <text x="${AX}" y="${AY+38}" text-anchor="middle" font-size="9" fill="#888">agent</text>
+          <text x="${AX}" y="${AY+50}" text-anchor="middle" font-size="8" fill="#555">retries · verifies</text>
+
+          <!-- inference fan-out -->
+          ${lines}
+
+          <!-- inference column header -->
+          <text x="${RX}" y="22" text-anchor="middle" font-size="9" fill="#888">inference calls</text>
+          <text id="nw-count" x="${RX}" y="${H-10}" text-anchor="middle"
+                font-size="11" font-weight="700" fill="#c05a52" opacity="0">20×</text>
+        </svg>
+        <p class="chart-caption">You ask one question. The agent fires twenty inference calls. Then it retries. Then it verifies. Then it bills you.</p>
+      </div>`;
+
+    const tl = gsap.timeline({ repeat: -1, repeatDelay: 2 });
+    tl.to('#nw-link', { strokeDashoffset: 0, duration: 0.6, ease: 'power1.inOut' });
+    for (let i = 0; i < N; i++) {
+      tl.to(`#nw-call-${i}`, { strokeDashoffset: 0, duration: 0.32, ease: 'power1.out' }, `+=${i===0?0.1:0.04}`);
+      tl.to(`#nw-tok-${i}`,  { opacity: 1, duration: 0.18 }, '-=0.12');
+    }
+    tl.to('#nw-count', { opacity: 1, duration: 0.4 }, '+=0.2')
+      .to('#nw-count', { scale: 1.15, transformOrigin: 'center', duration: 0.4, yoyo: true, repeat: 1, ease: 'sine.inOut' }, '+=0.1');
   }
 };
