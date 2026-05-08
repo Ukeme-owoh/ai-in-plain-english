@@ -1995,18 +1995,23 @@ const animations = {
     }).join('');
 
     visual.innerHTML = `
-      <svg viewBox="0 0 ${VW} ${VH}" style="width:100%;max-width:${VW}px">
-        <!-- axes -->
-        <line x1="${L}" y1="${B}" x2="${R}" y2="${B}" stroke="#333" stroke-width="1"/>
-        <line x1="${L}" y1="${T}" x2="${L}" y2="${B}" stroke="#333" stroke-width="1"/>
-        ${yGrid}
-        ${xTicks}
-        ${tiersHTML}
-      </svg>
-      <p class="visual-caption">The floor has not moved. Only the ceiling rose.</p>`;
+      <div class="chart-frame">
+        <div class="chart-header">Monthly subscription tiers, 2023 to 2026</div>
+        <svg viewBox="0 0 ${VW} ${VH}" style="width:100%;max-width:${VW}px">
+          <!-- axes -->
+          <line x1="${L}" y1="${B}" x2="${R}" y2="${B}" stroke="#333" stroke-width="1"/>
+          <line x1="${L}" y1="${T}" x2="${L}" y2="${B}" stroke="#333" stroke-width="1"/>
+          ${yGrid}
+          ${xTicks}
+          ${tiersHTML}
+        </svg>
+        <p class="chart-caption">The labs raised the ceiling by adding new tiers. They did not raise the existing ones. ChatGPT Plus, Claude Pro, Google AI Pro, and Perplexity Pro all still sit at the $20 line.</p>
+        <p class="chart-source"><strong>Source.</strong> Fello AI pricing comparison (2026), Sentisight pricing analysis. Plan launch dates from official lab announcements.</p>
+      </div>`;
 
-    const caption = visual.querySelector('.visual-caption');
-    gsap.set(caption, { autoAlpha: 0, y: 6 });
+    const captionItalic = visual.querySelector('.chart-caption');
+    const sourceLine = visual.querySelector('.chart-source');
+    gsap.set([captionItalic, sourceLine], { autoAlpha: 0, y: 6 });
 
     const tl = gsap.timeline({ repeat: -1, repeatDelay: 2.5 });
 
@@ -2027,7 +2032,8 @@ const animations = {
         .to(lblIds, { opacity: 1, duration: 0.25, stagger: 0.08 }, '-=0.15');
     });
 
-    tl.to(caption, { autoAlpha: 1, y: 0, duration: 0.4 }, '+=0.2');
+    tl.to(captionItalic, { autoAlpha: 1, y: 0, duration: 0.4 }, '+=0.2')
+      .to(sourceLine, { autoAlpha: 1, y: 0, duration: 0.4 }, '-=0.2');
   },
 
   'shrinkflation': (scene, visual) => {
@@ -2086,25 +2092,27 @@ const animations = {
     const tagY = (T - 10).toFixed(1);
 
     visual.innerHTML = `
-      <svg viewBox="0 0 ${VW} ${VH}" style="width:100%;max-width:${VW}px">
-        <!-- title -->
-        <text x="${((L+R)/2).toFixed(1)}" y="16" text-anchor="middle"
-              font-size="10" font-weight="600" fill="#888">Included usage at a $20 plan, indexed (Q1 2024 = 100)</text>
-        <!-- grid + axes -->
-        <line x1="${L}" y1="${B}" x2="${R}" y2="${B}" stroke="#333" stroke-width="1"/>
-        ${yGrid}
-        ${barsHTML}
-        <!-- AI shrinkflation tag -->
-        <text id="sf-tag1" x="${tagX}" y="${tagY}" text-anchor="end"
-              font-size="10" font-weight="700" fill="#c05a52" opacity="0">"AI shrinkflation"</text>
-        <text id="sf-tag2" x="${tagX}" y="${(parseFloat(tagY)+13).toFixed(1)}" text-anchor="end"
-              font-size="9" fill="#888" opacity="0">went viral, April 2026</text>
-      </svg>
-      <p class="visual-caption">Same price. Roughly half the usage. Across all three major labs.</p>`;
+      <div class="chart-frame">
+        <div class="chart-header">Included usage at a $20 plan, indexed (Q1 2024 = 100)</div>
+        <svg viewBox="0 0 ${VW} ${VH}" style="width:100%;max-width:${VW}px">
+          <!-- grid + axes -->
+          <line x1="${L}" y1="${B}" x2="${R}" y2="${B}" stroke="#333" stroke-width="1"/>
+          ${yGrid}
+          ${barsHTML}
+          <!-- AI shrinkflation tag -->
+          <text id="sf-tag1" x="${tagX}" y="${tagY}" text-anchor="end"
+                font-size="10.5" font-weight="700" fill="#c05a52" opacity="0">"AI shrinkflation"</text>
+          <text id="sf-tag2" x="${tagX}" y="${(parseFloat(tagY)+13).toFixed(1)}" text-anchor="end"
+                font-size="9" fill="#888" opacity="0">went viral, April 2026</text>
+        </svg>
+        <p class="chart-caption">The pattern is illustrative. Quarterly figures are smoothed across plans. The direction, that included usage at $20 is roughly half what it was two years ago, is well documented across Anthropic, OpenAI, and Google.</p>
+        <p class="chart-source"><strong>Sources.</strong> FindSkill.ai (April 2026 Plus limits), Aizolo subscription guide, AIviewer.ai. Index values illustrative.</p>
+      </div>`;
 
     const barEls  = [...visual.querySelectorAll('.sf-bar')];
-    const caption = visual.querySelector('.visual-caption');
-    gsap.set(caption, { autoAlpha: 0, y: 6 });
+    const captionItalic = visual.querySelector('.chart-caption');
+    const sourceLine = visual.querySelector('.chart-source');
+    gsap.set([captionItalic, sourceLine], { autoAlpha: 0, y: 6 });
 
     const tl = gsap.timeline({ repeat: -1, repeatDelay: 2.5 });
 
@@ -2118,7 +2126,8 @@ const animations = {
     const after = barEls.length * 0.15 + 0.4;
     tl
       .to(['#sf-tag1','#sf-tag2'], { opacity: 1, duration: 0.35, stagger: 0.1 }, after)
-      .to(caption, { autoAlpha: 1, y: 0, duration: 0.4 }, after + 0.4);
+      .to(captionItalic, { autoAlpha: 1, y: 0, duration: 0.4 }, after + 0.4)
+      .to(sourceLine, { autoAlpha: 1, y: 0, duration: 0.4 }, after + 0.7);
   },
 
   'billing-phases': (scene, visual) => {
@@ -2178,22 +2187,27 @@ const animations = {
     const nowX = px(2026).toFixed(1);
 
     visual.innerHTML = `
-      <svg viewBox="0 0 ${VW} ${VH}" style="width:100%;max-width:${VW}px">
-        <!-- baseline -->
-        <line x1="${L}" y1="${B}" x2="${R}" y2="${B}" stroke="#333" stroke-width="1"/>
-        ${xGrid}
-        ${xTicks}
-        ${phHTML}
-        <!-- NOW marker -->
-        <line id="bp-now-line" x1="${nowX}" y1="${T}" x2="${nowX}" y2="${B}"
-              stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="4,3" opacity="0"/>
-        <text id="bp-now-lbl" x="${nowX}" y="${T-6}" text-anchor="middle"
-              font-size="9" font-weight="700" fill="#fbbf24" opacity="0">NOW</text>
-      </svg>
-      <p class="visual-caption">Each new phase did not replace the previous one. All four coexist.</p>`;
+      <div class="chart-frame">
+        <div class="chart-header">Four phases of enterprise AI pricing</div>
+        <svg viewBox="0 0 ${VW} ${VH}" style="width:100%;max-width:${VW}px">
+          <!-- baseline -->
+          <line x1="${L}" y1="${B}" x2="${R}" y2="${B}" stroke="#333" stroke-width="1"/>
+          ${xGrid}
+          ${xTicks}
+          ${phHTML}
+          <!-- NOW marker -->
+          <line id="bp-now-line" x1="${nowX}" y1="${T}" x2="${nowX}" y2="${B}"
+                stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="4,3" opacity="0"/>
+          <text id="bp-now-lbl" x="${nowX}" y="${T-6}" text-anchor="middle"
+                font-size="9" font-weight="700" fill="#fbbf24" opacity="0">NOW</text>
+        </svg>
+        <p class="chart-caption">Each new phase did not replace the previous one. Phase 1 still exists. Phase 2 still exists. The enterprise market now operates across all four simultaneously, with the bill assembled from whichever phases the customer is in.</p>
+        <p class="chart-source"><strong>Sources.</strong> GitHub blog (April 2026), Microsoft Partner blog (May 2026), CNBC reporting on Anthropic enterprise contract changes (2026).</p>
+      </div>`;
 
-    const caption = visual.querySelector('.visual-caption');
-    gsap.set(caption, { autoAlpha: 0, y: 6 });
+    const captionItalic = visual.querySelector('.chart-caption');
+    const sourceLine = visual.querySelector('.chart-source');
+    gsap.set([captionItalic, sourceLine], { autoAlpha: 0, y: 6 });
 
     const tl = gsap.timeline({ repeat: -1, repeatDelay: 2.5 });
 
@@ -2207,7 +2221,8 @@ const animations = {
     const after = phases.length * 0.55 + 0.55;
     tl
       .to(['#bp-now-line','#bp-now-lbl'], { opacity: 1, duration: 0.4 }, after)
-      .to(caption, { autoAlpha: 1, y: 0, duration: 0.4 }, after + 0.3);
+      .to(captionItalic, { autoAlpha: 1, y: 0, duration: 0.4 }, after + 0.3)
+      .to(sourceLine, { autoAlpha: 1, y: 0, duration: 0.4 }, after + 0.6);
   },
 
   'commodity-cycle': (scene, visual) => {
