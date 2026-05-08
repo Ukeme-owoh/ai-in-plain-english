@@ -135,6 +135,13 @@
   max-width: 44ch;
 }
 
+.scene-source {
+  font-size: 0.68rem;
+  color: #3a3a3a;
+  line-height: 1.5;
+  margin-top: -0.25rem;
+}
+
 /* Token demo */
 .token-demo {
   display: flex;
