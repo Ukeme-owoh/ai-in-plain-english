@@ -1657,6 +1657,110 @@ const animations = {
     );
   },
 
+  'subsidy-gap': (scene, visual) => {
+    gsap.fromTo(scene.querySelectorAll('.animate-in'),
+      { y: 24, autoAlpha: 0 },
+      { y: 0, autoAlpha: 1, duration: 0.7, stagger: 0.12, ease: 'power2.out' }
+    );
+
+    if (!visual) return;
+
+    const W = 520, H = 300, PL = 60, PB = 56, PT = 28, PR = 40;
+    const IW = W - PL - PR, IH = H - PT - PB;
+
+    // Bar positions
+    const barW = 70;
+    const gap   = IW * 0.55;
+    const xPaid = PL + IW * 0.18;
+    const xComp = PL + IW * 0.62;
+
+    // Heights: $200 vs $35,000. Log-scale so $200 is visibly there.
+    // Linear scale: $200/$35000 = 0.57% — invisible. Use a narrative scale instead.
+    // Paid bar = 14px, Compute bar = full IH. Keeps the visual impact dramatic.
+    const hPaid = 22;
+    const hComp = IH;
+
+    const yBase = PT + IH;
+    const yPaid = yBase - hPaid;
+    const yComp = PT;
+
+    // Gap arrow y positions (mid-height of compute bar, above paid bar)
+    const arrowY = PT + IH * 0.38;
+
+    visual.innerHTML = `
+      <svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:${W}px">
+
+        <!-- baseline -->
+        <line x1="${PL - 8}" y1="${yBase}" x2="${PL + IW + 8}" y2="${yBase}" stroke="#444" stroke-width="1"/>
+
+        <!-- Paid bar ($200, blue) -->
+        <rect id="sg-bar-paid" x="${xPaid - barW/2}" y="${yBase}" width="${barW}" height="0"
+              fill="#3b82f6" rx="3"/>
+
+        <!-- Compute bar ($35k, dark navy) -->
+        <rect id="sg-bar-comp" x="${xComp - barW/2}" y="${yBase}" width="${barW}" height="0"
+              fill="#1e3a5f" rx="3"/>
+
+        <!-- $200 label (above paid bar) -->
+        <text id="sg-lbl-paid" x="${xPaid}" y="${yPaid - 8}" text-anchor="middle"
+              font-size="15" font-weight="700" fill="#3b82f6" opacity="0">$200</text>
+        <text id="sg-sub-paid" x="${xPaid}" y="${yBase + 18}" text-anchor="middle"
+              font-size="11" fill="#888">paid</text>
+
+        <!-- $35,000 label -->
+        <text id="sg-lbl-comp" x="${xComp}" y="${yComp - 10}" text-anchor="middle"
+              font-size="15" font-weight="700" fill="#93c5fd" opacity="0">$35,000</text>
+        <text id="sg-sub-comp" x="${xComp}" y="${yBase + 18}" text-anchor="middle"
+              font-size="11" fill="#888">compute consumed</text>
+
+        <!-- 175× gap box (dashed, appears last) -->
+        <rect id="sg-gap-box" x="${xPaid + barW/2 + 8}" y="${arrowY - 18}"
+              width="${xComp - barW/2 - (xPaid + barW/2) - 16}" height="36"
+              fill="none" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="5,3"
+              rx="4" opacity="0"/>
+        <!-- dashed lines from box to bars -->
+        <line id="sg-gap-line-l" x1="${xPaid + barW/2}" y1="${arrowY}"
+              x2="${xPaid + barW/2 + 8}" y2="${arrowY}"
+              stroke="#ef4444" stroke-width="1" stroke-dasharray="4,3" opacity="0"/>
+        <line id="sg-gap-line-r" x1="${xComp - barW/2 - 8}" y1="${arrowY}"
+              x2="${xComp - barW/2}" y2="${arrowY}"
+              stroke="#ef4444" stroke-width="1" stroke-dasharray="4,3" opacity="0"/>
+        <text id="sg-gap-lbl" x="${(xPaid + xComp) / 2}" y="${arrowY + 5}"
+              text-anchor="middle" font-size="13" font-weight="700" fill="#ef4444"
+              opacity="0">175× gap</text>
+
+        <!-- caption -->
+        <text id="sg-caption" x="${W/2}" y="${H - 6}" text-anchor="middle"
+              font-size="9.5" fill="#555" opacity="0">One documented user. Methodology unverified. Direction is not in dispute.</text>
+      </svg>`;
+
+    const barPaid = visual.querySelector('#sg-bar-paid');
+    const barComp = visual.querySelector('#sg-bar-comp');
+    const lblPaid = visual.querySelector('#sg-lbl-paid');
+    const lblComp = visual.querySelector('#sg-lbl-comp');
+    const gapBox  = visual.querySelector('#sg-gap-box');
+    const gapLineL = visual.querySelector('#sg-gap-line-l');
+    const gapLineR = visual.querySelector('#sg-gap-line-r');
+    const gapLbl  = visual.querySelector('#sg-gap-lbl');
+    const caption = visual.querySelector('#sg-caption');
+
+    const tl = gsap.timeline({ repeat: -1, repeatDelay: 2 });
+    tl
+      // Paid bar grows up (tiny)
+      .to(barPaid, { attr: { y: yPaid, height: hPaid }, duration: 0.5, ease: 'power2.out' })
+      .to(lblPaid, { opacity: 1, duration: 0.3 }, '-=0.1')
+      // Compute bar grows up (dramatic, slow)
+      .to(barComp, { attr: { y: yComp, height: hComp }, duration: 1.4, ease: 'power3.out' }, '+=0.3')
+      .to(lblComp, { opacity: 1, duration: 0.35 }, '-=0.3')
+      // Gap box + lines appear
+      .to([gapBox, gapLineL, gapLineR], { opacity: 1, duration: 0.4 }, '+=0.3')
+      .to(gapLbl, { opacity: 1, duration: 0.35 }, '-=0.15')
+      // Caption
+      .to(caption, { opacity: 1, duration: 0.4 }, '+=0.3')
+      // Subtle pulse on gap label (finite)
+      .to(gapLbl, { scale: 1.08, transformOrigin: 'center', duration: 0.5, yoyo: true, repeat: 3, ease: 'sine.inOut' }, '+=0.5');
+  },
+
   'user-distribution': (scene, visual) => {
     gsap.fromTo(scene.querySelectorAll('.animate-in'),
       { y: 24, autoAlpha: 0 },
