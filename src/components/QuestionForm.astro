@@ -3,19 +3,18 @@ interface Props {
   postTitle: string;
 }
 const { postTitle } = Astro.props;
+const endpoint = import.meta.env.PUBLIC_FEEDBACK_ENDPOINT ?? '';
 ---
 
-<div class="question-form-wrap">
+<div class="question-form-wrap" data-endpoint={endpoint}>
   <h3 class="qf-heading">Have a question?</h3>
   <p class="qf-sub">Ask anything about this post. Ukeme reads every question.</p>
 
-  <form
-    id="question-form"
-    action="https://formspree.io/f/YOUR_FORM_ID"
-    method="POST"
-    class="qf-form"
-  >
+  <form id="question-form" class="qf-form" novalidate>
     <input type="hidden" name="post" value={postTitle} />
+    <!-- honeypot — bots fill this, humans do not -->
+    <input type="text" name="website" tabindex="-1" autocomplete="off"
+           aria-hidden="true" class="qf-honeypot" />
 
     <div class="qf-field">
       <label for="qf-name">Your name (optional)</label>
@@ -24,32 +23,96 @@ const { postTitle } = Astro.props;
 
     <div class="qf-field">
       <label for="qf-question">Your question</label>
-      <textarea id="qf-question" name="question" rows="3" placeholder="What confused you? What do you want to know more about?" required></textarea>
+      <textarea id="qf-question" name="question" rows="3"
+                placeholder="What confused you? What do you want to know more about?"
+                required minlength="3" maxlength="2000"></textarea>
     </div>
 
-    <button type="submit" class="qf-submit">Send question →</button>
+    <button type="submit" class="qf-submit" id="qf-submit">Send question →</button>
 
-    <p class="qf-success" id="qf-success" style="display:none">
+    <p class="qf-status qf-success" id="qf-success" hidden>
       Question sent. Thank you.
     </p>
+    <p class="qf-status qf-error" id="qf-error" hidden></p>
   </form>
 </div>
 
 <script>
-  const form = document.getElementById('question-form') as HTMLFormElement | null;
-  const success = document.getElementById('qf-success');
+  const wrap   = document.querySelector('.question-form-wrap') as HTMLElement | null;
+  const form   = document.getElementById('question-form') as HTMLFormElement | null;
+  const submit = document.getElementById('qf-submit') as HTMLButtonElement | null;
+  const success = document.getElementById('qf-success') as HTMLElement | null;
+  const errorBox = document.getElementById('qf-error') as HTMLElement | null;
+
+  const endpoint = wrap?.dataset.endpoint || '';
+
+  function showError(msg: string) {
+    if (!errorBox) return;
+    errorBox.textContent = msg;
+    errorBox.hidden = false;
+  }
+
+  function clearError() {
+    if (!errorBox) return;
+    errorBox.hidden = true;
+    errorBox.textContent = '';
+  }
 
   form?.addEventListener('submit', async (e) => {
     e.preventDefault();
+    clearError();
+
+    if (!form.checkValidity()) {
+      showError('Please fill in your question (at least 3 characters).');
+      return;
+    }
+
+    if (!endpoint) {
+      showError('The feedback endpoint is not configured. Set PUBLIC_FEEDBACK_ENDPOINT and rebuild.');
+      return;
+    }
+
     const data = new FormData(form);
-    const res = await fetch(form.action, {
-      method: 'POST',
-      body: data,
-      headers: { Accept: 'application/json' },
-    });
-    if (res.ok) {
+    // Honeypot — silently drop bot submissions
+    if ((data.get('website') as string)?.length) {
+      if (success) success.hidden = false;
       form.style.display = 'none';
-      if (success) success.style.display = 'block';
+      return;
+    }
+
+    const payload = {
+      name:     (data.get('name') as string)?.trim() || 'Anonymous',
+      question: (data.get('question') as string)?.trim() || '',
+      post:     (data.get('post') as string)?.trim() || '',
+      page:     location.pathname,
+      ts:       new Date().toISOString(),
+    };
+
+    if (submit) {
+      submit.disabled = true;
+      submit.textContent = 'Sending…';
+    }
+
+    try {
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const text = await res.text().catch(() => '');
+        throw new Error(text || `Request failed (${res.status})`);
+      }
+
+      form.style.display = 'none';
+      if (success) success.hidden = false;
+    } catch (err: any) {
+      showError(`Could not send. ${err?.message || 'Please try again later.'}`);
+      if (submit) {
+        submit.disabled = false;
+        submit.textContent = 'Send question →';
+      }
     }
   });
 </script>
@@ -112,6 +175,15 @@ const { postTitle } = Astro.props;
     border-color: #6ee7b7;
   }
 
+  .qf-honeypot {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
   .qf-submit {
     background: #6ee7b7;
     color: #0a0a0a;
@@ -129,9 +201,22 @@ const { postTitle } = Astro.props;
     opacity: 0.85;
   }
 
+  .qf-submit:disabled {
+    opacity: 0.55;
+    cursor: progress;
+  }
+
+  .qf-status {
+    font-size: 0.95rem;
+    padding: 0.6rem 0;
+    margin: 0;
+  }
+
   .qf-success {
     color: #6ee7b7;
-    font-size: 0.95rem;
-    padding: 1rem 0;
+  }
+
+  .qf-error {
+    color: #fda4af;
   }
 </style>
