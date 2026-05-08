@@ -13,6 +13,8 @@ const TABS = [
 
 const techPosts = posts.filter((p) => p.data.category === 'tech');
 const techPlaceholders = Math.max(0, 12 - techPosts.length);
+const policyPosts = posts.filter((p) => p.data.category === 'policy');
+const policyPlaceholders = Math.max(0, 6 - policyPosts.length);
 const emptyPlaceholders = 6;
 ---
 
@@ -124,7 +126,39 @@ const emptyPlaceholders = 6;
         </div>
       ))}
 
-      {Array.from({ length: emptyPlaceholders }).map((_, i) => (
+      {policyPosts.map((post) => (
+        <a
+          href={`${base}/posts/${post.slug}`}
+          class={`post-card theme-${post.data.theme ?? 'coral'}`}
+          data-category="policy"
+        >
+          <div class="card-preview">
+            <div class="card-meta">
+              <span class="card-status">
+                <span class="card-dot"></span>
+                {post.data.previewLabel ?? 'policy.read()'}
+              </span>
+              <span class="card-week">Week {post.data.week}</span>
+            </div>
+            <div class="card-figure">
+              <div class="card-icon-ring">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true">
+                  <rect x="3" y="14" width="4" height="7" rx="1" />
+                  <rect x="10" y="8" width="4" height="13" rx="1" />
+                  <rect x="17" y="4" width="4" height="17" rx="1" />
+                </svg>
+              </div>
+              <span class="card-figure-label">{post.data.previewCaption ?? 'Policy'}</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <h2 class="card-title">{post.data.title}</h2>
+            <p class="card-desc">{post.data.description}</p>
+          </div>
+        </a>
+      ))}
+
+      {Array.from({ length: policyPlaceholders }).map((_, i) => (
         <div class="post-card post-card--coming" data-category="policy">
           <div class="card-preview">
             <div class="card-figure">
