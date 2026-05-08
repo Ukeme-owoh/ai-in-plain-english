@@ -1657,7 +1657,7 @@ const animations = {
     );
   },
 
-  'subsidy-gap': (scene, visual) => {
+  'user-distribution': (scene, visual) => {
     gsap.fromTo(scene.querySelectorAll('.animate-in'),
       { y: 24, autoAlpha: 0 },
       { y: 0, autoAlpha: 1, duration: 0.7, stagger: 0.12, ease: 'power2.out' }
@@ -1665,56 +1665,125 @@ const animations = {
 
     if (!visual) return;
 
-    const BL = 295;
-    const PAID_H = 14;
-    const COMP_H = 240;
-    const paidX = 22, paidW = 80, paidCx = paidX + paidW / 2;
-    const compX = 200, compW = 85, compCx = compX + compW / 2;
-    const gapCx = paidX + paidW + (compX - paidX - paidW) / 2;
-    const gapMidY = BL - COMP_H / 2;
+    // Log-normal: μ=4.8, σ=0.9 → mode≈$54, median≈$121, ~27% of users cost >$200
+    const MU = 4.8, SIG = 0.9;
+    const lnPDF = (x) => {
+      const z = (Math.log(x) - MU) / SIG;
+      return (1 / (x * SIG * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * z * z);
+    };
 
-    visual.innerHTML = `
-      <svg viewBox="0 0 310 355" class="visual-svg subsidy-svg">
-        <line x1="10" y1="${BL}" x2="300" y2="${BL}" stroke="#222" stroke-width="1"/>
-        <rect class="bar-paid" x="${paidX}" y="${BL}" width="${paidW}" height="0" rx="3" fill="#6ee7b7"/>
-        <rect class="bar-comp" x="${compX}" y="${BL}" width="${compW}" height="0" rx="3" fill="#fda4af"/>
-        <text class="lbl-pv" x="${paidCx}" y="${BL + 18}" text-anchor="middle"
-          font-size="13" font-weight="700" fill="#6ee7b7" opacity="0">$200</text>
-        <text class="lbl-ps" x="${paidCx}" y="${BL + 31}" text-anchor="middle"
-          font-size="9" fill="#555" opacity="0">paid</text>
-        <text class="lbl-cv" x="${compCx}" y="${BL + 18}" text-anchor="middle"
-          font-size="13" font-weight="700" fill="#fda4af" opacity="0">$35,000</text>
-        <text class="lbl-cs" x="${compCx}" y="${BL + 31}" text-anchor="middle"
-          font-size="9" fill="#555" opacity="0">consumed</text>
-        <text class="gap-x" x="${gapCx}" y="${gapMidY + 8}" text-anchor="middle"
-          font-size="28" font-weight="800" fill="#ffffff" opacity="0">175×</text>
-        <text class="gap-s" x="${gapCx}" y="${gapMidY + 24}" text-anchor="middle"
-          font-size="9" fill="#666" opacity="0">gap absorbed</text>
-      </svg>
-      <p class="visual-caption">One month. One user. $200 paid. $35,000 consumed.</p>`;
+    // Plot area inside SVG viewBox 0 0 310 250
+    const L = 42, R = 295, T = 20, B = 200;
+    const PW = R - L, PH = B - T;
+    const toPx = (x) => L + ((Math.log10(x) - 1) / 4) * PW;  // log-scale x→svg x
 
-    const barPaid = visual.querySelector('.bar-paid');
-    const barComp  = visual.querySelector('.bar-comp');
-    const lblPv    = visual.querySelector('.lbl-pv');
-    const lblPs    = visual.querySelector('.lbl-ps');
-    const lblCv    = visual.querySelector('.lbl-cv');
-    const lblCs    = visual.querySelector('.lbl-cs');
-    const gapX     = visual.querySelector('.gap-x');
-    const gapS     = visual.querySelector('.gap-s');
-    const caption  = visual.querySelector('.visual-caption');
+    // Sample 80 points log-spaced $10–$100k
+    const pts = Array.from({ length: 81 }, (_, i) => {
+      const x = Math.pow(10, 1 + (i / 80) * 4);
+      return { x, y: lnPDF(x) };
+    });
+    const maxY = Math.max(...pts.map(p => p.y));
+    const svgPts = pts.map(p => ({
+      sx: toPx(p.x),
+      sy: T + PH - (p.y / maxY) * PH * 0.88
+    }));
 
+    const curveD = svgPts.map((p, i) => (i === 0 ? `M${p.sx.toFixed(1)},${p.sy.toFixed(1)}`
+      : `L${p.sx.toFixed(1)},${p.sy.toFixed(1)}`)).join(' ');
+
+    // Subsidized fill: region under curve to the right of $200
+    const px200 = toPx(200);
+    const rightPts = svgPts.filter(p => p.sx >= px200);
+    const fillD = rightPts.length
+      ? `M${px200.toFixed(1)},${B} L${px200.toFixed(1)},${rightPts[0].sy.toFixed(1)} `
+        + rightPts.map(p => `L${p.sx.toFixed(1)},${p.sy.toFixed(1)}`).join(' ')
+        + ` L${rightPts[rightPts.length - 1].sx.toFixed(1)},${B} Z`
+      : '';
+
+    const px35k = toPx(35000);
+    const subsidyCx = ((px200 + R) / 2).toFixed(1);
+
+    let svg = `<svg viewBox="0 0 310 250" class="visual-svg">`;
+
+    // Baseline axis
+    svg += `<line x1="${L}" y1="${B}" x2="${R}" y2="${B}" stroke="#222" stroke-width="1"/>`;
+
+    // X tick marks (log scale)
+    [[10,'$10'],[100,'$100'],[1000,'$1k'],[10000,'$10k'],[100000,'$100k']].forEach(([v,lbl]) => {
+      const tx = toPx(v).toFixed(1);
+      svg += `<line x1="${tx}" y1="${B}" x2="${tx}" y2="${B + 4}" stroke="#2a2a2a" stroke-width="1"/>`;
+      svg += `<text x="${tx}" y="${B + 14}" text-anchor="middle" font-size="8.5" fill="#3a3a3a">${lbl}</text>`;
+    });
+
+    // Subsidy fill (behind curve)
+    if (fillD) svg += `<path class="subsidy-fill" d="${fillD}" fill="#fda4af" opacity="0"/>`;
+
+    // Curve via clip rect
+    svg += `<defs>
+      <clipPath id="distclip">
+        <rect class="dist-clip" x="${L}" y="${T - 2}" width="0" height="${PH + 10}"/>
+      </clipPath>
+    </defs>`;
+    svg += `<path d="${curveD}" fill="none" stroke="#ccc" stroke-width="2"
+      stroke-linejoin="round" clip-path="url(#distclip)"/>`;
+
+    // $200 flat-price line
+    svg += `<line class="price-line" x1="${px200.toFixed(1)}" y1="${T}"
+      x2="${px200.toFixed(1)}" y2="${B}" stroke="#6ee7b7" stroke-width="1.5"
+      stroke-dasharray="4,3" opacity="0"/>`;
+    svg += `<text class="price-lbl" x="${(px200 - 5).toFixed(1)}" y="${T + 11}"
+      text-anchor="end" font-size="8.5" fill="#6ee7b7" opacity="0">$200 flat price</text>`;
+
+    // Subsidized zone label
+    svg += `<text class="subsidy-lbl" x="${subsidyCx}" y="${T + 55}"
+      text-anchor="middle" font-size="8.5" fill="#fda4af" opacity="0">subsidized</text>`;
+    svg += `<text class="subsidy-lbl2" x="${subsidyCx}" y="${T + 67}"
+      text-anchor="middle" font-size="8.5" fill="#fda4af" opacity="0">zone</text>`;
+
+    // $35k outlier
+    svg += `<line class="outlier-tick" x1="${px35k.toFixed(1)}" y1="${B - 10}"
+      x2="${px35k.toFixed(1)}" y2="${B}" stroke="#fda4af" stroke-width="1.5" opacity="0"/>`;
+    svg += `<circle class="outlier-dot" cx="${px35k.toFixed(1)}" cy="${B - 10}" r="3.5"
+      fill="#fda4af" opacity="0"/>`;
+    svg += `<text class="outlier-lbl" x="${px35k.toFixed(1)}" y="${B - 17}"
+      text-anchor="middle" font-size="7.5" fill="#666" opacity="0">$35k (extreme)</text>`;
+
+    svg += `</svg>
+    <p class="visual-caption">Distribution is illustrative. Flat price, long cost tail — documented across every major lab.</p>`;
+
+    visual.innerHTML = svg;
+
+    const clipRect     = visual.querySelector('.dist-clip');
+    const subsidyFill  = visual.querySelector('.subsidy-fill');
+    const priceLine    = visual.querySelector('.price-line');
+    const priceLbl     = visual.querySelector('.price-lbl');
+    const subsidyLbl   = visual.querySelector('.subsidy-lbl');
+    const subsidyLbl2  = visual.querySelector('.subsidy-lbl2');
+    const outlierTick  = visual.querySelector('.outlier-tick');
+    const outlierDot   = visual.querySelector('.outlier-dot');
+    const outlierLbl   = visual.querySelector('.outlier-lbl');
+    const caption      = visual.querySelector('.visual-caption');
     gsap.set(caption, { autoAlpha: 0, y: 6 });
 
     const tl = gsap.timeline({ repeat: -1, repeatDelay: 2.5 });
     tl
-      .to(barPaid, { attr: { y: BL - PAID_H, height: PAID_H }, duration: 0.35, ease: 'power2.out' })
-      .to([lblPv, lblPs], { opacity: 1, duration: 0.25 }, '-=0.05')
-      .to(barComp, { attr: { y: BL - COMP_H, height: COMP_H }, duration: 1.5, ease: 'power3.out' }, '+=0.1')
-      .to([lblCv, lblCs], { opacity: 1, duration: 0.3 }, '-=0.4')
-      .fromTo(gapX, { autoAlpha: 0, y: 10 }, { autoAlpha: 1, y: 0, duration: 0.5, ease: 'power2.out' })
-      .to(gapS, { opacity: 1, duration: 0.3 })
+      // Curve draws left to right
+      .to(clipRect, { attr: { width: PW }, duration: 2.4, ease: 'power1.inOut' })
+
+      // Price line and fill appear as curve passes $200 (≈33% into the draw)
+      .to(priceLine, { opacity: 1, duration: 0.4 }, 0.8)
+      .to(priceLbl, { opacity: 1, duration: 0.3 }, 1.0)
+      .to(subsidyFill, { opacity: 0.18, duration: 0.7, ease: 'power2.out' }, 1.1)
+      .to([subsidyLbl, subsidyLbl2], { opacity: 1, duration: 0.3, stagger: 0.1 }, 1.5)
+
+      // Outlier appears after curve is done
+      .to([outlierTick, outlierDot], { opacity: 1, duration: 0.3 }, '+=0.3')
+      .to(outlierLbl, { opacity: 1, duration: 0.35 })
       .fromTo(caption, { autoAlpha: 0, y: 6 }, { autoAlpha: 1, y: 0, duration: 0.4 })
-      .to(gapX, { opacity: 0.5, duration: 1.0, yoyo: true, repeat: 3, ease: 'sine.inOut' }, '+=1.0');
+
+      // Brief pulse on outlier dot
+      .to(outlierDot, { attr: { r: 5.5 }, opacity: 0.6, duration: 0.5,
+        yoyo: true, repeat: 3, ease: 'sine.inOut' }, '+=0.5');
   },
 
   'price-table': (scene, visual) => {
