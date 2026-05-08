@@ -1688,51 +1688,52 @@ const animations = {
     const arrowY = PT + IH * 0.38;
 
     visual.innerHTML = `
-      <svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:${W}px">
+      <div class="chart-frame">
+        <div class="chart-header">A single power user, one month</div>
+        <svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:${W}px">
 
-        <!-- baseline -->
-        <line x1="${PL - 8}" y1="${yBase}" x2="${PL + IW + 8}" y2="${yBase}" stroke="#444" stroke-width="1"/>
+          <!-- baseline -->
+          <line x1="${PL - 8}" y1="${yBase}" x2="${PL + IW + 8}" y2="${yBase}" stroke="#3a3a3a" stroke-width="1"/>
 
-        <!-- Paid bar ($200, blue) -->
-        <rect id="sg-bar-paid" x="${xPaid - barW/2}" y="${yBase}" width="${barW}" height="0"
-              fill="#3b82f6" rx="3"/>
+          <!-- Paid bar ($200, blue) -->
+          <rect id="sg-bar-paid" x="${xPaid - barW/2}" y="${yBase}" width="${barW}" height="0"
+                fill="#3b82f6" rx="3"/>
 
-        <!-- Compute bar ($35k, dark navy) -->
-        <rect id="sg-bar-comp" x="${xComp - barW/2}" y="${yBase}" width="${barW}" height="0"
-              fill="#1e3a5f" rx="3"/>
+          <!-- Compute bar ($35k, dark navy) -->
+          <rect id="sg-bar-comp" x="${xComp - barW/2}" y="${yBase}" width="${barW}" height="0"
+                fill="#1e3a5f" rx="3"/>
 
-        <!-- $200 label (above paid bar) -->
-        <text id="sg-lbl-paid" x="${xPaid}" y="${yPaid - 8}" text-anchor="middle"
-              font-size="15" font-weight="700" fill="#3b82f6" opacity="0">$200</text>
-        <text id="sg-sub-paid" x="${xPaid}" y="${yBase + 18}" text-anchor="middle"
-              font-size="11" fill="#888">paid</text>
+          <!-- $200 label (above paid bar) -->
+          <text id="sg-lbl-paid" x="${xPaid}" y="${yPaid - 8}" text-anchor="middle"
+                font-size="15" font-weight="700" fill="#3b82f6" opacity="0">$200</text>
+          <text id="sg-sub-paid" x="${xPaid}" y="${yBase + 18}" text-anchor="middle"
+                font-size="11" fill="#888">paid</text>
 
-        <!-- $35,000 label -->
-        <text id="sg-lbl-comp" x="${xComp}" y="${yComp - 10}" text-anchor="middle"
-              font-size="15" font-weight="700" fill="#93c5fd" opacity="0">$35,000</text>
-        <text id="sg-sub-comp" x="${xComp}" y="${yBase + 18}" text-anchor="middle"
-              font-size="11" fill="#888">compute consumed</text>
+          <!-- $35,000 label -->
+          <text id="sg-lbl-comp" x="${xComp}" y="${yComp - 10}" text-anchor="middle"
+                font-size="15" font-weight="700" fill="#93c5fd" opacity="0">$35,000</text>
+          <text id="sg-sub-comp" x="${xComp}" y="${yBase + 18}" text-anchor="middle"
+                font-size="11" fill="#888">compute consumed</text>
 
-        <!-- 175× gap box (dashed, appears last) -->
-        <rect id="sg-gap-box" x="${xPaid + barW/2 + 8}" y="${arrowY - 18}"
-              width="${xComp - barW/2 - (xPaid + barW/2) - 16}" height="36"
-              fill="none" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="5,3"
-              rx="4" opacity="0"/>
-        <!-- dashed lines from box to bars -->
-        <line id="sg-gap-line-l" x1="${xPaid + barW/2}" y1="${arrowY}"
-              x2="${xPaid + barW/2 + 8}" y2="${arrowY}"
-              stroke="#ef4444" stroke-width="1" stroke-dasharray="4,3" opacity="0"/>
-        <line id="sg-gap-line-r" x1="${xComp - barW/2 - 8}" y1="${arrowY}"
-              x2="${xComp - barW/2}" y2="${arrowY}"
-              stroke="#ef4444" stroke-width="1" stroke-dasharray="4,3" opacity="0"/>
-        <text id="sg-gap-lbl" x="${(xPaid + xComp) / 2}" y="${arrowY + 5}"
-              text-anchor="middle" font-size="13" font-weight="700" fill="#ef4444"
-              opacity="0">175× gap</text>
-
-        <!-- caption -->
-        <text id="sg-caption" x="${W/2}" y="${H - 6}" text-anchor="middle"
-              font-size="9.5" fill="#555" opacity="0">One documented user. Methodology unverified. Direction is not in dispute.</text>
-      </svg>`;
+          <!-- 175× gap box (dashed, appears last) -->
+          <rect id="sg-gap-box" x="${xPaid + barW/2 + 8}" y="${arrowY - 18}"
+                width="${xComp - barW/2 - (xPaid + barW/2) - 16}" height="36"
+                fill="none" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="5,3"
+                rx="4" opacity="0"/>
+          <!-- dashed lines from box to bars -->
+          <line id="sg-gap-line-l" x1="${xPaid + barW/2}" y1="${arrowY}"
+                x2="${xPaid + barW/2 + 8}" y2="${arrowY}"
+                stroke="#ef4444" stroke-width="1" stroke-dasharray="4,3" opacity="0"/>
+          <line id="sg-gap-line-r" x1="${xComp - barW/2 - 8}" y1="${arrowY}"
+                x2="${xComp - barW/2}" y2="${arrowY}"
+                stroke="#ef4444" stroke-width="1" stroke-dasharray="4,3" opacity="0"/>
+          <text id="sg-gap-lbl" x="${(xPaid + xComp) / 2}" y="${arrowY + 5}"
+                text-anchor="middle" font-size="13" font-weight="700" fill="#ef4444"
+                opacity="0">175× gap</text>
+        </svg>
+        <p class="chart-caption" id="sg-caption-italic">This is one documented user, not the typical subscriber. The figure has been widely cited and rounded, and the methodology has not been published. The directional fact, that flat-rate plans can be exploited by automated agents at the extreme tail, is not in dispute.</p>
+        <p class="chart-source"><strong>Source.</strong> TechCrunch tokenmaxxing reporting (April 2026), via Artefact analysis.</p>
+      </div>`;
 
     const barPaid = visual.querySelector('#sg-bar-paid');
     const barComp = visual.querySelector('#sg-bar-comp');
@@ -1742,7 +1743,9 @@ const animations = {
     const gapLineL = visual.querySelector('#sg-gap-line-l');
     const gapLineR = visual.querySelector('#sg-gap-line-r');
     const gapLbl  = visual.querySelector('#sg-gap-lbl');
-    const caption = visual.querySelector('#sg-caption');
+    const captionItalic = visual.querySelector('#sg-caption-italic');
+    const sourceLine = visual.querySelector('.chart-source');
+    gsap.set([captionItalic, sourceLine], { autoAlpha: 0, y: 6 });
 
     const tl = gsap.timeline({ repeat: -1, repeatDelay: 2 });
     tl
@@ -1755,8 +1758,9 @@ const animations = {
       // Gap box + lines appear
       .to([gapBox, gapLineL, gapLineR], { opacity: 1, duration: 0.4 }, '+=0.3')
       .to(gapLbl, { opacity: 1, duration: 0.35 }, '-=0.15')
-      // Caption
-      .to(caption, { opacity: 1, duration: 0.4 }, '+=0.3')
+      // Italic caption + source
+      .to(captionItalic, { autoAlpha: 1, y: 0, duration: 0.4 }, '+=0.3')
+      .to(sourceLine, { autoAlpha: 1, y: 0, duration: 0.4 }, '-=0.2')
       // Subtle pulse on gap label (finite)
       .to(gapLbl, { scale: 1.08, transformOrigin: 'center', duration: 0.5, yoyo: true, repeat: 3, ease: 'sine.inOut' }, '+=0.5');
   },
@@ -1814,59 +1818,64 @@ const animations = {
     const midRed  = ((x200 + xS(20000)) / 2).toFixed(1);
 
     visual.innerHTML = `
-      <svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:${W}px">
-        <!-- y-axis label rotated -->
-        <text transform="rotate(-90,14,${((T+B)/2).toFixed(1)})"
-              x="14" y="${((T+B)/2+4).toFixed(1)}"
-              text-anchor="middle" font-size="9" fill="#666">share of subscribers</text>
+      <div class="chart-frame">
+        <div class="chart-header">Monthly compute consumed by Claude Max subscribers (illustrative)</div>
+        <svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:${W}px">
+          <!-- y-axis label rotated -->
+          <text transform="rotate(-90,14,${((T+B)/2).toFixed(1)})"
+                x="14" y="${((T+B)/2+4).toFixed(1)}"
+                text-anchor="middle" font-size="9" fill="#666">share of subscribers</text>
 
-        <!-- baseline -->
-        <line x1="${L}" y1="${B}" x2="${R}" y2="${B}" stroke="#444" stroke-width="1"/>
+          <!-- baseline -->
+          <line x1="${L}" y1="${B}" x2="${R}" y2="${B}" stroke="#3a3a3a" stroke-width="1"/>
 
-        <!-- x-axis label -->
-        <text x="${((L+R)/2).toFixed(1)}" y="${H-6}" text-anchor="middle"
-              font-size="9" fill="#555">monthly compute consumed (retail API equivalent, log scale)</text>
+          <!-- x-axis label -->
+          <text x="${((L+R)/2).toFixed(1)}" y="${H-6}" text-anchor="middle"
+                font-size="9" fill="#666" font-style="italic">monthly compute consumed (retail API equivalent, log scale)</text>
 
-        <!-- histogram bars -->
-        ${barsHTML}
+          <!-- histogram bars -->
+          ${barsHTML}
 
-        <!-- $200 dashed line -->
-        <line id="ud-pline" x1="${x200.toFixed(1)}" y1="${T}"
-              x2="${x200.toFixed(1)}" y2="${B}"
-              stroke="#e2e8f0" stroke-width="1.5" stroke-dasharray="5,3" opacity="0"/>
-        <text id="ud-plbl1" x="${x200.toFixed(1)}" y="${T - 4}"
-              text-anchor="middle" font-size="9" font-weight="600"
-              fill="#e2e8f0" opacity="0">|$200 paid</text>
-        <text id="ud-plbl2" x="${x200.toFixed(1)}" y="${T + 7}"
-              text-anchor="middle" font-size="8.5" fill="#9ca3af" opacity="0">monthly subscription</text>
+          <!-- $200 dashed line -->
+          <line id="ud-pline" x1="${x200.toFixed(1)}" y1="${T}"
+                x2="${x200.toFixed(1)}" y2="${B}"
+                stroke="#e2e8f0" stroke-width="1.5" stroke-dasharray="5,3" opacity="0"/>
+          <text id="ud-plbl1" x="${x200.toFixed(1)}" y="${T - 4}"
+                text-anchor="middle" font-size="9" font-weight="600"
+                fill="#e2e8f0" opacity="0">$200 paid</text>
+          <text id="ud-plbl2" x="${x200.toFixed(1)}" y="${T + 7}"
+                text-anchor="middle" font-size="8.5" fill="#9ca3af" opacity="0">monthly subscription</text>
 
-        <!-- Cross-subsidy pool label -->
-        <text id="ud-blbl1" x="${midBlue}" y="${T + 16}"
-              text-anchor="middle" font-size="9.5" font-weight="600"
-              fill="#5b8fd4" opacity="0">Cross-subsidy pool</text>
-        <text id="ud-blbl2" x="${midBlue}" y="${T + 28}"
-              text-anchor="middle" font-size="8.5" fill="#9ca3af" opacity="0">most users, well below $200</text>
+          <!-- Cross-subsidy pool label -->
+          <text id="ud-blbl1" x="${midBlue}" y="${T + 16}"
+                text-anchor="middle" font-size="9.5" font-weight="600"
+                fill="#5b8fd4" opacity="0">Cross-subsidy pool</text>
+          <text id="ud-blbl2" x="${midBlue}" y="${T + 28}"
+                text-anchor="middle" font-size="8.5" fill="#9ca3af" opacity="0">most users, well below $200</text>
 
-        <!-- Margin-eating tail label -->
-        <text id="ud-rlbl1" x="${midRed}" y="${T + 16}"
-              text-anchor="middle" font-size="9.5" font-weight="600"
-              fill="#c05a52" opacity="0">Margin-eating tail</text>
-        <text id="ud-rlbl2" x="${midRed}" y="${T + 28}"
-              text-anchor="middle" font-size="8.5" fill="#9ca3af" opacity="0">small minority, far above $200</text>
+          <!-- Margin-eating tail label -->
+          <text id="ud-rlbl1" x="${midRed}" y="${T + 16}"
+                text-anchor="middle" font-size="9.5" font-weight="600"
+                fill="#c05a52" opacity="0">Margin-eating tail</text>
+          <text id="ud-rlbl2" x="${midRed}" y="${T + 28}"
+                text-anchor="middle" font-size="8.5" fill="#9ca3af" opacity="0">small minority, far above $200</text>
 
-        <!-- $35K outlier dot -->
-        <circle id="ud-dot" cx="${x35k.toFixed(1)}" cy="${dotY.toFixed(1)}"
-                r="5" fill="#c05a52" opacity="0"/>
-        <text id="ud-dlbl1" x="${(x35k + 10).toFixed(1)}" y="${(dotY - 5).toFixed(1)}"
-              font-size="8.5" fill="#c05a52" opacity="0">~99th percentile</text>
-        <text id="ud-dlbl2" x="${(x35k + 10).toFixed(1)}" y="${(dotY + 6).toFixed(1)}"
-              font-size="8.5" fill="#c05a52" opacity="0">$35K user</text>
-      </svg>
-      <p class="visual-caption">Illustrative. Anthropic has not published its actual usage distribution.</p>`;
+          <!-- $35K outlier dot -->
+          <circle id="ud-dot" cx="${x35k.toFixed(1)}" cy="${dotY.toFixed(1)}"
+                  r="5" fill="#c05a52" opacity="0"/>
+          <text id="ud-dlbl1" x="${(x35k + 10).toFixed(1)}" y="${(dotY - 5).toFixed(1)}"
+                font-size="8.5" fill="#c05a52" opacity="0">~99th percentile</text>
+          <text id="ud-dlbl2" x="${(x35k + 10).toFixed(1)}" y="${(dotY + 6).toFixed(1)}"
+                font-size="8.5" fill="#c05a52" opacity="0">$35K user</text>
+        </svg>
+        <p class="chart-caption">The shape above is a log-normal distribution, the empirically observed pattern of consumer usage across nearly every flat-rate service ever measured. Most subscribers consume well below the price they pay. A small minority consume far more. AI follows the same shape with a fatter tail than most.</p>
+        <p class="chart-source"><strong>Sources.</strong> Distribution shape based on the long-tail / log-normal pattern documented across SaaS usage research (the Pareto principle, dating to 1896, generalizes to most consumer-service usage). Specific subscriber counts at each spending level are illustrative. Anthropic has not published its actual usage distribution. The $35K user is the single documented case (TechCrunch, April 2026).</p>
+      </div>`;
 
     const barEls  = [...visual.querySelectorAll('.ud-bar')];
-    const caption = visual.querySelector('.visual-caption');
-    gsap.set(caption, { autoAlpha: 0, y: 6 });
+    const captionItalic = visual.querySelector('.chart-caption');
+    const sourceLine = visual.querySelector('.chart-source');
+    gsap.set([captionItalic, sourceLine], { autoAlpha: 0, y: 6 });
 
     const tl = gsap.timeline({ repeat: -1, repeatDelay: 2.5 });
 
@@ -1887,9 +1896,10 @@ const animations = {
       .to(['#ud-rlbl1','#ud-rlbl2'], { opacity: 1, duration: 0.35, stagger: 0.1 }, after + 0.5)
       // Outlier dot
       .to(['#ud-dot','#ud-dlbl1','#ud-dlbl2'], { opacity: 1, duration: 0.35 }, after + 0.8)
-      .to(caption, { autoAlpha: 1, y: 0, duration: 0.4 }, after + 1.1)
+      .to(captionItalic, { autoAlpha: 1, y: 0, duration: 0.4 }, after + 1.1)
+      .to(sourceLine, { autoAlpha: 1, y: 0, duration: 0.4 }, after + 1.4)
       // Pulse dot (finite)
-      .to('#ud-dot', { attr: { r: 8 }, duration: 0.5, yoyo: true, repeat: 3, ease: 'sine.inOut' }, after + 1.3);
+      .to('#ud-dot', { attr: { r: 8 }, duration: 0.5, yoyo: true, repeat: 3, ease: 'sine.inOut' }, after + 1.7);
   },
 
   'price-table': (scene, visual) => {
@@ -1900,35 +1910,32 @@ const animations = {
     if (!visual) return;
 
     const rows = [
-      { market: 'Consumer API rate',       arrow: '↓', dir: 'Falling',          color: '#6ee7b7' },
-      { market: 'Consumer subscription',   arrow: '→', dir: 'Flat / unclear',    color: '#888'    },
-      { market: 'Enterprise sticker rate', arrow: '→', dir: 'Flat',              color: '#888'    },
-      { market: 'Enterprise invoice',      arrow: '↑', dir: 'Rising near-term',  color: '#fda4af' },
-      { market: 'Cost per task',           arrow: '→', dir: 'Unclear',           color: '#888'    },
-      { market: 'Provider unit cost',      arrow: '↓', dir: 'Falling',           color: '#6ee7b7' },
+      { market: 'Consumer API rate',                  arrow: '↓', dir: 'Down',            color: '#6ee7b7' },
+      { market: 'Consumer subscription effective price', arrow: '→', dir: 'Flat or unclear', color: '#9ca3af' },
+      { market: 'Enterprise sticker rate',            arrow: '→', dir: 'Flat',            color: '#9ca3af' },
+      { market: 'Enterprise invoice (total spend)',   arrow: '↑', dir: 'Up near-term',    color: '#fda4af' },
+      { market: 'Cost per successful task',           arrow: '→', dir: 'Unclear',         color: '#9ca3af' },
+      { market: 'Provider unit cost to serve',        arrow: '↓', dir: 'Down',            color: '#6ee7b7' },
     ];
 
     visual.innerHTML = `
-      <div style="display:flex;flex-direction:column;gap:5px;padding:10px 6px;width:100%">
+      <div class="chart-frame">
+        <div class="pt-head">
+          <span class="pt-head-l">MARKET &amp; METRIC</span>
+          <span class="pt-head-r">DIRECTION</span>
+        </div>
         ${rows.map(r => `
-          <div class="pt-row" style="display:flex;align-items:center;
-            padding:8px 10px;background:#111;border-radius:6px;border:1px solid #1e1e1e">
-            <span style="font-size:0.78rem;color:#999;flex:1;min-width:0">${r.market}</span>
-            <span style="font-size:1rem;color:${r.color};margin:0 10px;flex-shrink:0">${r.arrow}</span>
-            <span style="font-size:0.72rem;color:${r.color};width:110px;text-align:right;flex-shrink:0">${r.dir}</span>
+          <div class="pt-row">
+            <span class="pt-market">${r.market}</span>
+            <span class="pt-dir" style="color:${r.color}"><span class="pt-arrow">${r.arrow}</span> <strong>${r.dir}</strong></span>
           </div>`).join('')}
-      </div>
-      <p class="visual-caption">Six markets. They do not move together.</p>`;
+      </div>`;
 
     const ptRows = visual.querySelectorAll('.pt-row');
-    gsap.set(ptRows, { autoAlpha: 0, x: -20 });
-    gsap.set(visual.querySelector('.visual-caption'), { autoAlpha: 0, y: 6 });
+    gsap.set(ptRows, { autoAlpha: 0, x: -16 });
 
     const tl = gsap.timeline({ repeat: -1, repeatDelay: 2.5 });
-    tl
-      .to(ptRows, { autoAlpha: 1, x: 0, duration: 0.4, stagger: 0.14, ease: 'power2.out' })
-      .fromTo(visual.querySelector('.visual-caption'),
-        { autoAlpha: 0, y: 6 }, { autoAlpha: 1, y: 0, duration: 0.4 }, '-=0.1');
+    tl.to(ptRows, { autoAlpha: 1, x: 0, duration: 0.4, stagger: 0.13, ease: 'power2.out' });
   },
 
   'price-timeline': (scene, visual) => {

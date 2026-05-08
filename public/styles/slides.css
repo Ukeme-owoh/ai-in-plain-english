@@ -98,6 +98,92 @@
   max-width: 60ch;
 }
 
+/* Bordered frame around a chart, matching the PDF's beige cards */
+.chart-frame {
+  width: 100%;
+  border: 1px solid #1e1e1e;
+  border-radius: 10px;
+  background: #0e0e0e;
+  padding: 14px 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.chart-header {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #ddd;
+  letter-spacing: 0.01em;
+}
+
+.chart-caption {
+  font-size: 0.74rem;
+  color: #888;
+  font-style: italic;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.chart-source {
+  font-size: 0.65rem;
+  color: #555;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.chart-source strong {
+  color: #777;
+  font-weight: 600;
+}
+
+/* Price-table styling */
+.pt-head {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  padding: 0 4px 6px;
+  border-bottom: 1px solid #1e1e1e;
+  margin-bottom: 4px;
+}
+
+.pt-head-l, .pt-head-r {
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  color: #555;
+  font-weight: 600;
+}
+
+.pt-head-r {
+  text-align: right;
+}
+
+.pt-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  padding: 8px 4px;
+  border-bottom: 1px solid #1a1a1a;
+}
+
+.pt-row:last-child {
+  border-bottom: none;
+}
+
+.pt-market {
+  font-size: 0.78rem;
+  color: #ccc;
+}
+
+.pt-dir {
+  font-size: 0.78rem;
+  text-align: right;
+}
+
+.pt-arrow {
+  margin-right: 0.25rem;
+  font-weight: 600;
+}
+
 .scene-text .week-tag {
   font-size: 0.8rem;
   text-transform: uppercase;
