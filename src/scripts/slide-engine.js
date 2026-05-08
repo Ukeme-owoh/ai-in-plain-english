@@ -2121,45 +2121,85 @@ const animations = {
     );
     if (!visual) return;
 
+    // Gantt chart layout
+    const VW = 560, VH = 280;
+    const L = 52, R = 520, T = 24, B = 240;
+    const IW = R - L, IH = B - T;
+
+    const xMin = 2022.5, xMax = 2027.5, xRange = xMax - xMin;
+    const px = yr => L + ((yr - xMin) / xRange) * IW;
+
+    // 4 rows, evenly spaced
+    const rows = 4;
+    const rowH = IH / rows;
+    const BAR_H = 24;
+    const cy = i => T + (i + 0.5) * rowH;
+
+    // Phase definitions: [label, sublabel, start year, end year, color]
     const phases = [
-      { num: '1', label: 'Pure API',    sub: 'Pay per token',         color: '#6ee7b7', year: '2023'    },
-      { num: '2', label: 'Flat seats',  sub: 'Fixed monthly fee',     color: '#60a5fa', year: '2023–24' },
-      { num: '3', label: 'Hybrid',      sub: 'Seat + consumption',    color: '#f472b6', year: '2024–25' },
-      { num: '4', label: 'Usage-based', sub: 'Full metered billing',  color: '#fda4af', year: '2026+'   },
+      { lbl:'Phase 1 · Pure API, pay per token',        col:'#3b82f6', x1:2022.9, x2:2024.3  },
+      { lbl:'Phase 2 · Flat-rate seats',                col:'#1e40af', x1:2023.6, x2:2025.5  },
+      { lbl:'Phase 3 · Hybrid (per-seat + consumption)',col:'#c05a52', x1:2024.75,x2:2027.5  },
+      { lbl:'Phase 4 · Usage-based',                    col:'#d97706', x1:2026.0, x2:2027.5  },
     ];
 
-    visual.innerHTML = `
-      <div style="display:flex;flex-direction:column;gap:8px;padding:16px 8px;width:100%">
-        ${phases.map(p => `
-          <div class="ph-row" style="display:flex;align-items:center;gap:10px">
-            <div style="width:28px;height:28px;border-radius:50%;background:${p.color}22;
-              border:1.5px solid ${p.color};display:flex;align-items:center;justify-content:center;
-              flex-shrink:0">
-              <span style="font-size:0.75rem;font-weight:700;color:${p.color}">${p.num}</span>
-            </div>
-            <div style="flex:1;min-width:0">
-              <div style="font-size:0.82rem;font-weight:600;color:#e0e0e0">${p.label}</div>
-              <div style="font-size:0.72rem;color:#555">${p.sub}</div>
-            </div>
-            <div style="font-size:0.7rem;color:#444;white-space:nowrap">${p.year}</div>
-          </div>`).join('')}
-        <div class="ph-now" style="margin-top:4px;padding:6px 10px;border:1px solid #fda4af33;
-          border-radius:6px;background:#fda4af08;text-align:center">
-          <span style="font-size:0.75rem;color:#fda4af;font-weight:600">◉ You are here — phases 3 and 4 simultaneously</span>
-        </div>
-      </div>
-      <p class="visual-caption">Each phase still exists. The bill is assembled from all four.</p>`;
+    // X-axis tick labels
+    const xTicks = [2023,2024,2025,2026,2027].map(yr => `
+      <text x="${px(yr).toFixed(1)}" y="${B+16}" text-anchor="middle"
+            font-size="9.5" fill="#555">${yr}</text>`).join('');
 
-    const phRows = visual.querySelectorAll('.ph-row');
-    const phNow  = visual.querySelector('.ph-now');
+    // Grid verticals at year marks
+    const xGrid = [2023,2024,2025,2026,2027].map(yr => `
+      <line x1="${px(yr).toFixed(1)}" y1="${T}" x2="${px(yr).toFixed(1)}" y2="${B}"
+            stroke="#1a1a1a" stroke-width="0.6"/>`).join('');
+
+    // Phase bars + labels
+    const phHTML = phases.map((p, i) => {
+      const x1 = px(p.x1), x2 = px(p.x2);
+      const yCtr = cy(i);
+      return `
+        <!-- phase ${i+1} label -->
+        <text id="bp-lbl-${i}" x="${x1.toFixed(1)}" y="${(yCtr - BAR_H/2 - 5).toFixed(1)}"
+              font-size="9.5" font-weight="600" fill="${p.col}" opacity="0">${p.lbl}</text>
+        <!-- bar -->
+        <rect id="bp-bar-${i}"
+              x="${x1.toFixed(1)}" y="${(yCtr - BAR_H/2).toFixed(1)}"
+              width="0" height="${BAR_H}" fill="${p.col}" rx="3" opacity="0"/>`;
+    }).join('');
+
+    // "NOW" marker at 2026
+    const nowX = px(2026).toFixed(1);
+
+    visual.innerHTML = `
+      <svg viewBox="0 0 ${VW} ${VH}" style="width:100%;max-width:${VW}px">
+        <!-- baseline -->
+        <line x1="${L}" y1="${B}" x2="${R}" y2="${B}" stroke="#333" stroke-width="1"/>
+        ${xGrid}
+        ${xTicks}
+        ${phHTML}
+        <!-- NOW marker -->
+        <line id="bp-now-line" x1="${nowX}" y1="${T}" x2="${nowX}" y2="${B}"
+              stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="4,3" opacity="0"/>
+        <text id="bp-now-lbl" x="${nowX}" y="${T-6}" text-anchor="middle"
+              font-size="9" font-weight="700" fill="#fbbf24" opacity="0">NOW</text>
+      </svg>
+      <p class="visual-caption">Each new phase did not replace the previous one. All four coexist.</p>`;
+
     const caption = visual.querySelector('.visual-caption');
-    gsap.set(phRows, { autoAlpha: 0, x: -16 });
-    gsap.set([phNow, caption], { autoAlpha: 0, y: 6 });
+    gsap.set(caption, { autoAlpha: 0, y: 6 });
 
     const tl = gsap.timeline({ repeat: -1, repeatDelay: 2.5 });
+
+    phases.forEach((p, i) => {
+      const barW = px(p.x2) - px(p.x1);
+      tl
+        .to(`#bp-lbl-${i}`, { opacity: 1, duration: 0.25 }, i * 0.55)
+        .to(`#bp-bar-${i}`,  { opacity: 1, attr: { width: barW }, duration: 0.5, ease: 'power2.out' }, i * 0.55 + 0.1);
+    });
+
+    const after = phases.length * 0.55 + 0.55;
     tl
-      .to(phRows, { autoAlpha: 1, x: 0, duration: 0.4, stagger: 0.18, ease: 'power2.out' })
-      .to(phNow,  { autoAlpha: 1, y: 0, duration: 0.4 }, '+=0.2')
-      .to(caption, { autoAlpha: 1, y: 0, duration: 0.35 });
+      .to(['#bp-now-line','#bp-now-lbl'], { opacity: 1, duration: 0.4 }, after)
+      .to(caption, { autoAlpha: 1, y: 0, duration: 0.4 }, after + 0.3);
   }
 };
