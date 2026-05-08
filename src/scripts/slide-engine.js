@@ -2201,5 +2201,230 @@ const animations = {
     tl
       .to(['#bp-now-line','#bp-now-lbl'], { opacity: 1, duration: 0.4 }, after)
       .to(caption, { autoAlpha: 1, y: 0, duration: 0.4 }, after + 0.3);
+  },
+
+  'commodity-cycle': (scene, visual) => {
+    gsap.fromTo(scene.querySelectorAll('.animate-in'),
+      { y: 24, autoAlpha: 0 },
+      { y: 0, autoAlpha: 1, duration: 0.7, stagger: 0.12, ease: 'power2.out' }
+    );
+    if (!visual) return;
+
+    const VW = 540, VH = 300;
+    const L = 44, R = 510, T = 22, B = 200;
+    const IW = R - L, IH = B - T;
+
+    // X: 2022–2032, Y: 0–1 normalised
+    const px = yr => L + ((yr - 2022) / 10) * IW;
+    const py = v  => B - v * IH;
+
+    // Three curves as [year, value] pairs
+    const tokenPts  = [[2022,.82],[2023,.78],[2024,.70],[2025,.62],[2026,.52],[2027,.40],[2028,.34],[2029,.32],[2030,.38],[2031,.48],[2032,.58]];
+    const capexPts  = [[2022,.14],[2023,.28],[2024,.50],[2025,.76],[2026,.94],[2027,.88],[2028,.65],[2029,.46],[2030,.34],[2031,.28],[2032,.26]];
+    const supplyPts = [[2022,.07],[2023,.10],[2024,.16],[2025,.24],[2026,.36],[2027,.54],[2028,.74],[2029,.92],[2030,.98],[2031,.86],[2032,.76]];
+
+    const toPath = pts => pts.map(([yr,v],i)=>`${i?'L':'M'}${px(yr).toFixed(1)},${py(v).toFixed(1)}`).join(' ');
+
+    // Clip rect reveals all three curves left→right
+    const clipId = 'cc-clip';
+
+    // Phase bands labels below x-axis
+    const phases = [
+      { lbl:'Subsidy',               x1:2022, x2:2024 },
+      { lbl:'Unwind',                x1:2024, x2:2026 },
+      { lbl:'Oversupply (predicted)',x1:2026, x2:2030 },
+      { lbl:'Rebound',               x1:2030, x2:2032 },
+    ];
+    const phaseBands = phases.map((p,i) => {
+      const cx = ((px(p.x1)+px(p.x2))/2).toFixed(1);
+      const colors = ['#5b8fd4','#d97706','#c05a52','#4ade80'];
+      return `<text id="cc-ph-${i}" x="${cx}" y="${B+28}" text-anchor="middle"
+                    font-size="9" font-weight="600" fill="${colors[i]}" opacity="0">${p.lbl}</text>`;
+    }).join('');
+
+    // Dividers between phases
+    const dividers = [2024,2026,2030].map(yr =>
+      `<line x1="${px(yr).toFixed(1)}" y1="${B}" x2="${px(yr).toFixed(1)}" y2="${B+6}"
+             stroke="#333" stroke-width="0.8"/>`).join('');
+
+    // X-axis tick labels
+    const xTicks = [2022,2024,2026,2028,2030,2032].map(yr =>
+      `<text x="${px(yr).toFixed(1)}" y="${B+14}" text-anchor="middle" font-size="9" fill="#555">'${String(yr).slice(2)}</text>`
+    ).join('');
+
+    // Annotation peaks
+    const capexPeakX = px(2026).toFixed(1);
+    const supplyPeakX = px(2030).toFixed(1);
+
+    // Legend
+    const legend = `
+      <circle cx="${L}"    cy="${T-6}" r="4" fill="#ef4444"/>
+      <text x="${L+8}"     y="${T-2}"  font-size="9" fill="#ef4444">Token price</text>
+      <circle cx="${L+85}" cy="${T-6}" r="4" fill="#1e40af"/>
+      <text x="${L+93}"    y="${T-2}"  font-size="9" fill="#3b82f6">Capex commitments</text>
+      <line  x1="${L+205}" y1="${T-6}" x2="${L+225}" y2="${T-6}" stroke="#4ade80" stroke-width="2" stroke-dasharray="5,3"/>
+      <text x="${L+229}"   y="${T-2}"  font-size="9" fill="#4ade80">Supply (4-yr lag)</text>`;
+
+    visual.innerHTML = `
+      <svg viewBox="0 0 ${VW} ${VH}" style="width:100%;max-width:${VW}px">
+        <defs>
+          <clipPath id="${clipId}">
+            <rect id="cc-clip-rect" x="${L}" y="${T-4}" width="0" height="${IH+8}"/>
+          </clipPath>
+        </defs>
+
+        <!-- axes + ticks -->
+        <line x1="${L}" y1="${B}" x2="${R}" y2="${B}" stroke="#333" stroke-width="1"/>
+        ${xTicks}${dividers}${phaseBands}${legend}
+
+        <!-- three curves, clipped -->
+        <path d="${toPath(tokenPts)}"  fill="none" stroke="#ef4444" stroke-width="2.2" stroke-linejoin="round" clip-path="url(#${clipId})"/>
+        <path d="${toPath(capexPts)}"  fill="none" stroke="#1e40af" stroke-width="2.2" stroke-linejoin="round" clip-path="url(#${clipId})"/>
+        <path d="${toPath(supplyPts)}" fill="none" stroke="#4ade80" stroke-width="2"   stroke-linejoin="round" stroke-dasharray="6,4" clip-path="url(#${clipId})"/>
+
+        <!-- annotation: capex peak -->
+        <line id="cc-ann-cap-l" x1="${capexPeakX}" y1="${py(.94).toFixed(1)}" x2="${capexPeakX}" y2="${py(1.05).toFixed(1)}"
+              stroke="#1e40af" stroke-width="1" stroke-dasharray="3,2" opacity="0"/>
+        <text id="cc-ann-cap-t1" x="${capexPeakX}" y="${py(1.12).toFixed(1)}" text-anchor="middle"
+              font-size="9" font-weight="600" fill="#3b82f6" opacity="0">Capex peaks</text>
+        <text id="cc-ann-cap-t2" x="${capexPeakX}" y="${py(1.12+0.08).toFixed(1)}" text-anchor="middle"
+              font-size="8.5" fill="#555" opacity="0">2025-26</text>
+
+        <!-- annotation: supply peak -->
+        <line id="cc-ann-sup-l" x1="${supplyPeakX}" y1="${py(.98).toFixed(1)}" x2="${supplyPeakX}" y2="${py(1.1).toFixed(1)}"
+              stroke="#4ade80" stroke-width="1" stroke-dasharray="3,2" opacity="0"/>
+        <text id="cc-ann-sup-t1" x="${supplyPeakX}" y="${py(1.17).toFixed(1)}" text-anchor="middle"
+              font-size="9" font-weight="600" fill="#4ade80" opacity="0">Supply hits</text>
+        <text id="cc-ann-sup-t2" x="${supplyPeakX}" y="${py(1.17+0.08).toFixed(1)}" text-anchor="middle"
+              font-size="8.5" fill="#555" opacity="0">~2029-30</text>
+      </svg>
+      <p class="visual-caption">Commodity markets with multi-year supply lags oscillate. They do not reach equilibrium.</p>`;
+
+    const clipRect = visual.querySelector('#cc-clip-rect');
+    const caption  = visual.querySelector('.visual-caption');
+    gsap.set(caption, { autoAlpha: 0, y: 6 });
+
+    const tl = gsap.timeline({ repeat: -1, repeatDelay: 2 });
+    tl
+      // Reveal all three curves left→right (2.8s)
+      .to(clipRect, { attr: { width: IW }, duration: 2.8, ease: 'power1.inOut' })
+
+      // Phase labels appear as chart draws through their midpoints
+      .to('#cc-ph-0', { opacity: 1, duration: 0.3 }, 0.3)
+      .to('#cc-ph-1', { opacity: 1, duration: 0.3 }, 0.85)
+      .to('#cc-ph-2', { opacity: 1, duration: 0.3 }, 1.2)
+      .to('#cc-ph-3', { opacity: 1, duration: 0.3 }, 2.4)
+
+      // Capex annotation at the peak (around 40% through draw = ~2026)
+      .to(['#cc-ann-cap-l','#cc-ann-cap-t1','#cc-ann-cap-t2'], { opacity: 1, duration: 0.4, stagger: 0.1 }, 1.1)
+
+      // Supply annotation near the end
+      .to(['#cc-ann-sup-l','#cc-ann-sup-t1','#cc-ann-sup-t2'], { opacity: 1, duration: 0.4, stagger: 0.1 }, 2.2)
+
+      .to(caption, { autoAlpha: 1, y: 0, duration: 0.4 }, '+=0.3');
+  },
+
+  'tokens-per-watt': (scene, visual) => {
+    gsap.fromTo(scene.querySelectorAll('.animate-in'),
+      { y: 24, autoAlpha: 0 },
+      { y: 0, autoAlpha: 1, duration: 0.7, stagger: 0.12, ease: 'power2.out' }
+    );
+    if (!visual) return;
+
+    const VW = 520, VH = 290;
+    const L = 52, R = 500, T = 28, B = 220;
+    const IW = R - L, IH = B - T;
+
+    // GPU generations matching PDF exactly: V100→A100→H100→H200→B200→Rubin*
+    const chips = [
+      { lbl:['V100','2017'],  val:0.4,  proj:false },
+      { lbl:['A100','2020'],  val:1.2,  proj:false },
+      { lbl:['H100','2022'],  val:3.5,  proj:false },
+      { lbl:['H200','2024'],  val:6.0,  proj:false },
+      { lbl:['B200','2025'],  val:18,   proj:false },
+      { lbl:['Rubin*','2027'],val:45,   proj:true  },
+    ];
+
+    // Log scale: log10(0.4)=−0.4 to log10(45)=1.65
+    const logMin = Math.log10(0.4), logMax = Math.log10(45);
+    const barH = v => ((Math.log10(v) - logMin) / (logMax - logMin)) * IH;
+
+    const n   = chips.length;
+    const BW  = (IW / n) * 0.56;
+    const gap = IW / n;
+
+    const barsHTML = chips.map((c, i) => {
+      const cx = L + i * gap + gap / 2;
+      const bh = barH(c.val);
+      const by = B - bh;
+      // Projected = lighter green, confirmed = full green
+      const fill = c.proj ? '#86efac' : '#16a34a';
+      const valCol = c.proj ? '#86efac' : '#4ade80';
+      const [line1, line2] = c.lbl;
+      return `
+        <rect class="tpw-bar" id="tpw-bar-${i}"
+              x="${(cx-BW/2).toFixed(1)}" y="${B}" width="${BW.toFixed(1)}" height="0"
+              fill="${fill}" rx="3"
+              data-by="${by.toFixed(1)}" data-bh="${bh.toFixed(1)}"/>
+        <text id="tpw-val-${i}" x="${cx.toFixed(1)}" y="${(by-5).toFixed(1)}"
+              text-anchor="middle" font-size="10" font-weight="700"
+              fill="${valCol}" opacity="0">${c.val}</text>
+        <text x="${cx.toFixed(1)}" y="${B+14}" text-anchor="middle"
+              font-size="9" fill="#888">${line1}</text>
+        <text x="${cx.toFixed(1)}" y="${B+25}" text-anchor="middle"
+              font-size="8.5" fill="#555">${line2}</text>`;
+    }).join('');
+
+    // Y-axis log ticks
+    const yTicks = [0.4,1,3,10,30].map(v => {
+      const ty = (B - barH(v)).toFixed(1);
+      return `<line x1="${L-4}" y1="${ty}" x2="${L}" y2="${ty}" stroke="#444" stroke-width="0.8"/>
+              <text x="${L-7}" y="${(parseFloat(ty)+3.5).toFixed(1)}" text-anchor="end"
+                    font-size="8.5" fill="#555">${v}</text>
+              <line x1="${L}" y1="${ty}" x2="${R}" y2="${ty}"
+                    stroke="#181818" stroke-width="0.5" stroke-dasharray="3,4"/>`;
+    }).join('');
+
+    visual.innerHTML = `
+      <svg viewBox="0 0 ${VW} ${VH}" style="width:100%;max-width:${VW}px">
+        <!-- chart title -->
+        <text x="${((L+R)/2).toFixed(1)}" y="14" text-anchor="middle"
+              font-size="10" font-weight="600" fill="#888">Inference efficiency by GPU generation, log scale</text>
+
+        <!-- axes -->
+        <line x1="${L}" y1="${T}" x2="${L}" y2="${B}" stroke="#444" stroke-width="1"/>
+        <line x1="${L}" y1="${B}" x2="${R}" y2="${B}" stroke="#444" stroke-width="1"/>
+        ${yTicks}
+
+        <!-- y-axis label -->
+        <text transform="rotate(-90,14,${((T+B)/2).toFixed(1)})"
+              x="14" y="${((T+B)/2+4).toFixed(1)}" text-anchor="middle"
+              font-size="9" fill="#666">tokens / watt</text>
+
+        ${barsHTML}
+
+        <!-- Projected note -->
+        <rect x="${(R-88).toFixed(1)}" y="${T+2}" width="86" height="16" fill="#86efac22" rx="3"/>
+        <text x="${(R-44).toFixed(1)}" y="${T+13}" text-anchor="middle"
+              font-size="8.5" fill="#86efac">* projected</text>
+      </svg>
+      <p class="visual-caption">Eight years, roughly 110× more efficient. V100 to Rubin.</p>`;
+
+    const barEls  = [...visual.querySelectorAll('.tpw-bar')];
+    const caption = visual.querySelector('.visual-caption');
+    gsap.set(caption, { autoAlpha: 0, y: 6 });
+
+    const tl = gsap.timeline({ repeat: -1, repeatDelay: 2 });
+
+    barEls.forEach((bar, i) => {
+      const bh = parseFloat(bar.dataset.bh);
+      const by = parseFloat(bar.dataset.by);
+      tl
+        .to(bar,             { attr: { y: by, height: bh }, duration: 0.42, ease: 'power2.out' }, i * 0.2)
+        .to(`#tpw-val-${i}`, { opacity: 1, duration: 0.25 }, i * 0.2 + 0.3);
+    });
+
+    const after = barEls.length * 0.2 + 0.5;
+    tl.to(caption, { autoAlpha: 1, y: 0, duration: 0.4 }, after);
   }
 };
