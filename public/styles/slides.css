@@ -22,16 +22,17 @@
   position: absolute;
   inset: 0;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: 4rem 2rem 6rem;
+  padding: 2.5rem 2rem 5rem;
+  overflow-y: auto;
 }
 
 .scene-layout {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 4rem;
-  align-items: center;
+  gap: 3rem;
+  align-items: start;
   max-width: 1100px;
   width: 100%;
   margin: 0 auto;
@@ -40,28 +41,61 @@
 .scene-text {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 0.9rem;
 }
 
 .scene-text h1 {
-  font-size: clamp(2rem, 5vw, 3.5rem);
-  line-height: 1.15;
+  font-size: clamp(1.6rem, 3.4vw, 2.4rem);
+  line-height: 1.18;
   font-weight: 800;
   color: #f0f0f0;
+  margin: 0;
 }
 
 .scene-text h2 {
-  font-size: clamp(1.5rem, 3.5vw, 2.25rem);
+  font-size: clamp(1.25rem, 2.6vw, 1.75rem);
   line-height: 1.25;
   font-weight: 700;
   color: #f0f0f0;
+  margin: 0;
 }
 
 .scene-text p {
-  font-size: clamp(1rem, 2vw, 1.25rem);
+  font-size: clamp(0.86rem, 1.4vw, 1rem);
   color: #aaa;
-  line-height: 1.75;
-  max-width: 48ch;
+  line-height: 1.6;
+  max-width: 60ch;
+  margin: 0;
+}
+
+.scene-text p em,
+.scene-text em {
+  color: #888;
+  font-style: italic;
+}
+
+.scene-visual {
+  position: sticky;
+  top: 1rem;
+  align-self: flex-start;
+}
+
+/* Inline citation, mid-paragraph, small grey type */
+.cite {
+  font-size: 0.7rem;
+  color: #555;
+  white-space: nowrap;
+  font-family: system-ui, sans-serif;
+  margin-left: 0.15rem;
+}
+
+/* Italic chart caption sitting under a chart frame */
+.scene-caption {
+  font-size: 0.78rem;
+  color: #777;
+  font-style: italic;
+  line-height: 1.55;
+  max-width: 60ch;
 }
 
 .scene-text .week-tag {
@@ -803,21 +837,24 @@
 @media (max-width: 700px) {
   .scene-layout {
     grid-template-columns: 1fr;
-    gap: 2rem;
+    gap: 1.5rem;
     padding: 0;
   }
 
-  /* On mobile, scene content can be taller than viewport — start
-     content at the top so the header isn't centered above the
-     scroll origin and clipped. */
   .scene {
-    padding: 1.5rem 1.25rem 6rem;
-    overflow-y: auto;
-    align-items: flex-start;
+    padding: 1.25rem 1.25rem 5rem;
   }
 
-  .scene-text h1 { font-size: 2rem; }
-  .scene-text h2 { font-size: 1.5rem; }
+  /* On mobile, the visual cannot be sticky because the layout is
+     single column. Restore static flow so the chart sits below
+     the prose. */
+  .scene-visual {
+    position: static;
+  }
+
+  .scene-text h1 { font-size: 1.7rem; }
+  .scene-text h2 { font-size: 1.3rem; }
+  .scene-text p { font-size: 0.95rem; }
 
   .slide-back-bar {
     padding: 0.5rem 1.25rem;
