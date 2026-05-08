@@ -1,0 +1,119 @@
+---
+title: "Will the Price of Tokens Fall or Rise?"
+description: "Tokens are sold below cost. The labs are absorbing the gap. The honest forecast is not up or down, but for whom, and when."
+publishDate: 2026-05-07
+week: 1
+category: policy
+theme: coral
+previewLabel: "tokens.price()"
+previewCaption: "Subsidy"
+---
+
+import Scene from '../../components/Scene.astro';
+import Term from '../../components/Term.astro';
+
+<Scene animation="text-reveal" index={0}>
+  <p class="week-tag animate-in">Policy · May 2026</p>
+  <h1 class="animate-in">Will the price of tokens fall or rise?</h1>
+  <p class="animate-in">Last month, a power user paid Anthropic two hundred dollars for the Claude Max plan. By routing every query through autonomous coding agents, they consumed compute that retail API rates would value at over thirty-five thousand dollars.</p>
+  <p class="animate-in">Anthropic absorbed the gap. So did OpenAI. So did Google. So did everyone.</p>
+  <p class="animate-in">This is not a glitch. It is the strategy.</p>
+  <p class="animate-in">Today, the answer is neither up nor down. The honest forecast is not a direction. It is a question. For whom, and when.</p>
+</Scene>
+
+<Scene animation="text-reveal" index={1}>
+  <h2 class="animate-in">Tokens are sold below cost</h2>
+  <p class="animate-in">Not as a glitch. As a strategy.</p>
+  <p class="animate-in">OpenAI lost five billion dollars on under four billion in revenue. Anthropic acknowledged losing tens of thousands per month on the heaviest Claude Max users. Notion's gross margins fell ten percentage points the year they shipped AI features. Replit's swung from positive thirty-six percent to negative fourteen.</p>
+  <p class="animate-in">Every major lab is pricing <Term word="Inference" definition="Running a trained AI model to produce an output. Every message Claude writes, every image GPT-4 describes, every question Gemini answers is one inference call. Inference is what labs pay for when you use their products." analogy="Printing a copy of a book. Writing the original costs a fortune. Each copy still costs something to print.">inference</Term> below cost to capture share.</p>
+  <p class="animate-in">OpenAI's Nick Turley said it plainly on a podcast in February. Having an unlimited plan is like having an unlimited electricity plan. It just does not make sense.</p>
+  <p class="animate-in">So the labs are taking it back. But not the way you would expect.</p>
+</Scene>
+
+<Scene animation="text-reveal" index={2}>
+  <h2 class="animate-in">Six prices, not one</h2>
+  <p class="animate-in">Ask whether token prices are rising or falling. The honest answer is a question back. Which one?</p>
+  <p class="animate-in">At least six markets exist. They do not move together.</p>
+  <p class="animate-in">Consumer API rates are falling. Consumer subscription effective prices are flat or unclear. Enterprise sticker rates are flat. Enterprise invoices are rising near-term. The cost per successful task is anyone's guess. Provider unit costs to serve are falling.</p>
+  <p class="animate-in">Pick which one you mean before predicting anything. Most arguments about AI pricing slide between definitions without saying so.</p>
+  <p class="animate-in">Now watch what the consumer side actually looks like.</p>
+</Scene>
+
+<Scene animation="text-reveal" index={3}>
+  <h2 class="animate-in">The sticker price has not moved</h2>
+  <p class="animate-in">ChatGPT Plus has been twenty dollars per month since launch in February 2023.</p>
+  <p class="animate-in">Claude Pro is twenty. Google AI Pro is nineteen ninety-nine. Perplexity Pro is twenty.</p>
+  <p class="animate-in">Three years of capability gains. Billions of dollars of <Term word="Capex" definition="Capital expenditure. Money spent on building data centers, buying chips, and installing power infrastructure. Once spent, it cannot easily be redirected. That is why oversupply cycles happen in this industry." analogy="Building a factory. It takes years and billions of dollars. Once it is open, it keeps producing even if demand drops.">capex</Term>. A price war on the API side. The standard consumer sticker has not budged.</p>
+  <p class="animate-in">The labs raised the ceiling by adding new tiers above twenty dollars. A hundred dollars. Two hundred. Google Ultra at two hundred fifty. They did not raise the existing ones.</p>
+  <p class="animate-in">If the sticker price has not changed, how is the subsidy unwinding?</p>
+</Scene>
+
+<Scene animation="text-reveal" index={4}>
+  <h2 class="animate-in">What twenty dollars buys is shrinking</h2>
+  <p class="animate-in">In April 2026, ChatGPT Plus tightened its message caps. Anthropic introduced weekly rate limits on Claude Pro. Google's Gemini moved from unlimited to metered AI Credits.</p>
+  <p class="animate-in">Same monthly check. Less work delivered.</p>
+  <p class="animate-in">A viral thread on X named the pattern. AI shrinkflation.</p>
+  <p class="animate-in">Usage included at the twenty-dollar tier has roughly halved since early 2024. Across Anthropic, OpenAI, and Google.</p>
+  <p class="animate-in">This is the consumer-side answer to the subsidy problem. The dollar price stays flat. The value behind it shrinks. For enterprises, the fix is more direct. The pricing model itself is changing.</p>
+</Scene>
+
+<Scene animation="text-reveal" index={5}>
+  <h2 class="animate-in">Enterprises are getting new bills</h2>
+  <p class="animate-in">Anthropic killed the flat-rate enterprise seat in early 2026. GitHub Copilot moved every plan to usage-based billing on June 1. Microsoft launched its Frontier Suite at ninety-nine dollars per seat plus separate <Term word="Token billing" definition="Charging for each token the AI produces or reads, rather than a flat monthly fee. Usage-based pricing means your bill varies with how much you use the AI — sometimes by a factor of ten or more." analogy="A pay-per-minute phone plan vs an unlimited monthly plan. Token billing is the pay-per-minute model, where heavy users pay far more.">token billing</Term> for agents.</p>
+  <p class="animate-in">The pricing model itself is changing.</p>
+  <p class="animate-in">Four phases define the arc. Pure API pay-per-token came first. Then flat-rate seats. Then hybrid plans combining both. Now full usage-based pricing is arriving.</p>
+  <p class="animate-in">Each phase did not replace the previous one. The enterprise market now operates across all four simultaneously, and the bill is assembled from whichever phases the customer is in.</p>
+  <p class="animate-in">A reasonable mid-sized customer's bill can rise meaningfully even when no single rate changed. That is the near-term picture. The longer one requires history.</p>
+</Scene>
+
+<Scene animation="text-reveal" index={6}>
+  <h2 class="animate-in">This has happened before</h2>
+  <p class="animate-in">In the 1840s, British investors poured seven percent of GDP into railways. The track arrived years late, into demand that had moved on. Most lines were unprofitable for a generation.</p>
+  <p class="animate-in">In the 1990s, telecoms laid eighty million miles of fiber for the internet boom. Five years after the bust, eighty-five percent of it was still dark. Wholesale bandwidth prices fell ninety percent.</p>
+  <p class="animate-in">Commodity markets with multi-year supply lags do not reach equilibrium. They oscillate around it.</p>
+  <p class="animate-in">AI capex is peaking in 2025 and 2026. Data center capacity follows with a four-year lag. Supply hits around 2029 to 2030. The price trough follows by a year or two.</p>
+  <p class="animate-in">Whether the trough is gentle or dramatic depends on one variable. Watch it closely.</p>
+</Scene>
+
+<Scene animation="text-reveal" index={7}>
+  <h2 class="animate-in">Watch tokens-per-watt</h2>
+  <p class="animate-in">Power, not chips, is the binding constraint. Morgan Stanley projects a forty-nine gigawatt US shortfall by 2028. Transformer lead times are now five years. Half of planned data center builds have already been delayed.</p>
+  <p class="animate-in">But what matters is how many <Term word="Tokens per watt" definition="A measure of AI efficiency. How much output — measured in tokens — a model produces for each watt of electricity consumed. As each new chip generation ships, this number rises, meaning more AI for the same power bill." analogy="Miles per gallon for AI. A newer, more efficient engine takes you further on the same tank of fuel.">tokens a watt produces</Term>.</p>
+  <p class="animate-in">Over eight years, inference efficiency has risen roughly a hundred and ten times. V100 in 2017. Blackwell in 2025. NVIDIA's own numbers show roughly ten times improvement from Hopper to Blackwell alone.</p>
+  <p class="animate-in">If efficiency keeps doubling per generation, the supply arriving at the cycle peak will be four to eight times more productive per watt than the supply that triggered the capex.</p>
+  <p class="animate-in">Bigger glut. Cheaper tokens. Eventually. So which way does it actually break?</p>
+</Scene>
+
+<Scene animation="text-reveal" index={8}>
+  <h2 class="animate-in">Now you decide</h2>
+  <p class="animate-in">Four assumptions drive the whole forecast. Setting them differently produces very different answers.</p>
+  <p class="animate-in">How fast does the subsidy unwind. How much pricing power do vendors gain from lock-in. How fast does inference efficiency improve per chip generation. How fast does token demand grow year over year.</p>
+  <p class="animate-in">Each assumption is named so you can see exactly which inputs drive the output.</p>
+  <p class="animate-in">My positions produce a 2030 price index of roughly one hundred and eighteen. Sixteen percent above today. The deflation case lands near seventy-eight. The lock-in case near one hundred and forty-five.</p>
+  <p class="animate-in">My answer is below.</p>
+</Scene>
+
+<Scene animation="text-reveal" index={9}>
+  <h2 class="animate-in">My view</h2>
+  <p class="animate-in">Enterprise effective prices rise modestly through 2028, plateau, then drift back down.</p>
+  <p class="animate-in">The trajectory is not a spike. It is a long, shallow climb peaking around sixteen percent above today, then easing as the supply cycle works through.</p>
+  <p class="animate-in">Two forces pull against each other. Strong lock-in lets vendors raise prices. Aggressive tokens-per-watt gains mean the supply that arrives at the cycle peak is dramatically more productive per watt than the supply that triggered the capex. Lock-in raises the ceiling. Efficiency lowers it. Net result is a dampened cycle, not a runaway one.</p>
+  <p class="animate-in">I am also at the slow end on subsidy unwind. The labs have signaled the change but will not move all at once. Competitive pressure keeps pricing soft for longer than analysts expect.</p>
+  <p class="animate-in">What would change my mind. If 2030 enterprise effective prices double, the lock-in side won. If they collapse below eighty, the efficiency side ran away.</p>
+</Scene>
+
+<Scene animation="text-reveal" index={10}>
+  <h2 class="animate-in">What this means</h2>
+  <p class="animate-in">If you build with AI, invest in routing layers and exit optionality now. Not three-year price-locked contracts. The pricing model under your stack is changing, and the cost line that used to be bundled into a seat fee is becoming its own line item.</p>
+  <p class="animate-in">If you run finance, consumption budgets are the new governance challenge. Gartner predicts forty percent of enterprises using consumption-priced AI will exceed budgets by two times by 2027. The bills will surprise people. Plan for it.</p>
+  <p class="animate-in">If you watch policy, the railroads-and-fiber precedent is that consolidation follows the bust. The public-interest question is whether interoperability and fair pricing get enforced in the digestion phase. That question is not for 2030. That question is for now.</p>
+  <p class="animate-in">Tokens cost too little today. Tomorrow, the question will be who pays.</p>
+</Scene>
+
+<Scene animation="text-reveal" index={11}>
+  <p class="week-tag animate-in">Coming up</p>
+  <h2 class="animate-in">Week 2: Why agents make AI bills explode</h2>
+  <p class="animate-in">You ask one question. The agent fires twenty inference calls. Then it retries. Then it verifies. Then it bills you.</p>
+  <p class="animate-in">The <Term word="Jevons paradox" definition="When a resource becomes more efficient to use, total consumption of that resource often rises rather than falls. Applied to AI: cheaper inference leads to more inference calls, not fewer. Efficiency feeds demand." analogy="Fuel-efficient cars. When gas mileage doubled, people drove more miles. Total fuel consumption went up, not down.">Jevons paradox</Term> at work.</p>
+  <p class="animate-in">Next week.</p>
+</Scene>
