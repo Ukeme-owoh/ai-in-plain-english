@@ -1655,5 +1655,65 @@ const animations = {
       { scale: 0.9, autoAlpha: 0 },
       { scale: 1, autoAlpha: 1, duration: 0.6, stagger: 0.15, ease: 'back.out(1.4)' }
     );
+  },
+
+  'subsidy-gap': (scene, visual) => {
+    gsap.fromTo(scene.querySelectorAll('.animate-in'),
+      { y: 24, autoAlpha: 0 },
+      { y: 0, autoAlpha: 1, duration: 0.7, stagger: 0.12, ease: 'power2.out' }
+    );
+
+    if (!visual) return;
+
+    const BL = 295;
+    const PAID_H = 14;
+    const COMP_H = 240;
+    const paidX = 22, paidW = 80, paidCx = paidX + paidW / 2;
+    const compX = 200, compW = 85, compCx = compX + compW / 2;
+    const gapCx = paidX + paidW + (compX - paidX - paidW) / 2;
+    const gapMidY = BL - COMP_H / 2;
+
+    visual.innerHTML = `
+      <svg viewBox="0 0 310 355" class="visual-svg subsidy-svg">
+        <line x1="10" y1="${BL}" x2="300" y2="${BL}" stroke="#222" stroke-width="1"/>
+        <rect class="bar-paid" x="${paidX}" y="${BL}" width="${paidW}" height="0" rx="3" fill="#6ee7b7"/>
+        <rect class="bar-comp" x="${compX}" y="${BL}" width="${compW}" height="0" rx="3" fill="#fda4af"/>
+        <text class="lbl-pv" x="${paidCx}" y="${BL + 18}" text-anchor="middle"
+          font-size="13" font-weight="700" fill="#6ee7b7" opacity="0">$200</text>
+        <text class="lbl-ps" x="${paidCx}" y="${BL + 31}" text-anchor="middle"
+          font-size="9" fill="#555" opacity="0">paid</text>
+        <text class="lbl-cv" x="${compCx}" y="${BL + 18}" text-anchor="middle"
+          font-size="13" font-weight="700" fill="#fda4af" opacity="0">$35,000</text>
+        <text class="lbl-cs" x="${compCx}" y="${BL + 31}" text-anchor="middle"
+          font-size="9" fill="#555" opacity="0">consumed</text>
+        <text class="gap-x" x="${gapCx}" y="${gapMidY + 8}" text-anchor="middle"
+          font-size="28" font-weight="800" fill="#ffffff" opacity="0">175×</text>
+        <text class="gap-s" x="${gapCx}" y="${gapMidY + 24}" text-anchor="middle"
+          font-size="9" fill="#666" opacity="0">gap absorbed</text>
+      </svg>
+      <p class="visual-caption">One month. One user. $200 paid. $35,000 consumed.</p>`;
+
+    const barPaid = visual.querySelector('.bar-paid');
+    const barComp  = visual.querySelector('.bar-comp');
+    const lblPv    = visual.querySelector('.lbl-pv');
+    const lblPs    = visual.querySelector('.lbl-ps');
+    const lblCv    = visual.querySelector('.lbl-cv');
+    const lblCs    = visual.querySelector('.lbl-cs');
+    const gapX     = visual.querySelector('.gap-x');
+    const gapS     = visual.querySelector('.gap-s');
+    const caption  = visual.querySelector('.visual-caption');
+
+    gsap.set(caption, { autoAlpha: 0, y: 6 });
+
+    const tl = gsap.timeline({ repeat: -1, repeatDelay: 2.5 });
+    tl
+      .to(barPaid, { attr: { y: BL - PAID_H, height: PAID_H }, duration: 0.35, ease: 'power2.out' })
+      .to([lblPv, lblPs], { opacity: 1, duration: 0.25 }, '-=0.05')
+      .to(barComp, { attr: { y: BL - COMP_H, height: COMP_H }, duration: 1.5, ease: 'power3.out' }, '+=0.1')
+      .to([lblCv, lblCs], { opacity: 1, duration: 0.3 }, '-=0.4')
+      .fromTo(gapX, { autoAlpha: 0, y: 10 }, { autoAlpha: 1, y: 0, duration: 0.5, ease: 'power2.out' })
+      .to(gapS, { opacity: 1, duration: 0.3 })
+      .fromTo(caption, { autoAlpha: 0, y: 6 }, { autoAlpha: 1, y: 0, duration: 0.4 })
+      .to(gapX, { opacity: 0.5, duration: 1.0, yoyo: true, repeat: 3, ease: 'sine.inOut' }, '+=1.0');
   }
 };
