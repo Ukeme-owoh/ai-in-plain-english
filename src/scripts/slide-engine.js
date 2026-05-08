@@ -1938,90 +1938,89 @@ const animations = {
     );
     if (!visual) return;
 
-    // Y: $0–$260. Plot: x 50→285, y 25→225
-    const L = 50, R = 285, T = 25, B = 225;
-    const H = B - T;   // 200
-    const W = R - L;   // 235
-    const maxY = 260;
-    const py = (v) => B - (v / maxY) * H;
+    // Chart area (labels live to the right of R)
+    const VW = 560, VH = 260;
+    const L = 44, R = 380, T = 18, B = 226;
+    const IW = R - L, IH = B - T;
 
-    // X: 2023.0–2026.5
-    const xRange = 3.5;
-    const px = (yr) => L + ((yr - 2023) / xRange) * W;
+    // Scales
+    const maxY = 265, xEnd = 2026.8;
+    const py = v  => B - (v / maxY) * IH;
+    const px = yr => L + ((yr - 2023) / (xEnd - 2023)) * IW;
 
-    const y20 = py(20);
-
-    // Tier entries: label, value, launch year (approximate decimal)
-    const tiers = [
-      { label: '$200', val: 200, xr: 2024.92, color: '#fda4af' },
-      { label: '$100', xr: 2025.33, val: 100, color: '#f472b6' },
-      { label: '$250', xr: 2026.0,  val: 250, color: '#a78bfa' },
-    ];
-
-    let svg = `<svg viewBox="0 0 310 260" class="visual-svg">`;
-
-    // Axis lines
-    svg += `<line x1="${L}" y1="${B}" x2="${R}" y2="${B}" stroke="#2a2a2a" stroke-width="1"/>`;
-    svg += `<line x1="${L}" y1="${T}" x2="${L}" y2="${B}" stroke="#2a2a2a" stroke-width="1"/>`;
+    // Y grid lines + labels
+    const yTicks = [20, 100, 200, 250];
+    const yGrid = yTicks.map(v => `
+      <line x1="${L}" y1="${py(v).toFixed(1)}" x2="${R}" y2="${py(v).toFixed(1)}"
+            stroke="#1e1e1e" stroke-width="0.6"/>
+      <text x="${L-5}" y="${(py(v)+3.5).toFixed(1)}" text-anchor="end"
+            font-size="9" fill="#555">$${v}</text>`).join('');
 
     // X tick labels
-    [2023, 2024, 2025, 2026].forEach(yr => {
-      svg += `<text x="${px(yr)}" y="${B + 14}" text-anchor="middle" font-size="9" fill="#444">${yr}</text>`;
-    });
+    const xTicks = [2023,2024,2025,2026].map(yr => `
+      <text x="${px(yr).toFixed(1)}" y="${B+14}" text-anchor="middle"
+            font-size="9" fill="#555">${yr}</text>`).join('');
 
-    // Y tick labels
-    [0, 100, 200].forEach(v => {
-      svg += `<text x="${L - 4}" y="${py(v) + 3}" text-anchor="end" font-size="9" fill="#444">$${v}</text>`;
-      svg += `<line x1="${L}" y1="${py(v)}" x2="${R}" y2="${py(v)}" stroke="#1a1a1a" stroke-width="0.5"/>`;
-    });
+    // Four tiers: [label, sublabel, price, launch year decimal, color, dashed]
+    const tiers = [
+      { lbl:'$20 standard',   sub:'flat for 3+ years',   val:20,  xr:2023.0,   col:'#3b82f6', dash:false },
+      { lbl:'$200 ceiling',   sub:'added Dec 2024',       val:200, xr:2024.92,  col:'#c05a52', dash:false },
+      { lbl:'$100 power-user',sub:'added May 2025',       val:100, xr:2025.375, col:'#d97706', dash:false },
+      { lbl:'$250 Google Ultra', sub:'',                  val:250, xr:2025.375, col:'#c0524a', dash:true  },
+    ];
 
-    // $20 flat line
-    svg += `<line class="line-20" x1="${L}" y1="${y20}" x2="${L}" y2="${y20}"
-      stroke="#6ee7b7" stroke-width="2.5" stroke-linecap="round"/>`;
-    svg += `<text class="lbl-20" x="${L + 4}" y="${y20 - 5}" font-size="10" fill="#6ee7b7" opacity="0">$20</text>`;
-    svg += `<text class="flat-note" x="${px(2025)}" y="${y20 - 5}" text-anchor="middle"
-      font-size="9" fill="#6ee7b7" opacity="0">flat since 2023</text>`;
+    const tiersHTML = tiers.map((t, i) => {
+      const lx = px(t.xr), ty = py(t.val);
+      const dashAttr = t.dash ? 'stroke-dasharray="6,4"' : '';
+      const lxF = lx.toFixed(1), tyF = ty.toFixed(1);
+      const lblX = (R + 8).toFixed(1);
+      return `
+        <!-- tier ${i}: ${t.lbl} -->
+        <line id="pt-line-${i}" x1="${lxF}" y1="${tyF}" x2="${lxF}" y2="${tyF}"
+              stroke="${t.col}" stroke-width="${i===0?2.8:2}" ${dashAttr}
+              stroke-linecap="round" opacity="${i===0?1:0}"/>
+        <circle id="pt-dot-${i}" cx="${lxF}" cy="${tyF}" r="4.5"
+                fill="${t.col}" opacity="0"/>
+        <text id="pt-lbl-${i}" x="${lblX}" y="${(ty+1).toFixed(1)}"
+              font-size="9.5" font-weight="600" fill="${t.col}" opacity="0">${t.lbl}</text>
+        ${t.sub ? `<text id="pt-sub-${i}" x="${lblX}" y="${(ty+12).toFixed(1)}"
+              font-size="8.5" fill="#666" opacity="0">${t.sub}</text>` : ''}`;
+    }).join('');
 
-    // Tier marks
-    tiers.forEach((t, i) => {
-      const tx = px(t.xr);
-      const ty = py(t.val);
-      svg += `<line class="tier-line tier-${i}" x1="${tx}" y1="${ty}" x2="${tx}" y2="${ty}"
-        stroke="${t.color}" stroke-width="2" stroke-linecap="round" opacity="0"/>`;
-      svg += `<circle class="tier-dot tier-dot-${i}" cx="${tx}" cy="${ty}" r="4"
-        fill="${t.color}" opacity="0"/>`;
-      svg += `<text class="tier-lbl tier-lbl-${i}" x="${tx + 6}" y="${ty + 4}"
-        font-size="10" fill="${t.color}" opacity="0">${t.label}</text>`;
-    });
+    visual.innerHTML = `
+      <svg viewBox="0 0 ${VW} ${VH}" style="width:100%;max-width:${VW}px">
+        <!-- axes -->
+        <line x1="${L}" y1="${B}" x2="${R}" y2="${B}" stroke="#333" stroke-width="1"/>
+        <line x1="${L}" y1="${T}" x2="${L}" y2="${B}" stroke="#333" stroke-width="1"/>
+        ${yGrid}
+        ${xTicks}
+        ${tiersHTML}
+      </svg>
+      <p class="visual-caption">The floor has not moved. Only the ceiling rose.</p>`;
 
-    svg += `</svg>
-    <p class="visual-caption">The floor has not moved. Only the ceiling rose.</p>`;
-    visual.innerHTML = svg;
-
-    const line20   = visual.querySelector('.line-20');
-    const lbl20    = visual.querySelector('.lbl-20');
-    const flatNote = visual.querySelector('.flat-note');
-    const caption  = visual.querySelector('.visual-caption');
+    const caption = visual.querySelector('.visual-caption');
     gsap.set(caption, { autoAlpha: 0, y: 6 });
 
     const tl = gsap.timeline({ repeat: -1, repeatDelay: 2.5 });
 
-    // $20 flat line draws across
-    tl.to(line20, { attr: { x2: R }, duration: 1.6, ease: 'power1.inOut' })
-      .to([lbl20, flatNote], { opacity: 1, duration: 0.3 }, '-=0.5');
+    // $20 line draws across entire x range first
+    tl.to('#pt-line-0', { attr: { x2: R }, duration: 1.5, ease: 'power1.inOut' })
+      .to('#pt-dot-0',  { opacity: 1, duration: 0.3 }, 0.1)
+      .to(['#pt-lbl-0','#pt-sub-0'], { opacity: 1, duration: 0.3, stagger: 0.1 }, '-=0.3');
 
-    // Tiers pop in one by one
-    tiers.forEach((t, i) => {
-      const tx = px(t.xr);
+    // Remaining tiers appear in sequence, each drawing from launch to R
+    [[1,'#pt-line-1','#pt-dot-1',['#pt-lbl-1','#pt-sub-1']],
+     [2,'#pt-line-2','#pt-dot-2',['#pt-lbl-2','#pt-sub-2']],
+     [3,'#pt-line-3','#pt-dot-3',['#pt-lbl-3']]
+    ].forEach(([i, lineId, dotId, lblIds]) => {
+      const launchX = px(tiers[i].xr).toFixed(1);
       tl
-        .to(`.tier-dot-${i}`, { opacity: 1, duration: 0.01 }, '+=0.25')
-        .fromTo(`.tier-line-${i}`,
-          { attr: { x1: tx - 28, x2: tx - 28 } },
-          { attr: { x1: tx - 28, x2: tx + 28 }, opacity: 1, duration: 0.35, ease: 'power2.out' }, '<')
-        .to(`.tier-lbl-${i}`, { opacity: 1, duration: 0.25 }, '-=0.1');
+        .to(lineId, { opacity: 1, attr: { x2: R }, duration: 0.65, ease: 'power2.out' }, '+=0.3')
+        .to(dotId,  { opacity: 1, duration: 0.2 }, '<+0.1')
+        .to(lblIds, { opacity: 1, duration: 0.25, stagger: 0.08 }, '-=0.15');
     });
 
-    tl.fromTo(caption, { autoAlpha: 0, y: 6 }, { autoAlpha: 1, y: 0, duration: 0.4 });
+    tl.to(caption, { autoAlpha: 1, y: 0, duration: 0.4 }, '+=0.2');
   },
 
   'shrinkflation': (scene, visual) => {
