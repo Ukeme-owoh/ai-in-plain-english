@@ -11,11 +11,69 @@ const TABS = [
   { slug: 'policy', label: 'Policy' },
 ];
 
+const SLOTS = 3;
+
 const techPosts = posts.filter((p) => p.data.category === 'tech');
-const techPlaceholders = Math.max(0, 12 - techPosts.length);
+const strategyPosts = posts.filter((p) => p.data.category === 'strategy');
 const policyPosts = posts.filter((p) => p.data.category === 'policy');
-const policyPlaceholders = Math.max(0, 6 - policyPosts.length);
-const emptyPlaceholders = 6;
+
+// Announced upcoming articles. Each entry fills the next available slot
+// in its category. When a real post ships in this slot, the placeholder
+// disappears automatically.
+type Announced = { title: string; desc: string; week: number };
+const announced: Record<string, Announced[]> = {
+  tech: [
+    {
+      title: 'The Generations of AI Models',
+      desc: 'GPT-4 to GPT-5. The fast predictor and the slow reasoner are different beasts.',
+      week: 2,
+    },
+    {
+      title: 'Building Agents and Skills',
+      desc: 'Loops, tools, and the harness that lets a model act, not just answer.',
+      week: 3,
+    },
+  ],
+  strategy: [
+    {
+      title: 'When to Build vs When to Buy AI',
+      desc: 'You wrote 14 prompts. Now you have a product. Should you have built it?',
+      week: 1,
+    },
+    {
+      title: 'Pricing AI Products',
+      desc: 'Three pricing models. They each break differently.',
+      week: 2,
+    },
+    {
+      title: 'SaaS: When Frontier Models Verticalize',
+      desc: 'What SaaS founders should do when frontier AI labs stop selling APIs and start building the products themselves.',
+      week: 3,
+    },
+  ],
+  policy: [
+    {
+      title: 'Why Agents Make AI Bills Explode',
+      desc: 'You ask one question. The agent fires twenty inference calls. Then it retries. Then it verifies. Then it bills you.',
+      week: 2,
+    },
+    {
+      title: 'The Compute Moat',
+      desc: 'Is GPU access the new oil? Capex concentration, who owns the chips, and what that means for the next decade.',
+      week: 3,
+    },
+  ],
+};
+
+function placeholdersFor(category: string, liveCount: number) {
+  const remaining = Math.max(0, SLOTS - liveCount);
+  const list = announced[category] ?? [];
+  return Array.from({ length: remaining }, (_, i) => list[i] ?? null);
+}
+
+const techPlaceholders     = placeholdersFor('tech', techPosts.length);
+const strategyPlaceholders = placeholdersFor('strategy', strategyPosts.length);
+const policyPlaceholders   = placeholdersFor('policy', policyPosts.length);
 ---
 
 <Base title="Home">
@@ -93,35 +151,82 @@ const emptyPlaceholders = 6;
           <div class="card-body">
             <h2 class="card-title">{post.data.title}</h2>
             <p class="card-desc">{post.data.description}</p>
+            <div class="card-status-row card-status-row--live">
+              <span class="status-dot"></span>Live
+            </div>
           </div>
         </a>
       ))}
 
-      {Array.from({ length: techPlaceholders }).map((_, i) => (
+      {techPlaceholders.map((ann, i) => (
         <div class="post-card post-card--coming" data-category="tech">
           <div class="card-preview">
             <div class="card-meta">
-              <span class="card-week">Week {techPosts.length + i + 1}</span>
+              <span class="card-week">Week {ann?.week ?? techPosts.length + i + 1}</span>
             </div>
             <div class="card-figure">
               <div class="card-icon-ring card-icon-ring--empty"></div>
             </div>
           </div>
           <div class="card-body">
-            <h2 class="card-title coming-title">Coming soon</h2>
+            <h2 class="card-title">{ann?.title ?? 'Coming soon'}</h2>
+            {ann?.desc && <p class="card-desc">{ann.desc}</p>}
+            <div class="card-status-row card-status-row--coming">
+              <span class="status-dot"></span>Coming soon
+            </div>
           </div>
         </div>
       ))}
 
-      {Array.from({ length: emptyPlaceholders }).map((_, i) => (
+      {strategyPosts.map((post) => (
+        <a
+          href={`${base}/posts/${post.slug}`}
+          class={`post-card theme-${post.data.theme ?? 'magenta'}`}
+          data-category="strategy"
+        >
+          <div class="card-preview">
+            <div class="card-meta">
+              <span class="card-status">
+                <span class="card-dot"></span>
+                {post.data.previewLabel ?? 'strategy.read()'}
+              </span>
+              <span class="card-week">Week {post.data.week}</span>
+            </div>
+            <div class="card-figure">
+              <div class="card-icon-ring">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true">
+                  <path d="M12 2 4 6v6c0 5 3.5 9.5 8 10 4.5-.5 8-5 8-10V6l-8-4z" />
+                </svg>
+              </div>
+              <span class="card-figure-label">{post.data.previewCaption ?? 'Strategy'}</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <h2 class="card-title">{post.data.title}</h2>
+            <p class="card-desc">{post.data.description}</p>
+            <div class="card-status-row card-status-row--live">
+              <span class="status-dot"></span>Live
+            </div>
+          </div>
+        </a>
+      ))}
+
+      {strategyPlaceholders.map((ann, i) => (
         <div class="post-card post-card--coming" data-category="strategy">
           <div class="card-preview">
+            <div class="card-meta">
+              <span class="card-week">Week {ann?.week ?? strategyPosts.length + i + 1}</span>
+            </div>
             <div class="card-figure">
               <div class="card-icon-ring card-icon-ring--empty"></div>
             </div>
           </div>
           <div class="card-body">
-            <h2 class="card-title coming-title">Coming soon</h2>
+            <h2 class="card-title">{ann?.title ?? 'Coming soon'}</h2>
+            {ann?.desc && <p class="card-desc">{ann.desc}</p>}
+            <div class="card-status-row card-status-row--coming">
+              <span class="status-dot"></span>Coming soon
+            </div>
           </div>
         </div>
       ))}
@@ -154,19 +259,29 @@ const emptyPlaceholders = 6;
           <div class="card-body">
             <h2 class="card-title">{post.data.title}</h2>
             <p class="card-desc">{post.data.description}</p>
+            <div class="card-status-row card-status-row--live">
+              <span class="status-dot"></span>Live
+            </div>
           </div>
         </a>
       ))}
 
-      {Array.from({ length: policyPlaceholders }).map((_, i) => (
+      {policyPlaceholders.map((ann, i) => (
         <div class="post-card post-card--coming" data-category="policy">
           <div class="card-preview">
+            <div class="card-meta">
+              <span class="card-week">Week {ann?.week ?? policyPosts.length + i + 1}</span>
+            </div>
             <div class="card-figure">
               <div class="card-icon-ring card-icon-ring--empty"></div>
             </div>
           </div>
           <div class="card-body">
-            <h2 class="card-title coming-title">Coming soon</h2>
+            <h2 class="card-title">{ann?.title ?? 'Coming soon'}</h2>
+            {ann?.desc && <p class="card-desc">{ann.desc}</p>}
+            <div class="card-status-row card-status-row--coming">
+              <span class="status-dot"></span>Coming soon
+            </div>
           </div>
         </div>
       ))}
@@ -347,7 +462,7 @@ const emptyPlaceholders = 6;
   }
 
   .post-card--coming {
-    opacity: 0.45;
+    opacity: 0.85;
     pointer-events: none;
   }
 
@@ -451,14 +566,44 @@ const emptyPlaceholders = 6;
     word-break: break-word;
   }
 
-  .coming-title {
-    color: #444;
-  }
-
   .card-desc {
     font-size: 0.88rem;
     color: #777;
     line-height: 1.55;
+  }
+
+  /* Status row at the bottom of the card body — discrete dot + label */
+  .card-status-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    margin-top: 0.25rem;
+  }
+
+  .card-status-row .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+  }
+
+  .card-status-row--live {
+    color: #6ee7b7;
+  }
+
+  .card-status-row--live .status-dot {
+    background: #6ee7b7;
+    box-shadow: 0 0 6px rgba(110, 231, 183, 0.6);
+  }
+
+  .card-status-row--coming {
+    color: #777;
+  }
+
+  .card-status-row--coming .status-dot {
+    background: #555;
   }
 
   @media (max-width: 600px) {
