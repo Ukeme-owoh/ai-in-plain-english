@@ -2875,6 +2875,131 @@ const animations = {
     runThreeModels(visual, { extended: true });
   },
 
+  'neural-net-three-loops': (scene, visual) => {
+    gsap.fromTo(scene.querySelectorAll('.animate-in'),
+      { y: 24, autoAlpha: 0 },
+      { y: 0, autoAlpha: 1, duration: 0.7, stagger: 0.12, ease: 'power2.out' }
+    );
+    if (!visual) return;
+
+    const W = 460, H = 280;
+    // Network block at the center, slightly left so doer loop has room
+    const NX = 150, NY = 60, NW = 110, NH = 160;
+    const NCX = NX + NW / 2, NCY = NY + NH / 2;
+
+    // Six internal layers (small circles down the block)
+    const layerCount = 6;
+    const layers = Array.from({ length: layerCount }, (_, i) => {
+      const ly = NY + 22 + (i / (layerCount - 1)) * (NH - 44);
+      return { y: ly };
+    });
+
+    const layerCircles = layers.map((l, i) => `
+      <circle class="nn3-layer" id="nn3-layer-${i}"
+              cx="${NCX}" cy="${l.y}" r="5"
+              fill="#7dd3fc" opacity="0.18"/>
+    `).join('');
+
+    visual.innerHTML = `
+      <svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:${W}px">
+
+        <!-- Network block -->
+        <rect id="nn3-block" x="${NX}" y="${NY}" width="${NW}" height="${NH}"
+              rx="10" ry="10"
+              fill="#0d0d0d" stroke="#2a2a2a" stroke-width="1" opacity="0"/>
+        ${layerCircles}
+        <text id="nn3-block-lbl" x="${NCX}" y="${NY - 8}" text-anchor="middle"
+              font-size="9" fill="#888" opacity="0">transformer</text>
+
+        <!-- Predictor loop (left side, sky blue) -->
+        <!-- Arc: from top-left of block, looping out left, back to bottom-left -->
+        <path id="nn3-pred-path"
+              d="M ${NX} ${NY + 24} C ${NX - 60} ${NY + 30}, ${NX - 60} ${NY + NH - 30}, ${NX} ${NY + NH - 24}"
+              fill="none" stroke="#38bdf8" stroke-width="2"
+              stroke-dasharray="320" stroke-dashoffset="320" opacity="0.85"/>
+        <!-- arrowhead -->
+        <polygon id="nn3-pred-tip" points="0,-4 8,0 0,4"
+                 fill="#38bdf8" opacity="0"
+                 transform="translate(${NX} ${NY + 24}) rotate(-10)"/>
+        <text id="nn3-pred-lbl" x="${NX - 70}" y="${NCY - 6}" text-anchor="middle"
+              font-size="10" font-weight="700" fill="#38bdf8" opacity="0">Predictor</text>
+        <text id="nn3-pred-sub" x="${NX - 70}" y="${NCY + 6}" text-anchor="middle"
+              font-size="7.5" fill="#888" opacity="0">append + repeat</text>
+
+        <!-- Thinker loop (top, tight arc, amber) -->
+        <!-- Tight arc above the block looping back into itself (silent inner loop) -->
+        <path id="nn3-think-path"
+              d="M ${NX + 28} ${NY + 12} C ${NX + 28} ${NY - 28}, ${NX + NW - 28} ${NY - 28}, ${NX + NW - 28} ${NY + 12}"
+              fill="none" stroke="#fbbf24" stroke-width="2"
+              stroke-dasharray="180" stroke-dashoffset="180"/>
+        <text id="nn3-think-lbl" x="${NCX}" y="${NY - 32}" text-anchor="middle"
+              font-size="10" font-weight="700" fill="#fbbf24" opacity="0">Thinker</text>
+        <text id="nn3-think-sub" x="${NCX}" y="${NY - 22}" text-anchor="middle"
+              font-size="7.5" fill="#888" opacity="0">silent inner pass</text>
+
+        <!-- Doer loop (right side out to tools box, green) -->
+        <!-- Tool box at right -->
+        <rect id="nn3-tools" x="${W - 90}" y="${NCY - 22}" width="70" height="44"
+              rx="6" fill="#0d0d0d" stroke="#16a34a" stroke-width="1" opacity="0"/>
+        <text id="nn3-tools-lbl" x="${W - 55}" y="${NCY - 5}" text-anchor="middle"
+              font-size="9" font-weight="600" fill="#6ee7b7" opacity="0">tools</text>
+        <text id="nn3-tools-sub" x="${W - 55}" y="${NCY + 8}" text-anchor="middle"
+              font-size="7" fill="#888" opacity="0">world / runtime</text>
+
+        <!-- Out arrow: right of block to left of tool box -->
+        <path id="nn3-doer-out"
+              d="M ${NX + NW} ${NCY - 6} L ${W - 90} ${NCY - 6}"
+              fill="none" stroke="#6ee7b7" stroke-width="2"
+              stroke-dasharray="${W - 90 - (NX + NW)}"
+              stroke-dashoffset="${W - 90 - (NX + NW)}"/>
+        <!-- In arrow: left of tool box to right of block -->
+        <path id="nn3-doer-in"
+              d="M ${W - 90} ${NCY + 6} L ${NX + NW} ${NCY + 6}"
+              fill="none" stroke="#6ee7b7" stroke-width="2"
+              stroke-dasharray="${W - 90 - (NX + NW)}"
+              stroke-dashoffset="${W - 90 - (NX + NW)}"/>
+
+        <text id="nn3-doer-lbl" x="${(NX + NW + W - 90) / 2}" y="${NCY - 18}" text-anchor="middle"
+              font-size="10" font-weight="700" fill="#6ee7b7" opacity="0">Doer</text>
+        <text id="nn3-doer-sub" x="${(NX + NW + W - 90) / 2}" y="${NCY + 24}" text-anchor="middle"
+              font-size="7.5" fill="#888" opacity="0">tool call · result</text>
+
+        <!-- Closing caption -->
+        <text id="nn3-caption" x="${W / 2}" y="${H - 14}" text-anchor="middle"
+              font-size="9" fill="#666" opacity="0">
+          Same engine. Three different cars.
+        </text>
+      </svg>`;
+
+    const tl = gsap.timeline({ repeat: -1, repeatDelay: 2 });
+
+    // Network block + layers fade in
+    tl.to('#nn3-block', { opacity: 1, duration: 0.5 }, 0);
+    tl.to('#nn3-block-lbl', { opacity: 1, duration: 0.3 }, 0.2);
+    tl.to('.nn3-layer', { opacity: 0.6, duration: 0.4, stagger: 0.06 }, 0.3);
+
+    // Predictor loop draws + label
+    tl.to('#nn3-pred-path', { strokeDashoffset: 0, duration: 1.0, ease: 'power1.inOut' }, 1.0);
+    tl.to(['#nn3-pred-lbl', '#nn3-pred-sub'], { opacity: 1, duration: 0.4, stagger: 0.1 }, 1.4);
+    // pulse network briefly to show forward pass
+    tl.to('.nn3-layer', { opacity: 1, duration: 0.25, yoyo: true, repeat: 1, ease: 'sine.inOut' }, 1.6);
+
+    // Thinker loop draws + label, network pulses several times rapidly
+    tl.to('#nn3-think-path', { strokeDashoffset: 0, duration: 0.8, ease: 'power1.inOut' }, 2.6);
+    tl.to(['#nn3-think-lbl', '#nn3-think-sub'], { opacity: 1, duration: 0.4, stagger: 0.1 }, 2.9);
+    tl.to('.nn3-layer', { opacity: 1, duration: 0.18, yoyo: true, repeat: 5, ease: 'sine.inOut' }, 3.0);
+
+    // Doer loop: out arrow draws, tools box appears, in arrow draws, labels
+    tl.to('#nn3-doer-out', { strokeDashoffset: 0, duration: 0.6, ease: 'power1.inOut' }, 4.4);
+    tl.to(['#nn3-tools', '#nn3-tools-lbl', '#nn3-tools-sub'],
+      { opacity: 1, duration: 0.4, stagger: 0.08 }, 4.8);
+    tl.to('#nn3-doer-in', { strokeDashoffset: 0, duration: 0.6, ease: 'power1.inOut' }, 5.2);
+    tl.to(['#nn3-doer-lbl', '#nn3-doer-sub'], { opacity: 1, duration: 0.4, stagger: 0.1 }, 5.4);
+
+    // Final unified glow — caption fades in
+    tl.to('#nn3-caption', { opacity: 1, duration: 0.4 }, 6.0);
+  },
+
   'internal-cot': (scene, visual) => {
     gsap.fromTo(scene.querySelectorAll('.animate-in'),
       { y: 24, autoAlpha: 0 },
