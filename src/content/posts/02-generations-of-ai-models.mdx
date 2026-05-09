@@ -44,7 +44,7 @@ import Term from '../../components/Term.astro';
   <p class="animate-in">Smart, fast, often wrong on real reasoning. So what happens if you let it think longer?</p>
 </Scene>
 
-<Scene animation="text-reveal" index={3}>
+<Scene animation="internal-cot" index={3}>
   <h2 class="animate-in">One internal thought.</h2>
   <p class="animate-in">
     The atomic unit of the thinker is a <Term word="Chain of thought" definition="A long internal note the model writes to itself before answering. The note never reaches the user. The final answer is informed by it." analogy="Scratch paper for a math problem. The teacher only sees the final answer. The student needed twenty lines to get there.">chain of thought</Term>.
@@ -55,7 +55,7 @@ import Term from '../../components/Term.astro';
   <p class="animate-in">Thinking ends with words. What if the model could also act?</p>
 </Scene>
 
-<Scene animation="text-reveal" index={4}>
+<Scene animation="tool-call" index={4}>
   <h2 class="animate-in">One tool call.</h2>
   <p class="animate-in">
     The atomic unit of the doer is a <Term word="Tool call" definition="A structured instruction the model emits — function name, arguments — that an external runtime executes. The model sees the result and decides what to do next." analogy="A line cook calling 'order in!' to the kitchen. The kitchen does the work. The cook sees the plate come back and decides the next step.">tool call</Term>.

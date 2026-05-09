@@ -2875,6 +2875,181 @@ const animations = {
     runThreeModels(visual, { extended: true });
   },
 
+  'internal-cot': (scene, visual) => {
+    gsap.fromTo(scene.querySelectorAll('.animate-in'),
+      { y: 24, autoAlpha: 0 },
+      { y: 0, autoAlpha: 1, duration: 0.7, stagger: 0.12, ease: 'power2.out' }
+    );
+    if (!visual) return;
+
+    const cotLines = [
+      'Step 1. List candidate cities. NYC → CHI → LA.',
+      'Step 2. Estimate flights. NYC→CHI ~$120, CHI→LA ~$180.',
+      'Step 3. Estimate hotels. 2 nights each ~$150/night.',
+      'Step 4. Add up. $120 + $180 + $200 + $900 = $1400.',
+      'Step 5. Wait — return flight LA→NYC? Add $130.',
+      'Step 6. New total $1530. Still under $2K.',
+      'Step 7. Suggest cheaper hotels if user wants buffer.',
+      'Step 8. Final answer: 3 cities, $1530, with options.',
+    ];
+
+    visual.innerHTML = `
+      <div class="ic-panel">
+        <div class="ic-msg ic-user">Plan and book a 3-city trip under $2K.</div>
+
+        <div class="ic-thinking" id="ic-thinking">
+          <span class="ic-think-dots"><span></span><span></span><span></span></span>
+          <span>thinking</span>
+        </div>
+
+        <div class="ic-cot" id="ic-cot">
+          <div class="ic-cot-head">
+            <span>internal chain of thought</span>
+            <span class="ic-cot-count" id="ic-cot-count">0 lines</span>
+          </div>
+          <div class="ic-cot-window">
+            <div class="ic-cot-stream" id="ic-cot-stream">
+              ${cotLines.map(t => `<p>${t}</p>`).join('')}
+              ${cotLines.map(t => `<p>${t}</p>`).join('')}
+            </div>
+          </div>
+        </div>
+
+        <div class="ic-msg ic-bot" id="ic-final">
+          <span class="ic-final-text"></span>
+        </div>
+      </div>`;
+
+    const userMsg = visual.querySelector('.ic-user');
+    const thinking = visual.querySelector('#ic-thinking');
+    const thinkDots = visual.querySelectorAll('#ic-thinking .ic-think-dots span');
+    const cot = visual.querySelector('#ic-cot');
+    const cotCount = visual.querySelector('#ic-cot-count');
+    const cotStream = visual.querySelector('#ic-cot-stream');
+    const final = visual.querySelector('#ic-final');
+    const finalText = visual.querySelector('.ic-final-text');
+
+    gsap.set(userMsg, { autoAlpha: 0, y: 6 });
+    gsap.set(thinking, { autoAlpha: 0 });
+    gsap.set(cot, { autoAlpha: 0, height: 0, overflow: 'hidden' });
+    gsap.set(cotStream, { y: 0 });
+    gsap.set(final, { autoAlpha: 0, y: 6 });
+
+    const finalAnswer = '3 cities. NYC → CHI → LA. $1530. $470 buffer.';
+
+    function typeInto(el, text, duration) {
+      const obj = { i: 0 };
+      el.textContent = '';
+      return gsap.to(obj, {
+        i: text.length, duration, ease: 'none', snap: { i: 1 },
+        onUpdate: () => { el.textContent = text.slice(0, Math.round(obj.i)); }
+      });
+    }
+
+    function tickCount(finalN, duration) {
+      const obj = { v: 0 };
+      return gsap.to(obj, {
+        v: finalN, duration, ease: 'none', snap: { v: 1 },
+        onUpdate: () => { cotCount.textContent = `${Math.round(obj.v)} lines`; }
+      });
+    }
+
+    const tl = gsap.timeline({ repeat: -1, repeatDelay: 2 });
+
+    // User message
+    tl.to(userMsg, { autoAlpha: 1, y: 0, duration: 0.4 }, 0);
+
+    // Thinking indicator + finite dot pulses
+    tl.to(thinking, { autoAlpha: 1, duration: 0.3 }, 0.6);
+    tl.to(thinkDots, {
+      y: -3, yoyo: true, repeat: 5, duration: 0.28, stagger: 0.08, ease: 'sine.inOut'
+    }, 0.7);
+
+    // Thinking fades, CoT block expands
+    tl.to(thinking, { autoAlpha: 0, duration: 0.25 }, 2.4);
+    tl.to(cot, { autoAlpha: 1, height: 130, duration: 0.5, ease: 'power2.out' }, 2.5);
+
+    // Stream scrolls upward through the window (one full pass over duplicated content)
+    const streamScrollHeight = -250;
+    tl.to(cotStream, { y: streamScrollHeight, duration: 3.2, ease: 'none' }, 2.9);
+
+    // Line counter ticks up alongside the scroll
+    tl.add(tickCount(247, 3.2), 2.9);
+
+    // CoT block collapses (count remains visible briefly via final fade)
+    tl.to(cot, { autoAlpha: 0, height: 0, duration: 0.45 }, 6.2);
+
+    // Final answer appears, types out
+    tl.to(final, { autoAlpha: 1, y: 0, duration: 0.35 }, 6.6);
+    tl.add(typeInto(finalText, finalAnswer, 1.4), 6.7);
+  },
+
+  'tool-call': (scene, visual) => {
+    gsap.fromTo(scene.querySelectorAll('.animate-in'),
+      { y: 24, autoAlpha: 0 },
+      { y: 0, autoAlpha: 1, duration: 0.7, stagger: 0.12, ease: 'power2.out' }
+    );
+    if (!visual) return;
+
+    visual.innerHTML = `
+      <div class="tc-panel">
+        <div class="tc-row" id="tc-row-1">
+          <span class="tc-actor tc-actor-model">model</span>
+          <div class="tc-content">need flight prices NYC → CHI on 2026-06-12</div>
+        </div>
+
+        <div class="tc-row tc-row-call" id="tc-row-2">
+          <span class="tc-actor tc-actor-call">→ tool call</span>
+          <pre class="tc-content tc-json">{ tool: "search_flights", from: "NYC", to: "CHI", date: "2026-06-12" }</pre>
+        </div>
+
+        <div class="tc-row tc-row-runtime" id="tc-row-3">
+          <span class="tc-actor tc-actor-runtime">runtime</span>
+          <div class="tc-content tc-spinner-row">
+            <span class="tc-spin-dots"><span></span><span></span><span></span></span>
+            <span>executing</span>
+          </div>
+        </div>
+
+        <div class="tc-row tc-row-result" id="tc-row-4">
+          <span class="tc-actor tc-actor-result">← result</span>
+          <pre class="tc-content tc-json">[{ AA: 120 }, { UA: 145 }, { DL: 138 }]</pre>
+        </div>
+
+        <div class="tc-row" id="tc-row-5">
+          <span class="tc-actor tc-actor-model">model</span>
+          <div class="tc-content">picks AA at $120. calls book_seat()…</div>
+        </div>
+      </div>`;
+
+    const rows = visual.querySelectorAll('.tc-row');
+    const spinDots = visual.querySelectorAll('#tc-row-3 .tc-spin-dots span');
+
+    gsap.set(rows, { autoAlpha: 0, x: -8 });
+
+    const tl = gsap.timeline({ repeat: -1, repeatDelay: 2 });
+
+    // Row 1: model reasoning
+    tl.to(rows[0], { autoAlpha: 1, x: 0, duration: 0.4, ease: 'power2.out' }, 0);
+
+    // Row 2: tool call (slide from left)
+    tl.to(rows[1], { autoAlpha: 1, x: 0, duration: 0.4, ease: 'power2.out' }, 0.8);
+
+    // Row 3: runtime spinner — slides in then dots pulse finite
+    tl.to(rows[2], { autoAlpha: 1, x: 0, duration: 0.4, ease: 'power2.out' }, 1.5);
+    tl.to(spinDots, {
+      y: -2.5, yoyo: true, repeat: 3, duration: 0.3, stagger: 0.08, ease: 'sine.inOut'
+    }, 1.7);
+
+    // Row 4: result (slide from right via inverted x)
+    tl.fromTo(rows[3],
+      { autoAlpha: 0, x: 8 },
+      { autoAlpha: 1, x: 0, duration: 0.4, ease: 'power2.out' }, 3.0);
+
+    // Row 5: model picks next action
+    tl.to(rows[4], { autoAlpha: 1, x: 0, duration: 0.4, ease: 'power2.out' }, 3.8);
+  },
+
   'generation-timeline': (scene, visual) => {
     gsap.fromTo(scene.querySelectorAll('.animate-in'),
       { y: 24, autoAlpha: 0 },
