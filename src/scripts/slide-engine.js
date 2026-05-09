@@ -3518,73 +3518,75 @@ const animations = {
     );
     if (!visual) return;
 
-    const W = 480, H = 240;
-    const L = 30, R = 450, AY = 70; // axis y
+    // Portrait viewBox so the SVG fills the viewport-tall visual column.
+    const W = 380, H = 600;
+    const AX = 110;            // axis x position
+    const AT = 60, AB = 540;   // axis top and bottom y
 
-    // Year tick positions on the line (linear 2020 → 2026.5)
-    const xMin = 2020, xMax = 2026.5;
-    const px = yr => L + ((yr - xMin) / (xMax - xMin)) * (R - L);
+    const yMin = 2020, yMax = 2026.5;
+    const py = yr => AT + ((yr - yMin) / (yMax - yMin)) * (AB - AT);
 
-    // Year ticks every 2 years
+    // Year ticks on the LEFT of the axis (was: below the axis)
     const yearTicks = [2020, 2022, 2024, 2026].map(yr => `
-      <line x1="${px(yr).toFixed(1)}" y1="${AY - 4}" x2="${px(yr).toFixed(1)}" y2="${AY + 4}"
+      <line x1="${AX - 5}" y1="${py(yr).toFixed(1)}" x2="${AX + 5}" y2="${py(yr).toFixed(1)}"
             stroke="#3a3a3a" stroke-width="1"/>
-      <text x="${px(yr).toFixed(1)}" y="${AY + 18}" text-anchor="middle"
-            font-size="9.5" fill="#666">${yr}</text>`).join('');
+      <text x="${AX - 12}" y="${(py(yr) + 4).toFixed(1)}" text-anchor="end"
+            font-size="13" fill="#666">${yr}</text>`).join('');
 
-    // Three generations
+    // Three generations, positioned along the vertical axis
     const gens = [
       {
         id: 'pred',
-        x: px(2021.5),
+        y: py(2021.5),
         col: '#38bdf8',
         name: 'Chat model',
-        models: 'the predictor',
+        sub: 'the predictor',
         years: '2020 → 2023',
       },
       {
         id: 'thnk',
-        x: px(2024.4),
+        y: py(2024.4),
         col: '#fbbf24',
         name: 'Reasoning model',
-        models: 'the thinker',
+        sub: 'the thinker',
         years: '2024 → 2025',
       },
       {
         id: 'doer',
-        x: px(2025.6),
+        y: py(2025.6),
         col: '#6ee7b7',
         name: 'Agentic model',
-        models: 'the doer',
+        sub: 'the doer',
         years: '2025 → now',
       },
     ];
 
+    // Each marker: dot on the axis + horizontal dashed connector + labels to the right
     const markersHTML = gens.map(g => {
-      const labelY = AY + 50;
+      const lblX = AX + 36;
       return `
         <g id="gt-${g.id}" opacity="0">
-          <line x1="${g.x.toFixed(1)}" y1="${AY}" x2="${g.x.toFixed(1)}" y2="${(AY + 32).toFixed(1)}"
-                stroke="${g.col}" stroke-width="1" stroke-dasharray="2,2" opacity="0.55"/>
-          <circle cx="${g.x.toFixed(1)}" cy="${AY}" r="6"
+          <line x1="${AX}" y1="${g.y.toFixed(1)}" x2="${(AX + 28).toFixed(1)}" y2="${g.y.toFixed(1)}"
+                stroke="${g.col}" stroke-width="1.4" stroke-dasharray="3,3" opacity="0.55"/>
+          <circle cx="${AX}" cy="${g.y.toFixed(1)}" r="8"
                   fill="${g.col}"/>
-          <circle cx="${g.x.toFixed(1)}" cy="${AY}" r="10"
+          <circle cx="${AX}" cy="${g.y.toFixed(1)}" r="13"
                   fill="${g.col}" opacity="0.18"/>
-          <text x="${g.x.toFixed(1)}" y="${labelY}"
-                text-anchor="middle" font-size="11" font-weight="700"
+          <text x="${lblX}" y="${(g.y - 6).toFixed(1)}"
+                font-size="18" font-weight="700"
                 fill="${g.col}">${g.name}</text>
-          <text x="${g.x.toFixed(1)}" y="${(labelY + 14).toFixed(1)}"
-                text-anchor="middle" font-size="8.5" fill="#aaa">${g.models}</text>
-          <text x="${g.x.toFixed(1)}" y="${(labelY + 26).toFixed(1)}"
-                text-anchor="middle" font-size="8" fill="#666">${g.years}</text>
+          <text x="${lblX}" y="${(g.y + 14).toFixed(1)}"
+                font-size="13" fill="#aaa">${g.sub}</text>
+          <text x="${lblX}" y="${(g.y + 30).toFixed(1)}"
+                font-size="11" fill="#666">${g.years}</text>
         </g>`;
     }).join('');
 
     visual.innerHTML = `
-      <svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:${W}px">
-        <!-- axis line, drawn left to right -->
-        <line id="gt-axis" x1="${L}" y1="${AY}" x2="${L}" y2="${AY}"
-              stroke="#666" stroke-width="1.5" stroke-linecap="round"/>
+      <svg viewBox="0 0 ${W} ${H}" style="width:100%">
+        <!-- vertical axis line, drawn top to bottom -->
+        <line id="gt-axis" x1="${AX}" y1="${AT}" x2="${AX}" y2="${AT}"
+              stroke="#666" stroke-width="1.8" stroke-linecap="round"/>
 
         <!-- year ticks (revealed with the axis) -->
         <g id="gt-ticks" opacity="0">${yearTicks}</g>
@@ -3592,30 +3594,26 @@ const animations = {
         <!-- markers -->
         ${markersHTML}
 
-        <!-- caption underneath -->
-        <text id="gt-caption" x="${(W / 2).toFixed(1)}" y="${H - 14}"
-              text-anchor="middle" font-size="9.5" fill="#666" opacity="0">
-          Each generation added a capability the previous one did not have.
+        <!-- caption at the bottom -->
+        <text id="gt-caption" x="${(W / 2).toFixed(1)}" y="${H - 18}"
+              text-anchor="middle" font-size="13" fill="#777" opacity="0">
+          Each generation added something the previous one could not do.
         </text>
       </svg>`;
 
-    // Initial state: each marker group hidden via SVG opacity already
-    // Caption + ticks hidden via group opacity 0
-    // Axis x2 = x1 (zero-length)
-
     const tl = gsap.timeline({ repeat: -1, repeatDelay: 2 });
 
-    // Axis draws left-to-right
-    tl.to('#gt-axis', { attr: { x2: R }, duration: 1.2, ease: 'power1.inOut' });
+    // Axis draws top-to-bottom (was: left-to-right)
+    tl.to('#gt-axis', { attr: { y2: AB }, duration: 1.4, ease: 'power1.inOut' });
 
     // Year ticks fade in alongside the end of the axis draw
     tl.to('#gt-ticks', { opacity: 1, duration: 0.4 }, '-=0.3');
 
-    // Markers appear sequentially with a 0.5s offset each
+    // Markers appear sequentially top to bottom
     gens.forEach((g, i) => {
       tl.fromTo(`#gt-${g.id}`,
-        { autoAlpha: 0, y: -6 },
-        { autoAlpha: 1, y: 0, duration: 0.5, ease: 'back.out(2)' },
+        { autoAlpha: 0, x: -8 },
+        { autoAlpha: 1, x: 0, duration: 0.5, ease: 'back.out(2)' },
         i === 0 ? '+=0.1' : '+=0.4'
       );
     });
