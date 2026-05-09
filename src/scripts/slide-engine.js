@@ -2875,6 +2875,170 @@ const animations = {
     runThreeModels(visual, { extended: true });
   },
 
+  'cost-bar': (scene, visual) => {
+    gsap.fromTo(scene.querySelectorAll('.animate-in'),
+      { y: 24, autoAlpha: 0 },
+      { y: 0, autoAlpha: 1, duration: 0.7, stagger: 0.12, ease: 'power2.out' }
+    );
+    if (!visual) return;
+
+    const W = 460, H = 240, PB = 50, PT = 30;
+    const baseY = H - PB;
+
+    const bars = [
+      { gen: 'Predictor', cost: 0.01, h: 22,  col: '#38bdf8' },
+      { gen: 'Thinker',   cost: 0.50, h: 80,  col: '#fbbf24' },
+      { gen: 'Doer',      cost: 4.00, h: 150, col: '#6ee7b7' },
+    ];
+
+    const slotW = (W - 80) / bars.length;
+    const barW = 60;
+
+    const barsHTML = bars.map((b, i) => {
+      const cx = 40 + i * slotW + slotW / 2;
+      const fmt = b.cost < 0.10 ? `$${b.cost.toFixed(2)}` : `$${b.cost.toFixed(2)}`;
+      return `
+        <rect class="cb-bar" id="cb-bar-${i}"
+              x="${(cx - barW / 2).toFixed(1)}" y="${baseY}"
+              width="${barW}" height="0"
+              fill="${b.col}" rx="3"
+              data-h="${b.h}"/>
+        <text id="cb-cost-${i}" x="${cx.toFixed(1)}" y="${(baseY - b.h - 8).toFixed(1)}"
+              text-anchor="middle" font-size="13" font-weight="800"
+              fill="${b.col}" opacity="0">${fmt}</text>
+        <text x="${cx.toFixed(1)}" y="${(baseY + 16).toFixed(1)}"
+              text-anchor="middle" font-size="10" font-weight="600"
+              fill="${b.col}">${b.gen}</text>
+        <text x="${cx.toFixed(1)}" y="${(baseY + 30).toFixed(1)}"
+              text-anchor="middle" font-size="8" fill="#888">per task</text>`;
+    }).join('');
+
+    visual.innerHTML = `
+      <svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:${W}px">
+        <text x="${(W / 2).toFixed(1)}" y="20" text-anchor="middle"
+              font-size="10" font-weight="600" fill="#ccc">Cost per task across the three generations</text>
+
+        <line x1="40" y1="${baseY}" x2="${W - 40}" y2="${baseY}" stroke="#444" stroke-width="1"/>
+
+        ${barsHTML}
+
+        <!-- 400× gap callout -->
+        <text id="cb-gap" x="${(W / 2).toFixed(1)}" y="${PT + 8}" text-anchor="middle"
+              font-size="11" font-weight="700" fill="#fda4af" opacity="0">400× gap</text>
+        <text id="cb-gap-sub" x="${(W / 2).toFixed(1)}" y="${PT + 21}" text-anchor="middle"
+              font-size="8" fill="#888" opacity="0">predictor → doer, same prompt</text>
+      </svg>`;
+
+    const tl = gsap.timeline({ repeat: -1, repeatDelay: 2 });
+
+    bars.forEach((b, i) => {
+      const at = i * 0.4;
+      tl.to(`#cb-bar-${i}`,
+        { attr: { y: baseY - b.h, height: b.h }, duration: 0.55, ease: 'power2.out' }, at);
+      tl.to(`#cb-cost-${i}`, { opacity: 1, duration: 0.3 }, at + 0.4);
+    });
+
+    // Gap callout fades in last
+    tl.to(['#cb-gap', '#cb-gap-sub'], { opacity: 1, duration: 0.4, stagger: 0.1 }, '+=0.3');
+
+    // Finite settle pulse on bars
+    tl.to('.cb-bar', {
+      scaleY: 1.04, yoyo: true, repeat: 1,
+      transformOrigin: 'center bottom',
+      duration: 0.4, stagger: 0.08, ease: 'sine.inOut'
+    }, '+=0.2');
+  },
+
+  'decision-tree': (scene, visual) => {
+    gsap.fromTo(scene.querySelectorAll('.animate-in'),
+      { y: 24, autoAlpha: 0 },
+      { y: 0, autoAlpha: 1, duration: 0.7, stagger: 0.12, ease: 'power2.out' }
+    );
+    if (!visual) return;
+
+    const W = 460, H = 280;
+    const TX = W / 2, TY = 20;       // trunk top
+    const JX = W / 2, JY = 80;       // trunk junction
+    const LEAF_Y = 180;              // y where leaves sit
+
+    const branches = [
+      { x: 80,           qLine1: 'latency-sensitive?',    qLine2: 'just chat',          gen: 'Predictor', col: '#38bdf8' },
+      { x: W / 2,        qLine1: 'hard reasoning?',       qLine2: 'one good answer',    gen: 'Thinker',   col: '#fbbf24' },
+      { x: W - 80,       qLine1: 'multi-step + tools?',   qLine2: 'finish work',        gen: 'Doer',      col: '#6ee7b7' },
+    ];
+
+    const branchesHTML = branches.map((b, i) => {
+      const dashLen = Math.hypot(b.x - JX, LEAF_Y - JY) + 10;
+      return `
+        <line id="dt-branch-${i}" x1="${JX}" y1="${JY}" x2="${b.x}" y2="${LEAF_Y}"
+              stroke="${b.col}" stroke-width="1.6" stroke-linecap="round"
+              stroke-dasharray="${dashLen}" stroke-dashoffset="${dashLen}"/>
+
+        <g id="dt-leaf-${i}" opacity="0">
+          <text x="${b.x}" y="${LEAF_Y + 14}" text-anchor="middle"
+                font-size="9" fill="#aaa">${b.qLine1}</text>
+          <text x="${b.x}" y="${LEAF_Y + 26}" text-anchor="middle"
+                font-size="8.5" fill="#666">${b.qLine2}</text>
+          <rect x="${b.x - 38}" y="${LEAF_Y + 38}" width="76" height="22"
+                rx="11" fill="${b.col}" fill-opacity="0.18"
+                stroke="${b.col}" stroke-width="1"/>
+          <text x="${b.x}" y="${LEAF_Y + 53}" text-anchor="middle"
+                font-size="10" font-weight="700" fill="${b.col}">${b.gen}</text>
+        </g>`;
+    }).join('');
+
+    visual.innerHTML = `
+      <svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:${W}px">
+        <!-- Title at top -->
+        <text id="dt-title" x="${(W / 2).toFixed(1)}" y="${TY}"
+              text-anchor="middle" font-size="11" font-weight="700"
+              fill="#ddd" opacity="0">Pick the right model</text>
+
+        <!-- Trunk line -->
+        <line id="dt-trunk" x1="${JX}" y1="${TY + 10}" x2="${JX}" y2="${TY + 10}"
+              stroke="#666" stroke-width="2" stroke-linecap="round"/>
+
+        ${branchesHTML}
+
+        <!-- Caption at the bottom -->
+        <text id="dt-cap" x="${(W / 2).toFixed(1)}" y="${H - 10}" text-anchor="middle"
+              font-size="9" fill="#666" opacity="0">
+          Pick wrong and you either pay too much or get a wrong answer fast.
+        </text>
+      </svg>`;
+
+    const tl = gsap.timeline({ repeat: -1, repeatDelay: 2 });
+
+    // Title fades in
+    tl.to('#dt-title', { opacity: 1, duration: 0.4 }, 0);
+
+    // Trunk grows downward
+    tl.to('#dt-trunk', { attr: { y2: JY }, duration: 0.6, ease: 'power2.out' }, 0.3);
+
+    // Branches draw outward, staggered
+    branches.forEach((_, i) => {
+      tl.to(`#dt-branch-${i}`,
+        { strokeDashoffset: 0, duration: 0.5, ease: 'power2.out' },
+        0.9 + i * 0.2);
+    });
+
+    // Leaves fade in (label + badge) staggered after each branch
+    branches.forEach((_, i) => {
+      tl.fromTo(`#dt-leaf-${i}`,
+        { autoAlpha: 0, y: -6 },
+        { autoAlpha: 1, y: 0, duration: 0.4, ease: 'back.out(2)' },
+        1.3 + i * 0.2);
+    });
+
+    // Bottom caption
+    tl.to('#dt-cap', { opacity: 1, duration: 0.4 }, '+=0.3');
+
+    // Finite glow pulse on the three badges
+    tl.to(`#dt-leaf-0 rect, #dt-leaf-1 rect, #dt-leaf-2 rect`,
+      { fillOpacity: 0.35, yoyo: true, repeat: 1, duration: 0.4, stagger: 0.1, ease: 'sine.inOut' },
+      '+=0.2');
+  },
+
   'training-curve':  makeScalingCurve({
     title: 'Capability vs training compute',
     xLabel: 'training compute (log)',
