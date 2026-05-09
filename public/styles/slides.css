@@ -1254,3 +1254,213 @@
     min-height: 0;
   }
 }
+
+/* ──────────────────────────────────────────────────────────────────
+   internal-cot (Tech 2 scene 4 — atomic unit of the thinker)
+   ────────────────────────────────────────────────────────────────── */
+
+.ic-panel {
+  background: #0d0d0d;
+  border: 1px solid #1e1e1e;
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 460px;
+  font-size: 0.78rem;
+}
+
+.ic-msg {
+  padding: 7px 10px;
+  border-radius: 7px;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.ic-user {
+  background: rgba(125, 211, 252, 0.08);
+  border: 1px solid rgba(125, 211, 252, 0.18);
+  color: #b6e3f6;
+}
+
+.ic-bot {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid #1e1e1e;
+  color: #ddd;
+  min-height: 22px;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.72rem;
+}
+
+.ic-thinking {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  font-size: 0.72rem;
+  color: #fbbf24;
+  font-style: italic;
+  border: 1px dashed rgba(251, 191, 36, 0.35);
+  background: rgba(251, 191, 36, 0.04);
+  border-radius: 7px;
+  align-self: flex-start;
+}
+
+.ic-think-dots {
+  display: inline-flex;
+  gap: 3px;
+}
+
+.ic-think-dots span {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #fbbf24;
+  display: inline-block;
+}
+
+.ic-cot {
+  border: 1px dashed rgba(251, 191, 36, 0.35);
+  background: rgba(251, 191, 36, 0.03);
+  border-radius: 7px;
+}
+
+.ic-cot-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 10px;
+  border-bottom: 1px dashed rgba(251, 191, 36, 0.2);
+  font-size: 0.66rem;
+  color: #fbbf24;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.ic-cot-count {
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.66rem;
+  color: #888;
+  letter-spacing: 0;
+  text-transform: none;
+  font-weight: 400;
+}
+
+.ic-cot-window {
+  height: 80px;
+  overflow: hidden;
+  position: relative;
+  padding: 6px 10px;
+}
+
+.ic-cot-stream p {
+  margin: 0 0 6px;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.66rem;
+  color: #b6b6b6;
+  line-height: 1.45;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ──────────────────────────────────────────────────────────────────
+   tool-call (Tech 2 scene 5 — atomic unit of the doer)
+   ────────────────────────────────────────────────────────────────── */
+
+.tc-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  width: 100%;
+  max-width: 460px;
+  background: #0d0d0d;
+  border: 1px solid #1e1e1e;
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.tc-row {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  gap: 10px;
+  align-items: center;
+}
+
+.tc-actor {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-weight: 700;
+  text-align: right;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+}
+
+.tc-actor-model    { color: #6ee7b7; }
+.tc-actor-call     { color: #38bdf8; }
+.tc-actor-runtime  { color: #fbbf24; }
+.tc-actor-result   { color: #fbbf24; }
+
+.tc-content {
+  padding: 6px 9px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid #1e1e1e;
+  font-size: 0.7rem;
+  color: #ccc;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.tc-json {
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.62rem;
+  color: #b6e3f6;
+  background: rgba(125, 211, 252, 0.04);
+  border-color: rgba(125, 211, 252, 0.2);
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.tc-row-result .tc-json {
+  color: #fde68a;
+  background: rgba(251, 191, 36, 0.04);
+  border-color: rgba(251, 191, 36, 0.2);
+}
+
+.tc-spinner-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-style: italic;
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.04);
+  border-color: rgba(251, 191, 36, 0.2);
+}
+
+.tc-spin-dots {
+  display: inline-flex;
+  gap: 3px;
+}
+
+.tc-spin-dots span {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #fbbf24;
+  display: inline-block;
+}
+
+@media (max-width: 700px) {
+  .tc-row {
+    grid-template-columns: 80px 1fr;
+    gap: 6px;
+  }
+  .ic-panel,
+  .tc-panel {
+    max-width: 100%;
+  }
+}
