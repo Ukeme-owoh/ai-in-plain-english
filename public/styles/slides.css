@@ -1105,20 +1105,23 @@
 .tm-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: 1fr;       /* single row that stretches */
   gap: 8px;
   width: 100%;
+  flex: 1;                        /* fill .scene-visual height */
+  align-self: stretch;
 }
 
 .tm-panel {
   background: #0d0d0d;
   border: 1px solid #1e1e1e;
   border-radius: 8px;
-  padding: 8px 9px 9px;
+  padding: 12px 13px 13px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  min-height: 240px;
-  font-size: 0.7rem;
+  gap: 8px;
+  min-height: 0;                  /* let the grid row drive the height */
+  font-size: 0.85rem;
 }
 
 .tm-head {
