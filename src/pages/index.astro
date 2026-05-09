@@ -151,6 +151,9 @@ const policyPlaceholders   = placeholdersFor('policy', policyPosts.length);
           <div class="card-body">
             <h2 class="card-title">{post.data.title}</h2>
             <p class="card-desc">{post.data.description}</p>
+            <div class="card-status-row card-status-row--live">
+              <span class="status-dot"></span>Live
+            </div>
           </div>
         </a>
       ))}
@@ -160,15 +163,17 @@ const policyPlaceholders   = placeholdersFor('policy', policyPosts.length);
           <div class="card-preview">
             <div class="card-meta">
               <span class="card-week">Week {ann?.week ?? techPosts.length + i + 1}</span>
-              <span class="coming-pill">Coming soon</span>
             </div>
             <div class="card-figure">
               <div class="card-icon-ring card-icon-ring--empty"></div>
             </div>
           </div>
           <div class="card-body">
-            <h2 class="card-title coming-title">{ann?.title ?? 'Coming soon'}</h2>
+            <h2 class="card-title">{ann?.title ?? 'Coming soon'}</h2>
             {ann?.desc && <p class="card-desc">{ann.desc}</p>}
+            <div class="card-status-row card-status-row--coming">
+              <span class="status-dot"></span>Coming soon
+            </div>
           </div>
         </div>
       ))}
@@ -199,6 +204,9 @@ const policyPlaceholders   = placeholdersFor('policy', policyPosts.length);
           <div class="card-body">
             <h2 class="card-title">{post.data.title}</h2>
             <p class="card-desc">{post.data.description}</p>
+            <div class="card-status-row card-status-row--live">
+              <span class="status-dot"></span>Live
+            </div>
           </div>
         </a>
       ))}
@@ -208,15 +216,17 @@ const policyPlaceholders   = placeholdersFor('policy', policyPosts.length);
           <div class="card-preview">
             <div class="card-meta">
               <span class="card-week">Week {ann?.week ?? strategyPosts.length + i + 1}</span>
-              <span class="coming-pill">Coming soon</span>
             </div>
             <div class="card-figure">
               <div class="card-icon-ring card-icon-ring--empty"></div>
             </div>
           </div>
           <div class="card-body">
-            <h2 class="card-title coming-title">{ann?.title ?? 'Coming soon'}</h2>
+            <h2 class="card-title">{ann?.title ?? 'Coming soon'}</h2>
             {ann?.desc && <p class="card-desc">{ann.desc}</p>}
+            <div class="card-status-row card-status-row--coming">
+              <span class="status-dot"></span>Coming soon
+            </div>
           </div>
         </div>
       ))}
@@ -249,6 +259,9 @@ const policyPlaceholders   = placeholdersFor('policy', policyPosts.length);
           <div class="card-body">
             <h2 class="card-title">{post.data.title}</h2>
             <p class="card-desc">{post.data.description}</p>
+            <div class="card-status-row card-status-row--live">
+              <span class="status-dot"></span>Live
+            </div>
           </div>
         </a>
       ))}
@@ -258,15 +271,17 @@ const policyPlaceholders   = placeholdersFor('policy', policyPosts.length);
           <div class="card-preview">
             <div class="card-meta">
               <span class="card-week">Week {ann?.week ?? policyPosts.length + i + 1}</span>
-              <span class="coming-pill">Coming soon</span>
             </div>
             <div class="card-figure">
               <div class="card-icon-ring card-icon-ring--empty"></div>
             </div>
           </div>
           <div class="card-body">
-            <h2 class="card-title coming-title">{ann?.title ?? 'Coming soon'}</h2>
+            <h2 class="card-title">{ann?.title ?? 'Coming soon'}</h2>
             {ann?.desc && <p class="card-desc">{ann.desc}</p>}
+            <div class="card-status-row card-status-row--coming">
+              <span class="status-dot"></span>Coming soon
+            </div>
           </div>
         </div>
       ))}
@@ -447,20 +462,8 @@ const policyPlaceholders   = placeholdersFor('policy', policyPosts.length);
   }
 
   .post-card--coming {
-    opacity: 0.62;
+    opacity: 0.85;
     pointer-events: none;
-  }
-
-  .coming-pill {
-    font-size: 0.6rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: #888;
-    border: 1px solid #2a2a2a;
-    background: rgba(255, 255, 255, 0.02);
-    padding: 2px 8px;
-    border-radius: 999px;
-    font-weight: 600;
   }
 
   /* Top zone — themed preview */
@@ -563,14 +566,44 @@ const policyPlaceholders   = placeholdersFor('policy', policyPosts.length);
     word-break: break-word;
   }
 
-  .coming-title {
-    color: #444;
-  }
-
   .card-desc {
     font-size: 0.88rem;
     color: #777;
     line-height: 1.55;
+  }
+
+  /* Status row at the bottom of the card body — discrete dot + label */
+  .card-status-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    margin-top: 0.25rem;
+  }
+
+  .card-status-row .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+  }
+
+  .card-status-row--live {
+    color: #6ee7b7;
+  }
+
+  .card-status-row--live .status-dot {
+    background: #6ee7b7;
+    box-shadow: 0 0 6px rgba(110, 231, 183, 0.6);
+  }
+
+  .card-status-row--coming {
+    color: #777;
+  }
+
+  .card-status-row--coming .status-dot {
+    background: #555;
   }
 
   @media (max-width: 600px) {
