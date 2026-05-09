@@ -1,0 +1,151 @@
+---
+title: "The Generations of AI Models"
+description: "Predictor, thinker, doer. Three eras, three scaling axes, three different bills."
+publishDate: 2026-05-14
+week: 2
+category: tech
+theme: sky
+previewLabel: "model.think()"
+previewCaption: "Generations"
+---
+
+import Scene from '../../components/Scene.astro';
+import Term from '../../components/Term.astro';
+
+<Scene animation="text-reveal" index={0}>
+  <p class="week-tag animate-in">Week 2: Generations of AI Models</p>
+  <h1 class="animate-in">Three models. One problem. Three different answers.</h1>
+  <p class="animate-in">Plan and book a three-city trip next month under two thousand dollars.</p>
+  <p class="animate-in">GPT-4 lists flights and hotels in five seconds. The math is wrong.</p>
+  <p class="animate-in">Claude 3.7 with thinking takes thirty seconds and gets the budget right. It does not book anything.</p>
+  <p class="animate-in">Claude Code takes four minutes. It checks fares, holds the seats, and emails me the itinerary.</p>
+  <p class="animate-in">All three are "AI models". They are not the same thing.</p>
+  <p class="animate-in">How can the same architecture produce such different behavior?</p>
+</Scene>
+
+<Scene animation="text-reveal" index={1}>
+  <h2 class="animate-in">Three generations.</h2>
+  <p class="animate-in">Predictor. Thinker. Doer.</p>
+  <p class="animate-in">The predictor reads tokens and writes the next one. GPT-3, GPT-4, Claude 3.5. From 2020 to 2023.</p>
+  <p class="animate-in">The thinker writes a long internal chain of thought before answering. o1, Claude 3.7 with thinking, DeepSeek R1. From 2024 to 2025.</p>
+  <p class="animate-in">The doer plans, calls tools, sees results, and decides what to do next. Claude Code, Operator, GPT-5 in agent mode. From 2025 onward.</p>
+  <p class="animate-in">Each generation added a capability the previous one did not have.</p>
+  <p class="animate-in">Underneath, they share the same architecture from week 1. So what actually changed?</p>
+</Scene>
+
+<Scene animation="text-reveal" index={2}>
+  <h2 class="animate-in">One forward pass.</h2>
+  <p class="animate-in">
+    The atomic unit of the predictor is a <Term word="Forward pass" definition="One trip through the neural network. Tokens come in, one new token comes out. The model repeats this for every word it writes." analogy="Pulling a single card from a deck. The model pulls one. Then shuffles in the result. Then pulls again.">forward pass</Term>.
+  </p>
+  <p class="animate-in">The model reads a sequence of tokens. It runs them through the network once. It produces one new token at the top. Then it adds that token to the sequence and runs the network again.</p>
+  <p class="animate-in">Predict. Append. Predict. Append.</p>
+  <p class="animate-in">Thirteen words go in. Ninety-four come out.</p>
+  <p class="animate-in">Smart, fast, often wrong on real reasoning. So what happens if you let it think longer?</p>
+</Scene>
+
+<Scene animation="text-reveal" index={3}>
+  <h2 class="animate-in">One internal thought.</h2>
+  <p class="animate-in">
+    The atomic unit of the thinker is a <Term word="Chain of thought" definition="A long internal note the model writes to itself before answering. The note never reaches the user. The final answer is informed by it." analogy="Scratch paper for a math problem. The teacher only sees the final answer. The student needed twenty lines to get there.">chain of thought</Term>.
+  </p>
+  <p class="animate-in">Before it answers your question, the model writes itself a long internal note. Two hundred lines. Sometimes two thousand. The note never reaches your screen.</p>
+  <p class="animate-in">It tries an approach. Catches its own mistake. Tries another. By the time it writes the final answer, most of the thinking has happened.</p>
+  <p class="animate-in">You see one paragraph. The model wrote a chapter.</p>
+  <p class="animate-in">Thinking ends with words. What if the model could also act?</p>
+</Scene>
+
+<Scene animation="text-reveal" index={4}>
+  <h2 class="animate-in">One tool call.</h2>
+  <p class="animate-in">
+    The atomic unit of the doer is a <Term word="Tool call" definition="A structured instruction the model emits — function name, arguments — that an external runtime executes. The model sees the result and decides what to do next." analogy="A line cook calling 'order in!' to the kitchen. The kitchen does the work. The cook sees the plate come back and decides the next step.">tool call</Term>.
+  </p>
+  <p class="animate-in">The model writes a structured request. Call this function with these arguments. A runtime takes the request, executes it, and hands the result back.</p>
+  <p class="animate-in">Read this file. Run this query. Book this flight.</p>
+  <p class="animate-in">The model takes the result and decides what to do next. Then it calls another tool. Then another.</p>
+  <p class="animate-in">This is the loop. Three calls becomes a paragraph. Twenty calls becomes a finished task.</p>
+  <p class="animate-in">Three different atomic moves. Now look at how each one scales.</p>
+</Scene>
+
+<Scene animation="text-reveal" index={5}>
+  <h2 class="animate-in">The same transformer, three different loops.</h2>
+  <p class="animate-in">Underneath, all three generations share the transformer architecture from week 1.</p>
+  <p class="animate-in">What changes is the loop wrapped around it.</p>
+  <p class="animate-in">The predictor runs the network once per token, appends, repeats.</p>
+  <p class="animate-in">The thinker runs the network thousands of times silently before showing you anything.</p>
+  <p class="animate-in">The doer runs the network, then calls out to the world, then runs the network again on what came back.</p>
+  <p class="animate-in">Same engine. Three different cars.</p>
+  <p class="animate-in">If the architecture is the same, what is making each generation more capable?</p>
+</Scene>
+
+<Scene animation="text-reveal" index={6}>
+  <h2 class="animate-in">First axis. Training compute.</h2>
+  <p class="animate-in">
+    The first scaling era was about making the engine bigger. More parameters. More data. More <Term word="Training compute" definition="The total compute spent teaching the model. Paid once, by the lab, before the model ever sees a user." analogy="The cost of building a factory. A one-time bill. Spread across every product the factory ever ships.">training compute</Term>.
+  </p>
+  <p class="animate-in">GPT-3 had a hundred and seventy-five billion parameters. GPT-4 had over a trillion.</p>
+  <p class="animate-in">Capability tracked the curve. For five years, every order of magnitude of training compute bought a measurable jump.</p>
+  <p class="animate-in">Then the curve started to bend.</p>
+  <p class="animate-in">More training compute kept making models smarter. Until it stopped. So the field looked for a new axis.</p>
+  <p class="animate-in scene-source">Parameter counts. OpenAI GPT-3 paper (2020), public reporting on GPT-4 (2023). The trillion-parameter figure is widely cited but never officially confirmed.</p>
+</Scene>
+
+<Scene animation="text-reveal" index={7}>
+  <h2 class="animate-in">Second axis. Inference compute.</h2>
+  <p class="animate-in">
+    The second scaling era was about thinking longer per question. <Term word="Inference compute" definition="The compute spent every time the model answers a question. Paid by you, every query." analogy="The electricity bill of running the factory. Pay it every shift, for every product.">Inference compute</Term>.
+  </p>
+  <p class="animate-in">o1 spent thirty seconds reasoning before answering. The accuracy curve was log-linear. Twice the thinking time, the next tier of problem solved.</p>
+  <p class="animate-in">Training compute is a one-time cost the lab pays. Inference compute is a cost you pay. Every query.</p>
+  <p class="animate-in">Hard problems became solvable at the price of patience.</p>
+  <p class="animate-in">But thinking still ends in words. What if the model could do more than answer?</p>
+  <p class="animate-in scene-source">o1 system card, OpenAI (Sep 2024). The log-linear scaling curve has been replicated in DeepSeek R1 and Anthropic's reasoning research.</p>
+</Scene>
+
+<Scene animation="text-reveal" index={8}>
+  <h2 class="animate-in">Third axis. Horizon.</h2>
+  <p class="animate-in">
+    The third scaling era is about how long the model can stay coherent on a single task. <Term word="Horizon" definition="How long the model can stay coherent on a single task. Measured in seconds, minutes, or hours." analogy="A marathon runner's stamina. A sprinter wins a hundred meters. A marathoner runs for hours without losing form. The race is different.">Horizon</Term>.
+  </p>
+  <p class="animate-in">Five seconds. Five minutes. Five hours.</p>
+  <p class="animate-in">A predictor can write a poem in one minute. A thinker can solve a contest math problem in twenty minutes. A doer can fix a bug in your codebase, run tests, and ship a pull request in eight hours.</p>
+  <p class="animate-in">Horizon length is what separates "answering questions" from "doing work".</p>
+  <p class="animate-in">Three axes, three eras. Now the hard question. When to use which.</p>
+  <p class="animate-in scene-source">Horizon as a scaling axis is documented in METR's "Measuring AI Ability to Complete Long Tasks" (2025). SWE-Bench Verified scores rose from 12% (GPT-4) to 70% (Claude 3.7 Sonnet with agent harness) primarily through horizon, not raw model capability.</p>
+</Scene>
+
+<Scene animation="text-reveal" index={9}>
+  <h2 class="animate-in">Each axis costs differently.</h2>
+  <p class="animate-in">Training compute is the lab's bill. They pay it once and amortize across every customer.</p>
+  <p class="animate-in">Inference compute is your bill. Every thinking query costs more. Sometimes ten or twenty times more, than a predictor query.</p>
+  <p class="animate-in">Horizon is the steepest. An eight-hour agent run can cost ten dollars. A predictor query for the same prompt costs a cent.</p>
+  <p class="animate-in">Same prompt. Same answer quality. Hundred-fold cost difference.</p>
+  <p class="animate-in">Cost decides as much as capability. So pick deliberately.</p>
+</Scene>
+
+<Scene animation="text-reveal" index={10}>
+  <h2 class="animate-in">Pick the right model.</h2>
+  <p class="animate-in">Latency-sensitive chat? Use the predictor. It answers in a second. Wrong sometimes, but cheap.</p>
+  <p class="animate-in">Hard reasoning, single answer needed? Use the thinker. It costs more, but it gets math, logic, and complex code right.</p>
+  <p class="animate-in">Multi-step task with side effects in the world? Use the doer. It is the only one that can call tools and finish work.</p>
+  <p class="animate-in">Pick wrong and you either pay too much or get a wrong answer fast.</p>
+  <p class="animate-in">Three generations. One task. Now watch them all run.</p>
+</Scene>
+
+<Scene animation="text-reveal" index={11}>
+  <h2 class="animate-in">One task, three answers.</h2>
+  <p class="animate-in">Plan and book a three-city trip next month under two thousand dollars.</p>
+  <p class="animate-in">The predictor returns in five seconds. Three flights. Two hotels. The total is two thousand four hundred. The math is wrong.</p>
+  <p class="animate-in">The thinker returns in thirty seconds. The math is right. The itinerary is reasonable. Nothing is booked.</p>
+  <p class="animate-in">The doer returns in four minutes. It checked fares. It held the seats. It sent confirmation emails.</p>
+  <p class="animate-in">Three generations. Three different bills. Three different outcomes.</p>
+  <p class="animate-in">But the doer cannot just run on its own. Someone has to give it the tools.</p>
+</Scene>
+
+<Scene animation="text-reveal" index={12}>
+  <p class="week-tag animate-in">Coming up</p>
+  <h2 class="animate-in">Week 3: Building Agents and Skills</h2>
+  <p class="animate-in">The doer can call tools. But it does not invent them. You write them.</p>
+  <p class="animate-in">Skills, MCP, function calling, scopes, context windows for agents.</p>
+  <p class="animate-in">Next week. The harness underneath the doer.</p>
+</Scene>
