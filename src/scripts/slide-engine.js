@@ -2875,6 +2875,132 @@ const animations = {
     runThreeModels(visual, { extended: true });
   },
 
+  'forward-pass': (scene, visual) => {
+    gsap.fromTo(scene.querySelectorAll('.animate-in'),
+      { y: 24, autoAlpha: 0 },
+      { y: 0, autoAlpha: 1, duration: 0.7, stagger: 0.12, ease: 'power2.out' }
+    );
+    if (!visual) return;
+
+    const text = "Three cities. NYC, Chicago, Los Angeles. Around two thousand four hundred dollars total.";
+    const words = text.split(' ');
+
+    visual.innerHTML = `
+      <div class="tw-wrap">
+        <div class="tw-counter-row">
+          <span class="tw-counter-label">Token</span>
+          <span class="tw-counter" id="fp-counter">1</span>
+          <span class="tw-counter-of">of ${words.length}</span>
+        </div>
+        <div class="tw-text" id="fp-text">
+          ${words.map((w, i) =>
+            `<span class="tw-word" data-i="${i}">${w}${i < words.length - 1 ? ' ' : ''}</span>`
+          ).join('')}
+        </div>
+        <div class="tw-arrow" id="fp-arrow">↑ one forward pass per token</div>
+      </div>`;
+
+    gsap.set('.tw-word', { opacity: 0 });
+    gsap.set('#fp-arrow', { opacity: 0 });
+
+    const tl = gsap.timeline({ delay: 0.5, repeat: -1, repeatDelay: 2 });
+    const wordDuration = 0.13;
+
+    words.forEach((_, i) => {
+      const at = i * wordDuration;
+      tl.to(`.tw-word[data-i="${i}"]`, {
+        opacity: 1,
+        duration: wordDuration * 0.5,
+        ease: 'none'
+      }, at);
+      tl.call(() => {
+        const counter = visual.querySelector('#fp-counter');
+        if (counter) counter.textContent = i + 1;
+      }, [], at);
+    });
+
+    tl.to('#fp-arrow', { opacity: 0.8, y: -4, duration: 0.4 }, '+=0.3');
+  },
+
+  'agent-tools-teaser': (scene, visual) => {
+    gsap.fromTo(scene.querySelectorAll('.animate-in'),
+      { y: 24, autoAlpha: 0 },
+      { y: 0, autoAlpha: 1, duration: 0.7, stagger: 0.12, ease: 'power2.out' }
+    );
+    if (!visual) return;
+
+    const W = 380, H = 260;
+    const AX = 60, AY = H / 2;          // doer (agent) origin
+    const TX_LEFT = 200;                  // start of tool column
+    const TX_RIGHT = 350;                 // tool box right edge
+
+    const tools = [
+      'search_flights()',
+      'check_calendar()',
+      'book_seats()',
+      'send_email()',
+      'read_file()',
+      'run_command()',
+    ];
+
+    const yStart = 30, yEnd = H - 30;
+    const yStep = (yEnd - yStart) / (tools.length - 1);
+
+    const linesAndBoxes = tools.map((name, i) => {
+      const ty = (yStart + i * yStep).toFixed(1);
+      return `
+        <line class="att-line" id="att-line-${i}"
+              x1="${AX}" y1="${AY}" x2="${TX_LEFT}" y2="${ty}"
+              stroke="#6ee7b7" stroke-width="1.4" stroke-linecap="round"
+              stroke-dasharray="200" stroke-dashoffset="200" opacity="0.85"/>
+        <rect class="att-box" id="att-box-${i}"
+              x="${TX_LEFT + 6}" y="${(parseFloat(ty) - 9).toFixed(1)}"
+              width="${TX_RIGHT - TX_LEFT - 12}" height="18"
+              rx="4" fill="rgba(110,231,183,0.04)"
+              stroke="#6ee7b7" stroke-width="1" opacity="0"/>
+        <text class="att-name" id="att-name-${i}"
+              x="${TX_LEFT + 14}" y="${(parseFloat(ty) + 4).toFixed(1)}"
+              font-size="9" font-family="ui-monospace, SFMono-Regular, monospace"
+              fill="#6ee7b7" opacity="0">${name}</text>`;
+    }).join('');
+
+    visual.innerHTML = `
+      <div class="chart-frame">
+        <div class="chart-header">The doer needs tools. You write them.</div>
+        <svg viewBox="0 0 ${W} ${H}" style="width:100%;display:block;max-width:${W}px">
+          <!-- doer node -->
+          <circle cx="${AX}" cy="${AY}" r="22" fill="#6ee7b7" opacity="0.18"/>
+          <circle cx="${AX}" cy="${AY}" r="14" fill="#6ee7b7"/>
+          <text x="${AX}" y="${AY + 38}" text-anchor="middle" font-size="9" fill="#888">doer</text>
+          <text x="${AX}" y="${AY + 50}" text-anchor="middle" font-size="8" fill="#555">agent + skills</text>
+
+          <!-- tool fan-out -->
+          ${linesAndBoxes}
+
+          <!-- column header -->
+          <text x="${((TX_LEFT + TX_RIGHT) / 2).toFixed(1)}" y="20" text-anchor="middle"
+                font-size="9" fill="#888">tools / skills</text>
+          <text id="att-count" x="${((TX_LEFT + TX_RIGHT) / 2).toFixed(1)}" y="${H - 8}"
+                text-anchor="middle" font-size="11" font-weight="700"
+                fill="#6ee7b7" opacity="0">${tools.length}+ tools</text>
+        </svg>
+        <p class="chart-caption">The doer can call tools but it does not invent them. You write them. Next week — building agents and skills.</p>
+      </div>`;
+
+    const tl = gsap.timeline({ repeat: -1, repeatDelay: 2 });
+
+    tools.forEach((_, i) => {
+      tl.to(`#att-line-${i}`, { strokeDashoffset: 0, duration: 0.32, ease: 'power1.out' }, i * 0.16);
+      tl.to(`#att-box-${i}`,  { opacity: 1, duration: 0.2 }, i * 0.16 + 0.2);
+      tl.to(`#att-name-${i}`, { opacity: 1, duration: 0.2 }, i * 0.16 + 0.25);
+    });
+
+    tl.to('#att-count', { opacity: 1, duration: 0.4 }, '+=0.2');
+    tl.to('#att-count',
+      { scale: 1.12, transformOrigin: 'center', duration: 0.4, yoyo: true, repeat: 1, ease: 'sine.inOut' },
+      '+=0.1');
+  },
+
   'cost-bar': (scene, visual) => {
     gsap.fromTo(scene.querySelectorAll('.animate-in'),
       { y: 24, autoAlpha: 0 },
