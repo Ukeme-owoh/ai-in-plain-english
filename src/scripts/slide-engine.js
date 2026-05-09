@@ -2875,6 +2875,52 @@ const animations = {
     runThreeModels(visual, { extended: true });
   },
 
+  'training-curve':  makeScalingCurve({
+    title: 'Capability vs training compute',
+    xLabel: 'training compute (log)',
+    yLabel: 'capability',
+    color: '#38bdf8',
+    points: [
+      { x: 0.10, y: 0.18, name: 'GPT-3',   sub: '2020' },
+      { x: 0.50, y: 0.62, name: 'GPT-4',   sub: '2023' },
+      { x: 0.92, y: 0.78, name: 'GPT-5?',  sub: '2025' },
+    ],
+    annotation: 'diminishing returns',
+    annotationAt: { x: 0.92, y: 0.78 },
+    bend: true,
+  }),
+
+  'inference-curve': makeScalingCurve({
+    title: 'Accuracy vs thinking time per query',
+    xLabel: 'thinking time per query (log)',
+    yLabel: 'accuracy on hard problems',
+    color: '#fbbf24',
+    points: [
+      { x: 0.05, y: 0.10, name: 'no thinking', sub: '~0s' },
+      { x: 0.35, y: 0.35, name: '10s',         sub: '' },
+      { x: 0.65, y: 0.62, name: '30s',         sub: 'o1' },
+      { x: 0.95, y: 0.85, name: '5 min',       sub: 'o3 / R1' },
+    ],
+    annotation: 'log-linear gain',
+    annotationAt: { x: 0.95, y: 0.85 },
+    withSlider: true,
+  }),
+
+  'horizon-curve':   makeScalingCurve({
+    title: 'Capability vs task duration the model can sustain',
+    xLabel: 'task duration (log)',
+    yLabel: 'capability',
+    color: '#6ee7b7',
+    points: [
+      { x: 0.10, y: 0.18, name: 'poem',     sub: '1 min' },
+      { x: 0.45, y: 0.42, name: 'long doc', sub: '15 min' },
+      { x: 0.72, y: 0.66, name: 'fix a PR', sub: '1 hr' },
+      { x: 0.95, y: 0.86, name: 'ship feature', sub: '8 hr' },
+    ],
+    annotation: 'doer territory',
+    annotationAt: { x: 0.95, y: 0.86 },
+  }),
+
   'neural-net-three-loops': (scene, visual) => {
     gsap.fromTo(scene.querySelectorAll('.animate-in'),
       { y: 24, autoAlpha: 0 },
@@ -3290,6 +3336,139 @@ const animations = {
 };
 
 // Shared HTML/animation helpers for three-models + three-models-extended.
+
+// Shared helper for the three Tech 2 scaling curves (training-compute,
+// inference-compute, horizon). Same chart shape, different x-axes.
+function makeScalingCurve(config) {
+  return function (scene, visual) {
+    gsap.fromTo(scene.querySelectorAll('.animate-in'),
+      { y: 24, autoAlpha: 0 },
+      { y: 0, autoAlpha: 1, duration: 0.7, stagger: 0.12, ease: 'power2.out' }
+    );
+    if (!visual) return;
+
+    const W = 480, H = 240;
+    const L = 50, R = 440, T = 38, B = 196;
+    const IW = R - L, IH = B - T;
+
+    // Map normalized 0..1 → pixel coords
+    const px = x => L + x * IW;
+    const py = y => B - y * IH;
+
+    // Path through points (smooth quadratic-ish via simple line segments)
+    const pathD = config.points.map((p, i) =>
+      `${i ? 'L' : 'M'}${px(p.x).toFixed(1)},${py(p.y).toFixed(1)}`
+    ).join(' ');
+
+    // Generous stroke-dasharray so dashoffset = full hides the line
+    const dashLen = 900;
+
+    // Y-axis grid + labels (low / mid / high)
+    const yMarks = [
+      { v: 0, label: 'low' },
+      { v: 0.5, label: '' },
+      { v: 1, label: 'high' },
+    ].map(m => `
+      <line x1="${L}" y1="${py(m.v).toFixed(1)}" x2="${R}" y2="${py(m.v).toFixed(1)}"
+            stroke="#1a1a1a" stroke-width="0.6" stroke-dasharray="${m.v === 0 ? '' : '3,4'}"/>
+      ${m.label ? `<text x="${L - 6}" y="${(py(m.v) + 3).toFixed(1)}" text-anchor="end"
+                    font-size="8" fill="#555">${m.label}</text>` : ''}
+    `).join('');
+
+    // X-axis ticks (log scale feel — three positions: low/mid/high)
+    const xMarks = [0, 0.5, 1].map((v, i) => `
+      <line x1="${px(v).toFixed(1)}" y1="${B}" x2="${px(v).toFixed(1)}" y2="${B + 4}"
+            stroke="#3a3a3a" stroke-width="1"/>
+      <text x="${px(v).toFixed(1)}" y="${B + 14}" text-anchor="${i === 0 ? 'start' : i === 2 ? 'end' : 'middle'}"
+            font-size="8" fill="#555">${i === 0 ? 'less' : i === 2 ? 'more' : ''}</text>
+    `).join('');
+
+    // Labeled points
+    const dots = config.points.map((p, i) => `
+      <circle class="sc-dot" id="sc-dot-${i}" cx="${px(p.x).toFixed(1)}" cy="${py(p.y).toFixed(1)}"
+              r="4" fill="${config.color}" opacity="0"/>
+      <text class="sc-dot-lbl" id="sc-dot-lbl-${i}"
+            x="${px(p.x).toFixed(1)}" y="${(py(p.y) - 9).toFixed(1)}"
+            text-anchor="${p.x > 0.85 ? 'end' : p.x < 0.15 ? 'start' : 'middle'}"
+            font-size="9" font-weight="700" fill="${config.color}" opacity="0">${p.name}</text>
+      ${p.sub ? `<text class="sc-dot-sub" id="sc-dot-sub-${i}"
+            x="${px(p.x).toFixed(1)}" y="${(py(p.y) + 13).toFixed(1)}"
+            text-anchor="${p.x > 0.85 ? 'end' : p.x < 0.15 ? 'start' : 'middle'}"
+            font-size="7.5" fill="#888" opacity="0">${p.sub}</text>` : ''}
+    `).join('');
+
+    // Annotation at the right edge
+    const annAtX = px(config.annotationAt.x);
+    const annAtY = py(config.annotationAt.y);
+    const annOffsetX = config.annotationAt.x > 0.85 ? -8 : 8;
+    const annAnchor = config.annotationAt.x > 0.85 ? 'end' : 'start';
+
+    // Optional thinking-time slider for inference-curve
+    const slider = config.withSlider
+      ? `<line id="sc-slider" x1="${px(0).toFixed(1)}" y1="${B + 22}"
+               x2="${px(0).toFixed(1)}" y2="${B + 28}"
+               stroke="${config.color}" stroke-width="2.5" stroke-linecap="round" opacity="0"/>
+         <text id="sc-slider-lbl" x="${px(0).toFixed(1)}" y="${B + 36}"
+               text-anchor="middle" font-size="7.5" fill="${config.color}" opacity="0">thinking budget</text>`
+      : '';
+
+    visual.innerHTML = `
+      <svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:${W}px">
+        <text x="${(L + R) / 2}" y="20" text-anchor="middle"
+              font-size="10" font-weight="600" fill="#ccc">${config.title}</text>
+
+        ${yMarks}
+
+        <line x1="${L}" y1="${T}" x2="${L}" y2="${B}" stroke="#444" stroke-width="1"/>
+        <line x1="${L}" y1="${B}" x2="${R}" y2="${B}" stroke="#444" stroke-width="1"/>
+
+        ${xMarks}
+
+        <text x="${(L + R) / 2}" y="${H - 10}" text-anchor="middle"
+              font-size="8.5" fill="#666">${config.xLabel}</text>
+
+        <text transform="rotate(-90,14,${((T + B) / 2).toFixed(1)})"
+              x="14" y="${((T + B) / 2 + 4).toFixed(1)}" text-anchor="middle"
+              font-size="8.5" fill="#666">${config.yLabel}</text>
+
+        <path id="sc-path" d="${pathD}"
+              fill="none" stroke="${config.color}" stroke-width="2.5"
+              stroke-linejoin="round" stroke-linecap="round"
+              stroke-dasharray="${dashLen}" stroke-dashoffset="${dashLen}"/>
+
+        ${dots}
+
+        <text id="sc-ann" x="${(annAtX + annOffsetX).toFixed(1)}" y="${(annAtY - 18).toFixed(1)}"
+              text-anchor="${annAnchor}"
+              font-size="9" font-weight="600" fill="${config.color}" opacity="0">${config.annotation}</text>
+
+        ${slider}
+      </svg>`;
+
+    const tl = gsap.timeline({ repeat: -1, repeatDelay: 2 });
+
+    // Curve draws first
+    tl.to('#sc-path', { strokeDashoffset: 0, duration: 1.5, ease: 'power1.inOut' }, 0.4);
+
+    // Each point pops in staggered as the curve passes through it
+    config.points.forEach((p, i) => {
+      const at = 0.4 + p.x * 1.5;
+      tl.to(`#sc-dot-${i}`,     { opacity: 1, duration: 0.3, ease: 'back.out(2)' }, at);
+      tl.to(`#sc-dot-lbl-${i}`, { opacity: 1, duration: 0.3 }, at + 0.05);
+      if (p.sub) tl.to(`#sc-dot-sub-${i}`, { opacity: 1, duration: 0.3 }, at + 0.1);
+    });
+
+    // Annotation fades in after the curve completes
+    tl.to('#sc-ann', { opacity: 1, duration: 0.4 }, 2.1);
+
+    // Optional slider yoyos once after the curve is drawn
+    if (config.withSlider) {
+      tl.to(['#sc-slider', '#sc-slider-lbl'], { opacity: 1, duration: 0.3 }, 2.4);
+      tl.to(['#sc-slider', '#sc-slider-lbl'],
+        { x: IW, duration: 1.2, yoyo: true, repeat: 1, ease: 'power2.inOut' }, 2.7);
+    }
+  };
+}
 
 function renderThreeModels({ extended }) {
   const meter = (id, time, cost) => extended

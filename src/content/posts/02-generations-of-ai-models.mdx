@@ -78,7 +78,7 @@ import Term from '../../components/Term.astro';
   <p class="animate-in">If the architecture is the same, what is making each generation more capable?</p>
 </Scene>
 
-<Scene animation="text-reveal" index={6}>
+<Scene animation="training-curve" index={6}>
   <h2 class="animate-in">First axis. Training compute.</h2>
   <p class="animate-in">
     The first scaling era was about making the engine bigger. More parameters. More data. More <Term word="Training compute" definition="The total compute spent teaching the model. Paid once, by the lab, before the model ever sees a user." analogy="The cost of building a factory. A one-time bill. Spread across every product the factory ever ships.">training compute</Term>.
@@ -90,7 +90,7 @@ import Term from '../../components/Term.astro';
   <p class="animate-in scene-source">Parameter counts. OpenAI GPT-3 paper (2020), public reporting on GPT-4 (2023). The trillion-parameter figure is widely cited but never officially confirmed.</p>
 </Scene>
 
-<Scene animation="text-reveal" index={7}>
+<Scene animation="inference-curve" index={7}>
   <h2 class="animate-in">Second axis. Inference compute.</h2>
   <p class="animate-in">
     The second scaling era was about thinking longer per question. <Term word="Inference compute" definition="The compute spent every time the model answers a question. Paid by you, every query." analogy="The electricity bill of running the factory. Pay it every shift, for every product.">Inference compute</Term>.
@@ -102,7 +102,7 @@ import Term from '../../components/Term.astro';
   <p class="animate-in scene-source">o1 system card, OpenAI (Sep 2024). The log-linear scaling curve has been replicated in DeepSeek R1 and Anthropic's reasoning research.</p>
 </Scene>
 
-<Scene animation="text-reveal" index={8}>
+<Scene animation="horizon-curve" index={8}>
   <h2 class="animate-in">Third axis. Horizon.</h2>
   <p class="animate-in">
     The third scaling era is about how long the model can stay coherent on a single task. <Term word="Horizon" definition="How long the model can stay coherent on a single task. Measured in seconds, minutes, or hours." analogy="A marathon runner's stamina. A sprinter wins a hundred meters. A marathoner runs for hours without losing form. The race is different.">Horizon</Term>.
