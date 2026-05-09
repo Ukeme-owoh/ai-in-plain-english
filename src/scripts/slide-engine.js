@@ -2873,6 +2873,119 @@ const animations = {
     if (!visual) return;
     visual.innerHTML = renderThreeModels({ extended: true });
     runThreeModels(visual, { extended: true });
+  },
+
+  'generation-timeline': (scene, visual) => {
+    gsap.fromTo(scene.querySelectorAll('.animate-in'),
+      { y: 24, autoAlpha: 0 },
+      { y: 0, autoAlpha: 1, duration: 0.7, stagger: 0.12, ease: 'power2.out' }
+    );
+    if (!visual) return;
+
+    const W = 480, H = 240;
+    const L = 30, R = 450, AY = 70; // axis y
+
+    // Year tick positions on the line (linear 2020 → 2026.5)
+    const xMin = 2020, xMax = 2026.5;
+    const px = yr => L + ((yr - xMin) / (xMax - xMin)) * (R - L);
+
+    // Year ticks every 2 years
+    const yearTicks = [2020, 2022, 2024, 2026].map(yr => `
+      <line x1="${px(yr).toFixed(1)}" y1="${AY - 4}" x2="${px(yr).toFixed(1)}" y2="${AY + 4}"
+            stroke="#3a3a3a" stroke-width="1"/>
+      <text x="${px(yr).toFixed(1)}" y="${AY + 18}" text-anchor="middle"
+            font-size="9.5" fill="#666">${yr}</text>`).join('');
+
+    // Three generations
+    const gens = [
+      {
+        id: 'pred',
+        x: px(2021.5),
+        col: '#38bdf8',
+        name: 'Predictor',
+        models: 'GPT-3 · GPT-4 · Claude 3.5',
+        years: '2020 → 2023',
+      },
+      {
+        id: 'thnk',
+        x: px(2024.4),
+        col: '#fbbf24',
+        name: 'Thinker',
+        models: 'o1 · R1 · Claude 3.7',
+        years: '2024 → 2025',
+      },
+      {
+        id: 'doer',
+        x: px(2025.6),
+        col: '#6ee7b7',
+        name: 'Doer',
+        models: 'Claude Code · Operator',
+        years: '2025 → now',
+      },
+    ];
+
+    const markersHTML = gens.map(g => {
+      const labelY = AY + 50;
+      return `
+        <g id="gt-${g.id}" opacity="0">
+          <line x1="${g.x.toFixed(1)}" y1="${AY}" x2="${g.x.toFixed(1)}" y2="${(AY + 32).toFixed(1)}"
+                stroke="${g.col}" stroke-width="1" stroke-dasharray="2,2" opacity="0.55"/>
+          <circle cx="${g.x.toFixed(1)}" cy="${AY}" r="6"
+                  fill="${g.col}"/>
+          <circle cx="${g.x.toFixed(1)}" cy="${AY}" r="10"
+                  fill="${g.col}" opacity="0.18"/>
+          <text x="${g.x.toFixed(1)}" y="${labelY}"
+                text-anchor="middle" font-size="11" font-weight="700"
+                fill="${g.col}">${g.name}</text>
+          <text x="${g.x.toFixed(1)}" y="${(labelY + 14).toFixed(1)}"
+                text-anchor="middle" font-size="8.5" fill="#aaa">${g.models}</text>
+          <text x="${g.x.toFixed(1)}" y="${(labelY + 26).toFixed(1)}"
+                text-anchor="middle" font-size="8" fill="#666">${g.years}</text>
+        </g>`;
+    }).join('');
+
+    visual.innerHTML = `
+      <svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:${W}px">
+        <!-- axis line, drawn left to right -->
+        <line id="gt-axis" x1="${L}" y1="${AY}" x2="${L}" y2="${AY}"
+              stroke="#666" stroke-width="1.5" stroke-linecap="round"/>
+
+        <!-- year ticks (revealed with the axis) -->
+        <g id="gt-ticks" opacity="0">${yearTicks}</g>
+
+        <!-- markers -->
+        ${markersHTML}
+
+        <!-- caption underneath -->
+        <text id="gt-caption" x="${(W / 2).toFixed(1)}" y="${H - 14}"
+              text-anchor="middle" font-size="9.5" fill="#666" opacity="0">
+          Each generation added a capability the previous one did not have.
+        </text>
+      </svg>`;
+
+    // Initial state: each marker group hidden via SVG opacity already
+    // Caption + ticks hidden via group opacity 0
+    // Axis x2 = x1 (zero-length)
+
+    const tl = gsap.timeline({ repeat: -1, repeatDelay: 2 });
+
+    // Axis draws left-to-right
+    tl.to('#gt-axis', { attr: { x2: R }, duration: 1.2, ease: 'power1.inOut' });
+
+    // Year ticks fade in alongside the end of the axis draw
+    tl.to('#gt-ticks', { opacity: 1, duration: 0.4 }, '-=0.3');
+
+    // Markers appear sequentially with a 0.5s offset each
+    gens.forEach((g, i) => {
+      tl.fromTo(`#gt-${g.id}`,
+        { autoAlpha: 0, y: -6 },
+        { autoAlpha: 1, y: 0, duration: 0.5, ease: 'back.out(2)' },
+        i === 0 ? '+=0.1' : '+=0.4'
+      );
+    });
+
+    // Caption fades in last
+    tl.to('#gt-caption', { opacity: 1, duration: 0.4 }, '+=0.2');
   }
 };
 
