@@ -3012,9 +3012,9 @@ const animations = {
     const baseY = H - PB;
 
     const bars = [
-      { gen: 'Predictor', cost: 0.01, h: 22,  col: '#38bdf8' },
-      { gen: 'Thinker',   cost: 0.50, h: 80,  col: '#fbbf24' },
-      { gen: 'Doer',      cost: 4.00, h: 150, col: '#6ee7b7' },
+      { gen: 'Chat',      cost: 0.01, h: 22,  col: '#38bdf8' },
+      { gen: 'Reasoning', cost: 0.50, h: 80,  col: '#fbbf24' },
+      { gen: 'Agentic',   cost: 4.00, h: 150, col: '#6ee7b7' },
     ];
 
     const slotW = (W - 80) / bars.length;
@@ -3088,9 +3088,9 @@ const animations = {
     const LEAF_Y = 180;              // y where leaves sit
 
     const branches = [
-      { x: 80,           qLine1: 'latency-sensitive?',    qLine2: 'just chat',          gen: 'Predictor', col: '#38bdf8' },
-      { x: W / 2,        qLine1: 'hard reasoning?',       qLine2: 'one good answer',    gen: 'Thinker',   col: '#fbbf24' },
-      { x: W - 80,       qLine1: 'multi-step + tools?',   qLine2: 'finish work',        gen: 'Doer',      col: '#6ee7b7' },
+      { x: 80,           qLine1: 'latency-sensitive?',    qLine2: 'just chat',          gen: 'Chat',      col: '#38bdf8' },
+      { x: W / 2,        qLine1: 'hard reasoning?',       qLine2: 'one good answer',    gen: 'Reasoning', col: '#fbbf24' },
+      { x: W - 80,       qLine1: 'multi-step + tools?',   qLine2: 'finish work',        gen: 'Agentic',   col: '#6ee7b7' },
     ];
 
     const branchesHTML = branches.map((b, i) => {
@@ -3171,9 +3171,9 @@ const animations = {
     yLabel: 'capability',
     color: '#38bdf8',
     points: [
-      { x: 0.10, y: 0.18, name: 'GPT-3',   sub: '2020' },
-      { x: 0.50, y: 0.62, name: 'GPT-4',   sub: '2023' },
-      { x: 0.92, y: 0.78, name: 'GPT-5?',  sub: '2025' },
+      { x: 0.10, y: 0.18, name: 'early chat',     sub: '2020' },
+      { x: 0.50, y: 0.62, name: 'frontier chat',  sub: '2023' },
+      { x: 0.92, y: 0.78, name: 'next gen?',      sub: '2025' },
     ],
     annotation: 'diminishing returns',
     annotationAt: { x: 0.92, y: 0.78 },
@@ -3186,10 +3186,10 @@ const animations = {
     yLabel: 'accuracy on hard problems',
     color: '#fbbf24',
     points: [
-      { x: 0.05, y: 0.10, name: 'no thinking', sub: '~0s' },
-      { x: 0.35, y: 0.35, name: '10s',         sub: '' },
-      { x: 0.65, y: 0.62, name: '30s',         sub: 'o1' },
-      { x: 0.95, y: 0.85, name: '5 min',       sub: 'o3 / R1' },
+      { x: 0.05, y: 0.10, name: 'no thinking', sub: 'chat' },
+      { x: 0.35, y: 0.35, name: '10s',         sub: 'reasoning' },
+      { x: 0.65, y: 0.62, name: '30s',         sub: 'reasoning' },
+      { x: 0.95, y: 0.85, name: '5 min',       sub: 'reasoning' },
     ],
     annotation: 'log-linear gain',
     annotationAt: { x: 0.95, y: 0.85 },
@@ -3538,24 +3538,24 @@ const animations = {
         id: 'pred',
         x: px(2021.5),
         col: '#38bdf8',
-        name: 'Predictor',
-        models: 'GPT-3 · GPT-4 · Claude 3.5',
+        name: 'Chat model',
+        models: 'the predictor',
         years: '2020 → 2023',
       },
       {
         id: 'thnk',
         x: px(2024.4),
         col: '#fbbf24',
-        name: 'Thinker',
-        models: 'o1 · R1 · Claude 3.7',
+        name: 'Reasoning model',
+        models: 'the thinker',
         years: '2024 → 2025',
       },
       {
         id: 'doer',
         x: px(2025.6),
         col: '#6ee7b7',
-        name: 'Doer',
-        models: 'Claude Code · Operator',
+        name: 'Agentic model',
+        models: 'the doer',
         years: '2025 → now',
       },
     ];
@@ -3774,7 +3774,7 @@ function renderThreeModels({ extended }) {
       <div class="tm-panel" data-gen="a">
         <div class="tm-head">
           <span class="tm-dot" style="background:#38bdf8"></span>
-          <span>GPT-4</span>
+          <span>Chat model</span>
           <span class="tm-tag">predictor</span>
         </div>
         <div class="tm-body">
@@ -3790,7 +3790,7 @@ function renderThreeModels({ extended }) {
       <div class="tm-panel" data-gen="b">
         <div class="tm-head">
           <span class="tm-dot" style="background:#fbbf24"></span>
-          <span>Claude 3.7 thinking</span>
+          <span>Reasoning model</span>
           <span class="tm-tag">thinker</span>
         </div>
         <div class="tm-body">
@@ -3810,7 +3810,7 @@ function renderThreeModels({ extended }) {
       <div class="tm-panel" data-gen="c">
         <div class="tm-head">
           <span class="tm-dot" style="background:#6ee7b7"></span>
-          <span>Claude Code</span>
+          <span>Agentic model</span>
           <span class="tm-tag">doer</span>
         </div>
         <div class="tm-body">
