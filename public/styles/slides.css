@@ -1085,3 +1085,172 @@
     padding: 0.5rem 1rem;
   }
 }
+
+/* ──────────────────────────────────────────────────────────────────
+   three-models / three-models-extended (Tech 2 hero + payoff)
+   ────────────────────────────────────────────────────────────────── */
+
+.tm-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  width: 100%;
+}
+
+.tm-panel {
+  background: #0d0d0d;
+  border: 1px solid #1e1e1e;
+  border-radius: 8px;
+  padding: 8px 9px 9px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 240px;
+  font-size: 0.7rem;
+}
+
+.tm-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.7rem;
+  color: #ddd;
+  font-weight: 600;
+  border-bottom: 1px solid #1e1e1e;
+  padding-bottom: 5px;
+}
+
+.tm-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: inline-block;
+}
+
+.tm-tag {
+  margin-left: auto;
+  font-size: 0.55rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #555;
+  font-weight: 500;
+}
+
+.tm-body {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1;
+}
+
+.tm-msg {
+  font-size: 0.65rem;
+  line-height: 1.35;
+  padding: 5px 7px;
+  border-radius: 6px;
+  word-break: break-word;
+}
+
+.tm-user {
+  background: rgba(125, 211, 252, 0.08);
+  color: #b6e3f6;
+  border: 1px solid rgba(125, 211, 252, 0.18);
+}
+
+.tm-bot {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid #1e1e1e;
+  color: #ccc;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.6rem;
+  min-height: 22px;
+}
+
+.tm-thinking {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.62rem;
+  color: #fbbf24;
+  font-style: italic;
+  padding: 4px 7px;
+}
+
+.tm-think-dots {
+  display: inline-flex;
+  gap: 3px;
+}
+
+.tm-think-dots span {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #fbbf24;
+  display: inline-block;
+}
+
+.tm-tools {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.58rem;
+  color: #6ee7b7;
+}
+
+.tm-tool {
+  padding: 3px 6px;
+  background: rgba(110, 231, 183, 0.05);
+  border-radius: 4px;
+  border-left: 2px solid #6ee7b7;
+}
+
+.tm-meter {
+  display: flex;
+  justify-content: space-between;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.58rem;
+  padding-top: 4px;
+  border-top: 1px dashed #1e1e1e;
+  color: #888;
+}
+
+.tm-time {
+  color: #ddd;
+}
+
+.tm-cost {
+  color: #fbbf24;
+}
+
+.tm-outcome {
+  margin-top: auto;
+  font-size: 0.62rem;
+  font-weight: 600;
+  padding: 4px 6px;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.tm-fail {
+  color: #fda4af;
+  background: rgba(253, 164, 175, 0.06);
+  border: 1px solid rgba(253, 164, 175, 0.2);
+}
+
+.tm-pass {
+  color: #6ee7b7;
+  background: rgba(110, 231, 183, 0.06);
+  border: 1px solid rgba(110, 231, 183, 0.2);
+}
+
+/* On narrow viewports stack the three panels */
+@media (max-width: 700px) {
+  .tm-grid {
+    grid-template-columns: 1fr;
+  }
+  .tm-panel {
+    min-height: 0;
+  }
+}

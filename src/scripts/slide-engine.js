@@ -2849,5 +2849,214 @@ const animations = {
     }
     tl.to('#nw-count', { opacity: 1, duration: 0.4 }, '+=0.2')
       .to('#nw-count', { scale: 1.15, transformOrigin: 'center', duration: 0.4, yoyo: true, repeat: 1, ease: 'sine.inOut' }, '+=0.1');
+  },
+
+  // ──────────────────────────────────────────────────────────────────
+  // Tech 2 — three generations of AI models
+  // ──────────────────────────────────────────────────────────────────
+
+  'three-models': (scene, visual) => {
+    gsap.fromTo(scene.querySelectorAll('.animate-in'),
+      { y: 24, autoAlpha: 0 },
+      { y: 0, autoAlpha: 1, duration: 0.7, stagger: 0.12, ease: 'power2.out' }
+    );
+    if (!visual) return;
+    visual.innerHTML = renderThreeModels({ extended: false });
+    runThreeModels(visual, { extended: false });
+  },
+
+  'three-models-extended': (scene, visual) => {
+    gsap.fromTo(scene.querySelectorAll('.animate-in'),
+      { y: 24, autoAlpha: 0 },
+      { y: 0, autoAlpha: 1, duration: 0.7, stagger: 0.12, ease: 'power2.out' }
+    );
+    if (!visual) return;
+    visual.innerHTML = renderThreeModels({ extended: true });
+    runThreeModels(visual, { extended: true });
   }
 };
+
+// Shared HTML/animation helpers for three-models + three-models-extended.
+
+function renderThreeModels({ extended }) {
+  const meter = (id, time, cost) => extended
+    ? `<div class="tm-meter">
+         <span class="tm-time" id="tm-time-${id}">0:00</span>
+         <span class="tm-cost" id="tm-cost-${id}">$0.00</span>
+       </div>`
+    : '';
+
+  return `
+    <div class="tm-grid">
+
+      <div class="tm-panel" data-gen="a">
+        <div class="tm-head">
+          <span class="tm-dot" style="background:#38bdf8"></span>
+          <span>GPT-4</span>
+          <span class="tm-tag">predictor</span>
+        </div>
+        <div class="tm-body">
+          <div class="tm-msg tm-user">Plan &amp; book a 3-city trip under $2K</div>
+          <div class="tm-msg tm-bot tm-bot-a">
+            <span class="tm-text-a"></span>
+          </div>
+          ${meter('a', '0:05', '$0.01')}
+          <div class="tm-outcome tm-fail" id="tm-out-a">✗ math wrong</div>
+        </div>
+      </div>
+
+      <div class="tm-panel" data-gen="b">
+        <div class="tm-head">
+          <span class="tm-dot" style="background:#fbbf24"></span>
+          <span>Claude 3.7 thinking</span>
+          <span class="tm-tag">thinker</span>
+        </div>
+        <div class="tm-body">
+          <div class="tm-msg tm-user">Plan &amp; book a 3-city trip under $2K</div>
+          <div class="tm-thinking" id="tm-think-b">
+            <span class="tm-think-dots"><span></span><span></span><span></span></span>
+            <span>thinking</span>
+          </div>
+          <div class="tm-msg tm-bot tm-bot-b">
+            <span class="tm-text-b"></span>
+          </div>
+          ${meter('b', '0:30', '$0.50')}
+          <div class="tm-outcome tm-pass" id="tm-out-b">✓ math right · not booked</div>
+        </div>
+      </div>
+
+      <div class="tm-panel" data-gen="c">
+        <div class="tm-head">
+          <span class="tm-dot" style="background:#6ee7b7"></span>
+          <span>Claude Code</span>
+          <span class="tm-tag">doer</span>
+        </div>
+        <div class="tm-body">
+          <div class="tm-msg tm-user">Plan &amp; book a 3-city trip under $2K</div>
+          <div class="tm-tools">
+            <div class="tm-tool" id="tm-tool-1">→ search_flights()</div>
+            <div class="tm-tool" id="tm-tool-2">→ check_calendar()</div>
+            <div class="tm-tool" id="tm-tool-3">→ book_seats()</div>
+          </div>
+          ${meter('c', '4:00', '$4.00')}
+          <div class="tm-outcome tm-pass" id="tm-out-c">✓ booked · email sent</div>
+        </div>
+      </div>
+
+    </div>`;
+}
+
+function runThreeModels(visual, { extended }) {
+  const userMsgs = visual.querySelectorAll('.tm-user');
+  const botA = visual.querySelector('.tm-bot-a');
+  const textA = visual.querySelector('.tm-text-a');
+  const outA = visual.querySelector('#tm-out-a');
+  const thinkB = visual.querySelector('#tm-think-b');
+  const dotsB = visual.querySelectorAll('#tm-think-b .tm-think-dots span');
+  const botB = visual.querySelector('.tm-bot-b');
+  const textB = visual.querySelector('.tm-text-b');
+  const outB = visual.querySelector('#tm-out-b');
+  const tools = visual.querySelectorAll('.tm-tool');
+  const outC = visual.querySelector('#tm-out-c');
+
+  // Initial state
+  gsap.set(userMsgs, { autoAlpha: 0, y: 6 });
+  gsap.set([botA, thinkB, botB], { autoAlpha: 0, y: 4 });
+  gsap.set(tools, { autoAlpha: 0, y: 4 });
+  gsap.set([outA, outB, outC], { autoAlpha: 0, y: 4 });
+
+  // For extended: reset meters
+  if (extended) {
+    visual.querySelector('#tm-time-a').textContent = '0:00';
+    visual.querySelector('#tm-time-b').textContent = '0:00';
+    visual.querySelector('#tm-time-c').textContent = '0:00';
+    visual.querySelector('#tm-cost-a').textContent = '$0.00';
+    visual.querySelector('#tm-cost-b').textContent = '$0.00';
+    visual.querySelector('#tm-cost-c').textContent = '$0.00';
+  }
+
+  const responseA = '$1200 + $700 + $500 = $2400';
+  const responseB = '$1100 + $650 + $200 = $1950 ✓';
+
+  function typeInto(el, text, duration) {
+    const obj = { i: 0 };
+    el.textContent = '';
+    return gsap.to(obj, {
+      i: text.length,
+      duration,
+      ease: 'none',
+      snap: { i: 1 },
+      onUpdate: () => { el.textContent = text.slice(0, Math.round(obj.i)); }
+    });
+  }
+
+  function tickTime(elId, finalSec, duration) {
+    const el = visual.querySelector(elId);
+    const obj = { v: 0 };
+    return gsap.to(obj, {
+      v: finalSec,
+      duration,
+      ease: 'none',
+      snap: { v: 1 },
+      onUpdate: () => {
+        const m = Math.floor(obj.v / 60);
+        const s = Math.round(obj.v % 60);
+        el.textContent = `${m}:${String(s).padStart(2, '0')}`;
+      }
+    });
+  }
+
+  function tickCost(elId, finalCost, duration) {
+    const el = visual.querySelector(elId);
+    const obj = { v: 0 };
+    return gsap.to(obj, {
+      v: finalCost,
+      duration,
+      ease: 'none',
+      onUpdate: () => { el.textContent = `$${obj.v.toFixed(2)}`; }
+    });
+  }
+
+  const tl = gsap.timeline({ repeat: -1, repeatDelay: 2.5 });
+
+  // All three user messages fade in together
+  tl.to(userMsgs, { autoAlpha: 1, y: 0, duration: 0.5, stagger: 0.05 }, 0);
+
+  // Panel A — predictor: bubble appears, fast type, fail outcome
+  tl.to(botA, { autoAlpha: 1, y: 0, duration: 0.3 }, 0.6);
+  tl.add(typeInto(textA, responseA, 1.2), 0.7);
+  tl.to(outA, { autoAlpha: 1, y: 0, duration: 0.4 }, 2.0);
+
+  // Panel B — thinker: dots pulse, then response, then outcome
+  tl.to(thinkB, { autoAlpha: 1, y: 0, duration: 0.3 }, 0.6);
+  tl.to(dotsB, {
+    y: -3,
+    yoyo: true,
+    repeat: 5,
+    duration: 0.28,
+    stagger: 0.08,
+    ease: 'sine.inOut',
+  }, 0.8);
+  tl.to(thinkB, { autoAlpha: 0, duration: 0.3 }, 2.5);
+  tl.to(botB, { autoAlpha: 1, y: 0, duration: 0.3 }, 2.7);
+  tl.add(typeInto(textB, responseB, 1.5), 2.8);
+  tl.to(outB, { autoAlpha: 1, y: 0, duration: 0.4 }, 4.4);
+
+  // Panel C — doer: three tool calls fire in sequence, then outcome
+  tools.forEach((t, i) => {
+    tl.to(t, { autoAlpha: 1, y: 0, duration: 0.3, ease: 'power2.out' }, 0.7 + i * 1.1);
+  });
+  tl.to(outC, { autoAlpha: 1, y: 0, duration: 0.4 }, 4.5);
+
+  // Extended: timers and cost meters tick in parallel
+  if (extended) {
+    tl.add(tickTime('#tm-time-a', 5,    1.4), 0.6);
+    tl.add(tickCost('#tm-cost-a', 0.01, 1.4), 0.6);
+    tl.add(tickTime('#tm-time-b', 30,   3.6), 0.8);
+    tl.add(tickCost('#tm-cost-b', 0.50, 3.6), 0.8);
+    tl.add(tickTime('#tm-time-c', 240,  3.6), 0.9);
+    tl.add(tickCost('#tm-cost-c', 4.00, 3.6), 0.9);
+  }
+
+  return tl;
+}
