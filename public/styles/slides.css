@@ -78,6 +78,20 @@
   position: sticky;
   top: 1rem;
   align-self: flex-start;
+  /* Claim most of the viewport vertically so charts use the available
+     space instead of sitting at their natural (small) size. */
+  min-height: calc(100vh - 9rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Override per-animation inline `max-width` caps (e.g. 480px / 460px /
+   520px) so SVGs scale to fill the column. viewBox preserves aspect. */
+.scene-visual svg {
+  max-width: 100% !important;
+  width: 100%;
+  height: auto;
 }
 
 /* Inline citation, mid-paragraph, small grey type */
@@ -537,7 +551,6 @@
 /* Typewriter (Scene 2) */
 .tw-wrap {
   width: 100%;
-  max-width: 440px;
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
@@ -767,7 +780,6 @@
   flex-direction: column;
   gap: 0.85rem;
   width: 100%;
-  max-width: 460px;
 }
 
 .chat-bubble {
@@ -1268,7 +1280,6 @@
   flex-direction: column;
   gap: 8px;
   width: 100%;
-  max-width: 460px;
   font-size: 0.78rem;
 }
 
@@ -1376,7 +1387,6 @@
   flex-direction: column;
   gap: 7px;
   width: 100%;
-  max-width: 460px;
   background: #0d0d0d;
   border: 1px solid #1e1e1e;
   border-radius: 10px;
