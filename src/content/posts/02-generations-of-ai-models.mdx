@@ -1,6 +1,6 @@
 ---
 title: "The Generations of AI Models"
-description: "Predictor, thinker, doer. Three eras, three scaling axes, three different bills."
+description: "Chat, reasoning, and agentic models. Three generations, three scaling axes, three different bills."
 publishDate: 2026-05-14
 week: 2
 category: tech
@@ -15,137 +15,128 @@ import Term from '../../components/Term.astro';
 <Scene animation="three-models" index={0}>
   <p class="week-tag animate-in">Week 2: Generations of AI Models</p>
   <h1 class="animate-in">Three models. One problem. Three different answers.</h1>
-  <p class="animate-in">Plan and book a three-city trip next month under two thousand dollars.</p>
-  <p class="animate-in">GPT-4 lists flights and hotels in five seconds. The math is wrong.</p>
-  <p class="animate-in">Claude 3.7 with thinking takes thirty seconds and gets the budget right. It does not book anything.</p>
-  <p class="animate-in">Claude Code takes four minutes. It checks fares, holds the seats, and emails me the itinerary.</p>
-  <p class="animate-in">All three are "AI models". They are not the same thing.</p>
+  <p class="animate-in">Have you noticed there are two very different kinds of question we ask AI now? Sometimes you want a quick answer. Sometimes you want it to actually do something for you. Those are not the same request, and they have not always been served by the same kind of model.</p>
+  <p class="animate-in">Large language models have evolved through three generations over the past five years, moving from systems that could answer your questions to systems that can finish your work. Each generation added a capability the one before it did not have. Understanding which generation you are talking to is the difference between knowing why a task succeeded and being surprised by why it did not.</p>
+  <p class="animate-in">Take a concrete request. Plan and book a three-city trip next month under two thousand dollars. A chat model will list flights in five seconds and the math will often be wrong. A reasoning model will take half a minute, get the budget right, and hand you a clean itinerary. An agentic model will take four minutes and actually book the flights for you.</p>
+  <p class="animate-in">All three are large language models. Underneath, they share the same architecture from week 1. The difference is not in the engine. It is in everything around the engine.</p>
   <p class="animate-in">How can the same architecture produce such different behavior?</p>
 </Scene>
 
 <Scene animation="generation-timeline" index={1}>
   <h2 class="animate-in">Three generations.</h2>
-  <p class="animate-in">Predictor. Thinker. Doer.</p>
-  <p class="animate-in">The predictor reads tokens and writes the next one. GPT-3, GPT-4, Claude 3.5. From 2020 to 2023.</p>
-  <p class="animate-in">The thinker writes a long internal chain of thought before answering. o1, Claude 3.7 with thinking, DeepSeek R1. From 2024 to 2025.</p>
-  <p class="animate-in">The doer plans, calls tools, sees results, and decides what to do next. Claude Code, Operator, GPT-5 in agent mode. From 2025 onward.</p>
-  <p class="animate-in">Each generation added a capability the previous one did not have.</p>
-  <p class="animate-in">Underneath, they share the same architecture from week 1. So what actually changed?</p>
+  <p class="animate-in">The three kinds of model you just saw answering the same prompt are not just different products. They represent three distinct generations in the evolution of the technology, and each one introduced a capability the previous generation did not have.</p>
+  <p class="animate-in">The first generation, the chat model, reads tokens and writes the next one. We informally call it the predictor. Most of what people meant by "AI" between 2020 and 2023 belongs here. It was the first generation that felt fluent enough to be useful.</p>
+  <p class="animate-in">The second generation, the reasoning model, writes a long internal chain of thought before it answers. Call it the thinker. The first widely used examples arrived in late 2024, and within a year they were beating chat models on nearly every hard reasoning benchmark.</p>
+  <p class="animate-in">The third generation, the agentic model, plans a task, calls tools, sees the results, and decides what to do next. Call it the doer. It started showing up in production through 2025 and is what most people now mean when they say "an AI agent".</p>
+  <p class="animate-in">Each generation did not replace the one before it. They coexist, and each one is the right choice for a different kind of work. You still want a chat model when you need an answer in a second. You want an agentic model when you need work to actually finish.</p>
+  <p class="animate-in">Underneath, all three share the same architecture from week 1. So what actually changed between them?</p>
 </Scene>
 
 <Scene animation="forward-pass" index={2}>
   <h2 class="animate-in">One forward pass.</h2>
   <p class="animate-in">
-    The atomic unit of the predictor is a <Term word="Forward pass" definition="One trip through the neural network. Tokens come in, one new token comes out. The model repeats this for every word it writes." analogy="Pulling a single card from a deck. The model pulls one. Then shuffles in the result. Then pulls again.">forward pass</Term>.
+    The atomic unit of the chat model is a <Term word="Forward pass" definition="One trip through the neural network. Tokens come in, one new token comes out. The model repeats this for every word it writes." analogy="Pulling a single card from a deck. The model pulls one. Then shuffles in the result. Then pulls again.">forward pass</Term>.
   </p>
-  <p class="animate-in">The model reads a sequence of tokens. It runs them through the network once. It produces one new token at the top. Then it adds that token to the sequence and runs the network again.</p>
-  <p class="animate-in">Predict. Append. Predict. Append.</p>
-  <p class="animate-in">Thirteen words go in. Ninety-four come out.</p>
-  <p class="animate-in">Smart, fast, often wrong on real reasoning. So what happens if you let it think longer?</p>
+  <p class="animate-in">A chat model reads a sequence of tokens, runs them through the network once, and produces one new token at the top. It then appends that token to the sequence and runs the network again. Predict, append, predict, append. The thirteen words you typed go in, and ninety-four words come out, one at a time.</p>
+  <p class="animate-in">This is what made the first generation feel magical. It is also what makes it brittle on hard problems. There is no time for the model to check its own work, no chance to back up and try a different approach. Whatever it produces in that first pass is the answer it commits to.</p>
+  <p class="animate-in">A chat model is fast and often wrong on real reasoning. So what happens if you let it think longer before answering?</p>
 </Scene>
 
 <Scene animation="internal-cot" index={3}>
   <h2 class="animate-in">One internal thought.</h2>
   <p class="animate-in">
-    The atomic unit of the thinker is a <Term word="Chain of thought" definition="A long internal note the model writes to itself before answering. The note never reaches the user. The final answer is informed by it." analogy="Scratch paper for a math problem. The teacher only sees the final answer. The student needed twenty lines to get there.">chain of thought</Term>.
+    The atomic unit of the reasoning model is the <Term word="Chain of thought" definition="A long internal note the model writes to itself before answering. The note never reaches the user. The final answer is informed by it." analogy="Scratch paper for a math problem. The teacher only sees the final answer. The student needed twenty lines to get there.">chain of thought</Term>.
   </p>
-  <p class="animate-in">Before it answers your question, the model writes itself a long internal note. Two hundred lines. Sometimes two thousand. The note never reaches your screen.</p>
-  <p class="animate-in">It tries an approach. Catches its own mistake. Tries another. By the time it writes the final answer, most of the thinking has happened.</p>
-  <p class="animate-in">You see one paragraph. The model wrote a chapter.</p>
-  <p class="animate-in">Thinking ends with words. What if the model could also act?</p>
+  <p class="animate-in">Before a reasoning model answers your question, it writes itself a long internal note. Two hundred lines is normal. Two thousand is not unusual on a hard problem. The note never reaches your screen, but it is what produces the answer.</p>
+  <p class="animate-in">The model tries an approach, catches its own mistake, abandons that path, and tries another. By the time it commits to a final answer, most of the thinking has already happened. You see one paragraph. The model wrote a chapter to get there.</p>
+  <p class="animate-in">This is why a reasoning model gets math right when a chat model does not. It is not a smarter network. It is the same network, given more chances to second-guess itself before it speaks.</p>
+  <p class="animate-in">A reasoning model still ends every interaction by writing words at you. What happens when a model can also act on the world?</p>
 </Scene>
 
 <Scene animation="tool-call" index={4}>
   <h2 class="animate-in">One tool call.</h2>
   <p class="animate-in">
-    The atomic unit of the doer is a <Term word="Tool call" definition="A structured instruction the model emits — function name, arguments — that an external runtime executes. The model sees the result and decides what to do next." analogy="A line cook calling 'order in!' to the kitchen. The kitchen does the work. The cook sees the plate come back and decides the next step.">tool call</Term>.
+    The atomic unit of the agentic model is the <Term word="Tool call" definition="A structured instruction the model emits with a function name and arguments that an external runtime executes. The model sees the result and decides what to do next." analogy="A line cook calling 'order in!' to the kitchen. The kitchen does the work. The cook sees the plate come back and decides the next step.">tool call</Term>.
   </p>
-  <p class="animate-in">The model writes a structured request. Call this function with these arguments. A runtime takes the request, executes it, and hands the result back.</p>
-  <p class="animate-in">Read this file. Run this query. Book this flight.</p>
-  <p class="animate-in">The model takes the result and decides what to do next. Then it calls another tool. Then another.</p>
-  <p class="animate-in">This is the loop. Three calls becomes a paragraph. Twenty calls becomes a finished task.</p>
-  <p class="animate-in">Three different atomic moves. Now look at how each one scales.</p>
+  <p class="animate-in">When an agentic model needs information it does not have, it writes a structured request, naming a function and listing its arguments, and a runtime executes the request and hands the result back. Read this file. Run this query. Book this flight. The model takes the result, reasons about it, and decides what to call next.</p>
+  <p class="animate-in">Three tool calls becomes a paragraph. Twenty becomes a finished task. The trip-planning request from the first scene is solved by an agentic model not because it thinks harder than a reasoning model, but because it can step out of the conversation, take a real-world action, and come back with the result.</p>
+  <p class="animate-in">Three different atomic moves at the bottom of three different generations. Now look at how each one scales.</p>
 </Scene>
 
 <Scene animation="neural-net-three-loops" index={5}>
-  <h2 class="animate-in">The same transformer, three different loops.</h2>
-  <p class="animate-in">Underneath, all three generations share the transformer architecture from week 1.</p>
-  <p class="animate-in">What changes is the loop wrapped around it.</p>
-  <p class="animate-in">The predictor runs the network once per token, appends, repeats.</p>
-  <p class="animate-in">The thinker runs the network thousands of times silently before showing you anything.</p>
-  <p class="animate-in">The doer runs the network, then calls out to the world, then runs the network again on what came back.</p>
-  <p class="animate-in">Same engine. Three different cars.</p>
-  <p class="animate-in">If the architecture is the same, what is making each generation more capable?</p>
+  <h2 class="animate-in">The same engine, three different cars.</h2>
+  <p class="animate-in">All three generations share the transformer architecture from week 1. Same attention, same feed-forward layers, same parameter counts in roughly the same order of magnitude. What changes is the loop wrapped around the network.</p>
+  <p class="animate-in">A chat model runs the network once per token, appends the result, and repeats. It is the simplest possible loop, and it is what got the field started.</p>
+  <p class="animate-in">A reasoning model runs the network thousands of times silently, generating an internal monologue, before showing you anything. The loop is the same shape, just much longer and hidden from view.</p>
+  <p class="animate-in">An agentic model runs the network, then steps out to call a tool, then runs the network again on what came back. The loop reaches outside the model into the world and pulls a result back in.</p>
+  <p class="animate-in">Same engine, three different cars built around it. The architecture does not predict which kind of behavior you get. The loop does.</p>
+  <p class="animate-in">If the architecture is the same, where does the new capability come from each time?</p>
 </Scene>
 
 <Scene animation="training-curve" index={6}>
   <h2 class="animate-in">First axis. Training compute.</h2>
+  <p class="animate-in">The first generation got more capable for one reason. The labs spent more money training the network.</p>
   <p class="animate-in">
-    The first scaling era was about making the engine bigger. More parameters. More data. More <Term word="Training compute" definition="The total compute spent teaching the model. Paid once, by the lab, before the model ever sees a user." analogy="The cost of building a factory. A one-time bill. Spread across every product the factory ever ships.">training compute</Term>.
+    More parameters, more data, more <Term word="Training compute" definition="The total compute spent teaching the model. Paid once, by the lab, before the model ever sees a user." analogy="The cost of building a factory. A one-time bill spread across every product the factory ever ships.">training compute</Term>. In 2018 the leading models had around a hundred million parameters. By 2020 they had crossed a hundred billion. By 2023 they had crossed a trillion. For five straight years, every order of magnitude of training compute bought a measurable jump in capability.
   </p>
-  <p class="animate-in">GPT-3 had a hundred and seventy-five billion parameters. GPT-4 had over a trillion.</p>
-  <p class="animate-in">Capability tracked the curve. For five years, every order of magnitude of training compute bought a measurable jump.</p>
-  <p class="animate-in">Then the curve started to bend.</p>
-  <p class="animate-in">More training compute kept making models smarter. Until it stopped. So the field looked for a new axis.</p>
-  <p class="animate-in scene-source">Parameter counts. OpenAI GPT-3 paper (2020), public reporting on GPT-4 (2023). The trillion-parameter figure is widely cited but never officially confirmed.</p>
+  <p class="animate-in">And then the curve started to bend. The next ten times of training compute did not produce the next ten times of capability. The lab profit-and-loss statements felt it before the public did, and something else had to give.</p>
+  <p class="animate-in">Training the network harder kept making models smarter, until it stopped. So the field looked for a new axis to scale on.</p>
+  <p class="animate-in scene-source">Parameter counts come from the original GPT and GPT-3 papers and from public reporting on later frontier models. The trillion-parameter figure is widely cited but never officially confirmed.</p>
 </Scene>
 
 <Scene animation="inference-curve" index={7}>
   <h2 class="animate-in">Second axis. Inference compute.</h2>
+  <p class="animate-in">The second generation found the new axis. Instead of making the model smarter at training time, the labs let it think longer at the moment it answers your question.</p>
   <p class="animate-in">
-    The second scaling era was about thinking longer per question. <Term word="Inference compute" definition="The compute spent every time the model answers a question. Paid by you, every query." analogy="The electricity bill of running the factory. Pay it every shift, for every product.">Inference compute</Term>.
+    The first widely used reasoning model spent thirty seconds reasoning silently before producing an answer. The improvement curve was log-linear, meaning every doubling of <Term word="Inference compute" definition="The compute spent every time the model answers a question. Paid by you, every query." analogy="The electricity bill of running the factory. Pay it every shift, for every product.">inference compute</Term> per query unlocked roughly the next tier of difficulty. Hard math problems became solvable. So did multi-step code edits and contract review.
   </p>
-  <p class="animate-in">o1 spent thirty seconds reasoning before answering. The accuracy curve was log-linear. Twice the thinking time, the next tier of problem solved.</p>
-  <p class="animate-in">Training compute is a one-time cost the lab pays. Inference compute is a cost you pay. Every query.</p>
-  <p class="animate-in">Hard problems became solvable at the price of patience.</p>
-  <p class="animate-in">But thinking still ends in words. What if the model could do more than answer?</p>
-  <p class="animate-in scene-source">o1 system card, OpenAI (Sep 2024). The log-linear scaling curve has been replicated in DeepSeek R1 and Anthropic's reasoning research.</p>
+  <p class="animate-in">Training compute is a one-time cost the lab pays before the model ever sees a customer. Inference compute is a cost you pay, every single query. The new generation moved a large piece of the bill onto the user, and it is part of why a single AI feature can be so much more expensive to run than the marketing suggested.</p>
+  <p class="animate-in">Reasoning models can solve harder problems, but every interaction still ends in words. What happens when a model can do more than answer?</p>
 </Scene>
 
 <Scene animation="horizon-curve" index={8}>
   <h2 class="animate-in">Third axis. Horizon.</h2>
+  <p class="animate-in">The third generation is scaling on a different axis again. Not bigger networks, not longer thinking per query. The new dimension is how long the model can stay coherent on a single task without losing the thread.</p>
   <p class="animate-in">
-    The third scaling era is about how long the model can stay coherent on a single task. <Term word="Horizon" definition="How long the model can stay coherent on a single task. Measured in seconds, minutes, or hours." analogy="A marathon runner's stamina. A sprinter wins a hundred meters. A marathoner runs for hours without losing form. The race is different.">Horizon</Term>.
+    Five seconds. Five minutes. Five hours. A chat model can write a poem in a minute. A reasoning model can solve a contest math problem in twenty minutes. An agentic model can fix a bug in a real codebase, run the tests, and ship a pull request over the course of an afternoon. Capability scaled by <Term word="Horizon" definition="How long the model can stay coherent on a single task. Measured in seconds, minutes, or hours." analogy="A marathon runner's stamina. A sprinter wins a hundred meters. A marathoner runs for hours without losing form. The race is different.">horizon</Term> looks like a different kind of progress entirely.
   </p>
-  <p class="animate-in">Five seconds. Five minutes. Five hours.</p>
-  <p class="animate-in">A predictor can write a poem in one minute. A thinker can solve a contest math problem in twenty minutes. A doer can fix a bug in your codebase, run tests, and ship a pull request in eight hours.</p>
-  <p class="animate-in">Horizon length is what separates "answering questions" from "doing work".</p>
-  <p class="animate-in">Three axes, three eras. Now the hard question. When to use which.</p>
-  <p class="animate-in scene-source">Horizon as a scaling axis is documented in METR's "Measuring AI Ability to Complete Long Tasks" (2025). SWE-Bench Verified scores rose from 12% (GPT-4) to 70% (Claude 3.7 Sonnet with agent harness) primarily through horizon, not raw model capability.</p>
+  <p class="animate-in">The benchmarks tell the same story. SWE-Bench, the standard test for autonomous software engineering, sat below fifteen percent with chat models. Reasoning models pushed it past thirty percent. Agentic models cleared seventy percent, almost entirely because they can iterate over long horizons without losing context. The model is not smarter than its predecessor. The work is just more complete.</p>
+  <p class="animate-in">Three axes, three eras. Each one shifts who pays. So what does it actually cost you?</p>
+  <p class="animate-in scene-source">SWE-Bench Verified scores tracked through 2024-2025 across published reasoning and agentic models. The horizon framing is from METR's research on long-task completion.</p>
 </Scene>
 
 <Scene animation="cost-bar" index={9}>
-  <h2 class="animate-in">Each axis costs differently.</h2>
-  <p class="animate-in">Training compute is the lab's bill. They pay it once and amortize across every customer.</p>
-  <p class="animate-in">Inference compute is your bill. Every thinking query costs more. Sometimes ten or twenty times more, than a predictor query.</p>
-  <p class="animate-in">Horizon is the steepest. An eight-hour agent run can cost ten dollars. A predictor query for the same prompt costs a cent.</p>
-  <p class="animate-in">Same prompt. Same answer quality. Hundred-fold cost difference.</p>
-  <p class="animate-in">Cost decides as much as capability. So pick deliberately.</p>
+  <h2 class="animate-in">Three generations, three different bills.</h2>
+  <p class="animate-in">Training compute is the lab's problem. They pay it once, amortize it across every customer, and you never see it on your bill.</p>
+  <p class="animate-in">Inference compute is your problem. A reasoning model query can cost twenty or fifty times what the same prompt would have cost a chat model, because the thinking is real compute consumed at the moment you ask the question.</p>
+  <p class="animate-in">Horizon is the steepest of the three. An eight-hour agent run can cost ten dollars or more. The same prompt sent to a chat model would have cost a cent. Same input, different generation, hundred-fold cost difference.</p>
+  <p class="animate-in">The trick is that each generation also unlocks tasks the previous one could not finish at all. So the comparison is not really "more expensive" in the way you might first read it. It is "expensive but possible" versus "cheap and impossible".</p>
+  <p class="animate-in">Cost decides as much as capability. So how do you actually pick?</p>
 </Scene>
 
 <Scene animation="decision-tree" index={10}>
   <h2 class="animate-in">Pick the right model.</h2>
-  <p class="animate-in">Latency-sensitive chat? Use the predictor. It answers in a second. Wrong sometimes, but cheap.</p>
-  <p class="animate-in">Hard reasoning, single answer needed? Use the thinker. It costs more, but it gets math, logic, and complex code right.</p>
-  <p class="animate-in">Multi-step task with side effects in the world? Use the doer. It is the only one that can call tools and finish work.</p>
-  <p class="animate-in">Pick wrong and you either pay too much or get a wrong answer fast.</p>
-  <p class="animate-in">Three generations. One task. Now watch them all run.</p>
+  <p class="animate-in">The fastest way to think about it is to ask what kind of work you are sending in.</p>
+  <p class="animate-in">If you need a quick conversational answer, like a summary or a draft email or a one-line question, send it to a chat model. It will answer in a second, sometimes wrong, almost always cheap.</p>
+  <p class="animate-in">If you need one good answer to a hard question, the kind that requires several steps of reasoning, send it to a reasoning model. It will cost more and take longer, but it will get math, logic, and complex code right where the chat model would have guessed.</p>
+  <p class="animate-in">If you need work to actually finish in the world, with side effects, file edits, API calls, or multi-step tasks, send it to an agentic model. It is the only generation that can call tools and own the result.</p>
+  <p class="animate-in">Pick wrong in either direction and you suffer. The chat model gives you a wrong answer fast. The agentic model gives you the right answer but burns ten dollars to do what should have cost a cent. The match between the task and the generation is half the battle.</p>
+  <p class="animate-in">Three generations. One concrete request. Now watch them all run.</p>
 </Scene>
 
 <Scene animation="three-models-extended" index={11}>
-  <h2 class="animate-in">One task, three answers.</h2>
-  <p class="animate-in">Plan and book a three-city trip next month under two thousand dollars.</p>
-  <p class="animate-in">The predictor returns in five seconds. Three flights. Two hotels. The total is two thousand four hundred. The math is wrong.</p>
-  <p class="animate-in">The thinker returns in thirty seconds. The math is right. The itinerary is reasonable. Nothing is booked.</p>
-  <p class="animate-in">The doer returns in four minutes. It checked fares. It held the seats. It sent confirmation emails.</p>
-  <p class="animate-in">Three generations. Three different bills. Three different outcomes.</p>
-  <p class="animate-in">But the doer cannot just run on its own. Someone has to give it the tools.</p>
+  <h2 class="animate-in">One task. Three answers. Three bills.</h2>
+  <p class="animate-in">Plan and book a three-city trip next month under two thousand dollars. The same prompt, sent to all three generations, gives you three different stories.</p>
+  <p class="animate-in">The chat model returns in five seconds. It lists three flights, two hotels, and a total of two thousand four hundred dollars. The math is wrong, the budget is blown, and nothing is booked. The query ran up about a cent.</p>
+  <p class="animate-in">The reasoning model returns in thirty seconds. It worked through the constraints carefully. The math is right, the budget fits, and the itinerary is plausible. But it has not booked a single thing. The bill came to about fifty cents.</p>
+  <p class="animate-in">The agentic model returns in four minutes. It checked real fares on real airline APIs, held seats, paid with a corporate card you authorized, and emailed you the confirmations. The trip is actually happening. The bill came to about four dollars.</p>
+  <p class="animate-in">Three different generations. Three different bills. Three different outcomes. None of them is the right answer in every situation. The right answer depends on what you actually needed in the first place.</p>
+  <p class="animate-in">An agentic model that can do this much work needs tools. Someone has to build them.</p>
 </Scene>
 
 <Scene animation="agent-tools-teaser" index={12}>
   <p class="week-tag animate-in">Coming up</p>
-  <h2 class="animate-in">Week 3: Building Agents and Skills</h2>
-  <p class="animate-in">The doer can call tools. But it does not invent them. You write them.</p>
-  <p class="animate-in">Skills, MCP, function calling, scopes, context windows for agents.</p>
-  <p class="animate-in">Next week. The harness underneath the doer.</p>
+  <h2 class="animate-in">Week 3. Building Agents and Skills.</h2>
+  <p class="animate-in">An agentic model can call tools, but it cannot invent them. You write them. You define what they take, what they return, and how the model is allowed to compose them.</p>
+  <p class="animate-in">Next week we look at how agents actually work in production. Skills, the model-context protocol, function calling, scoped permissions, and the harness that turns a powerful model into a system you can trust to act on your behalf.</p>
 </Scene>
