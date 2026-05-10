@@ -554,6 +554,9 @@
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+  flex: 1;
+  align-self: stretch;
+  justify-content: center;
 }
 
 .tw-counter-row {
@@ -571,25 +574,26 @@
 }
 
 .tw-counter {
-  font-size: 1.6rem;
+  font-size: 2rem;
   color: #6ee7b7;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
 }
 
 .tw-counter-of {
-  font-size: 0.85rem;
+  font-size: 1rem;
   color: #555;
 }
 
 .tw-text {
-  font-size: 0.95rem;
+  font-size: 1.1rem;
   color: #ddd;
-  line-height: 1.7;
-  padding: 1rem 1.1rem;
+  line-height: 1.75;
+  padding: 1.25rem 1.4rem;
   border: 1px solid #1a1a1a;
   background: #0f0f0f;
   border-radius: 8px;
+  min-height: 200px;
 }
 
 .tw-word {
@@ -1278,18 +1282,21 @@
   background: #0d0d0d;
   border: 1px solid #1e1e1e;
   border-radius: 10px;
-  padding: 12px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   width: 100%;
-  font-size: 0.78rem;
+  flex: 1;
+  align-self: stretch;
+  font-size: 0.92rem;
 }
 
 .ic-msg {
-  padding: 7px 10px;
+  padding: 10px 14px;
   border-radius: 7px;
-  line-height: 1.4;
+  line-height: 1.45;
+  font-size: 0.95rem;
   word-break: break-word;
 }
 
@@ -1303,17 +1310,17 @@
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid #1e1e1e;
   color: #ddd;
-  min-height: 22px;
+  min-height: 28px;
   font-family: ui-monospace, SFMono-Regular, monospace;
-  font-size: 0.72rem;
+  font-size: 0.88rem;
 }
 
 .ic-thinking {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 5px 10px;
-  font-size: 0.72rem;
+  gap: 8px;
+  padding: 8px 14px;
+  font-size: 0.85rem;
   color: #fbbf24;
   font-style: italic;
   border: 1px dashed rgba(251, 191, 36, 0.35);
@@ -1341,13 +1348,19 @@
   border-radius: 7px;
 }
 
+.ic-cot {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
 .ic-cot-head {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 5px 10px;
+  padding: 8px 14px;
   border-bottom: 1px dashed rgba(251, 191, 36, 0.2);
-  font-size: 0.66rem;
+  font-size: 0.78rem;
   color: #fbbf24;
   font-weight: 600;
   letter-spacing: 0.04em;
@@ -1356,7 +1369,7 @@
 
 .ic-cot-count {
   font-family: ui-monospace, SFMono-Regular, monospace;
-  font-size: 0.66rem;
+  font-size: 0.78rem;
   color: #888;
   letter-spacing: 0;
   text-transform: none;
@@ -1364,18 +1377,19 @@
 }
 
 .ic-cot-window {
-  height: 80px;
+  flex: 1;
+  min-height: 140px;
   overflow: hidden;
   position: relative;
-  padding: 6px 10px;
+  padding: 10px 14px;
 }
 
 .ic-cot-stream p {
-  margin: 0 0 6px;
+  margin: 0 0 8px;
   font-family: ui-monospace, SFMono-Regular, monospace;
-  font-size: 0.66rem;
+  font-size: 0.82rem;
   color: #b6b6b6;
-  line-height: 1.45;
+  line-height: 1.5;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1388,25 +1402,28 @@
 .tc-panel {
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: 12px;
   width: 100%;
+  flex: 1;
+  align-self: stretch;
   background: #0d0d0d;
   border: 1px solid #1e1e1e;
   border-radius: 10px;
-  padding: 12px;
+  padding: 18px;
+  justify-content: space-around;     /* spread the 5 rows down the column */
 }
 
 .tc-row {
   display: grid;
-  grid-template-columns: 100px 1fr;
-  gap: 10px;
+  grid-template-columns: 130px 1fr;
+  gap: 14px;
   align-items: center;
 }
 
 .tc-actor {
-  font-size: 0.6rem;
+  font-size: 0.74rem;
   text-transform: uppercase;
-  letter-spacing: 0.07em;
+  letter-spacing: 0.08em;
   font-weight: 700;
   text-align: right;
   font-family: ui-monospace, SFMono-Regular, monospace;
@@ -1418,19 +1435,19 @@
 .tc-actor-result   { color: #fbbf24; }
 
 .tc-content {
-  padding: 6px 9px;
-  border-radius: 5px;
+  padding: 10px 14px;
+  border-radius: 6px;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid #1e1e1e;
-  font-size: 0.7rem;
+  font-size: 0.88rem;
   color: #ccc;
-  line-height: 1.4;
+  line-height: 1.45;
   margin: 0;
 }
 
 .tc-json {
   font-family: ui-monospace, SFMono-Regular, monospace;
-  font-size: 0.62rem;
+  font-size: 0.78rem;
   color: #b6e3f6;
   background: rgba(125, 211, 252, 0.04);
   border-color: rgba(125, 211, 252, 0.2);

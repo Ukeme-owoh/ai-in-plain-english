@@ -3026,51 +3026,51 @@ const animations = {
     );
     if (!visual) return;
 
-    const W = 460, H = 240, PB = 50, PT = 30;
+    // Portrait — taller bars dramatize the cost spread.
+    const W = 380, H = 600, PB = 100, PT = 80;
     const baseY = H - PB;
 
     const bars = [
-      { gen: 'Chat',      cost: 0.01, h: 22,  col: '#38bdf8' },
-      { gen: 'Reasoning', cost: 0.50, h: 80,  col: '#fbbf24' },
-      { gen: 'Agentic',   cost: 4.00, h: 150, col: '#6ee7b7' },
+      { gen: 'Chat',      cost: 0.01, h: 30,   col: '#38bdf8' },
+      { gen: 'Reasoning', cost: 0.50, h: 160,  col: '#fbbf24' },
+      { gen: 'Agentic',   cost: 4.00, h: 360,  col: '#6ee7b7' },
     ];
 
-    const slotW = (W - 80) / bars.length;
-    const barW = 60;
+    const slotW = (W - 60) / bars.length;
+    const barW = 72;
 
     const barsHTML = bars.map((b, i) => {
-      const cx = 40 + i * slotW + slotW / 2;
-      const fmt = b.cost < 0.10 ? `$${b.cost.toFixed(2)}` : `$${b.cost.toFixed(2)}`;
+      const cx = 30 + i * slotW + slotW / 2;
       return `
         <rect class="cb-bar" id="cb-bar-${i}"
               x="${(cx - barW / 2).toFixed(1)}" y="${baseY}"
               width="${barW}" height="0"
-              fill="${b.col}" rx="3"
+              fill="${b.col}" rx="4"
               data-h="${b.h}"/>
-        <text id="cb-cost-${i}" x="${cx.toFixed(1)}" y="${(baseY - b.h - 8).toFixed(1)}"
-              text-anchor="middle" font-size="13" font-weight="800"
-              fill="${b.col}" opacity="0">${fmt}</text>
-        <text x="${cx.toFixed(1)}" y="${(baseY + 16).toFixed(1)}"
-              text-anchor="middle" font-size="10" font-weight="600"
+        <text id="cb-cost-${i}" x="${cx.toFixed(1)}" y="${(baseY - b.h - 12).toFixed(1)}"
+              text-anchor="middle" font-size="20" font-weight="800"
+              fill="${b.col}" opacity="0">$${b.cost.toFixed(2)}</text>
+        <text x="${cx.toFixed(1)}" y="${(baseY + 24).toFixed(1)}"
+              text-anchor="middle" font-size="14" font-weight="700"
               fill="${b.col}">${b.gen}</text>
-        <text x="${cx.toFixed(1)}" y="${(baseY + 30).toFixed(1)}"
-              text-anchor="middle" font-size="8" fill="#888">per task</text>`;
+        <text x="${cx.toFixed(1)}" y="${(baseY + 40).toFixed(1)}"
+              text-anchor="middle" font-size="10" fill="#888">per task</text>`;
     }).join('');
 
     visual.innerHTML = `
-      <svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:${W}px">
-        <text x="${(W / 2).toFixed(1)}" y="20" text-anchor="middle"
-              font-size="10" font-weight="600" fill="#ccc">Cost per task across the three generations</text>
+      <svg viewBox="0 0 ${W} ${H}" style="width:100%">
+        <text x="${(W / 2).toFixed(1)}" y="32" text-anchor="middle"
+              font-size="14" font-weight="600" fill="#ddd">Cost per task across the three generations</text>
 
-        <line x1="40" y1="${baseY}" x2="${W - 40}" y2="${baseY}" stroke="#444" stroke-width="1"/>
+        <line x1="30" y1="${baseY}" x2="${W - 30}" y2="${baseY}" stroke="#444" stroke-width="1.2"/>
 
         ${barsHTML}
 
         <!-- 400× gap callout -->
-        <text id="cb-gap" x="${(W / 2).toFixed(1)}" y="${PT + 8}" text-anchor="middle"
-              font-size="11" font-weight="700" fill="#fda4af" opacity="0">400× gap</text>
-        <text id="cb-gap-sub" x="${(W / 2).toFixed(1)}" y="${PT + 21}" text-anchor="middle"
-              font-size="8" fill="#888" opacity="0">predictor → doer, same prompt</text>
+        <text id="cb-gap" x="${(W / 2).toFixed(1)}" y="${PT - 18}" text-anchor="middle"
+              font-size="16" font-weight="700" fill="#fda4af" opacity="0">400× gap</text>
+        <text id="cb-gap-sub" x="${(W / 2).toFixed(1)}" y="${PT}" text-anchor="middle"
+              font-size="11" fill="#888" opacity="0">chat → agentic, same prompt</text>
       </svg>`;
 
     const tl = gsap.timeline({ repeat: -1, repeatDelay: 2 });
@@ -3078,14 +3078,12 @@ const animations = {
     bars.forEach((b, i) => {
       const at = i * 0.4;
       tl.to(`#cb-bar-${i}`,
-        { attr: { y: baseY - b.h, height: b.h }, duration: 0.55, ease: 'power2.out' }, at);
-      tl.to(`#cb-cost-${i}`, { opacity: 1, duration: 0.3 }, at + 0.4);
+        { attr: { y: baseY - b.h, height: b.h }, duration: 0.65, ease: 'power2.out' }, at);
+      tl.to(`#cb-cost-${i}`, { opacity: 1, duration: 0.3 }, at + 0.5);
     });
 
-    // Gap callout fades in last
     tl.to(['#cb-gap', '#cb-gap-sub'], { opacity: 1, duration: 0.4, stagger: 0.1 }, '+=0.3');
 
-    // Finite settle pulse on bars
     tl.to('.cb-bar', {
       scaleY: 1.04, yoyo: true, repeat: 1,
       transformOrigin: 'center bottom',
@@ -3100,53 +3098,51 @@ const animations = {
     );
     if (!visual) return;
 
-    const W = 460, H = 280;
-    const TX = W / 2, TY = 20;       // trunk top
-    const JX = W / 2, JY = 80;       // trunk junction
-    const LEAF_Y = 180;              // y where leaves sit
+    // Portrait — taller trunk, more space for leaf cards
+    const W = 380, H = 600;
+    const TY = 30;
+    const JX = W / 2, JY = 130;       // trunk junction
+    const LEAF_Y = 360;               // y where leaf labels start
 
     const branches = [
-      { x: 80,           qLine1: 'latency-sensitive?',    qLine2: 'just chat',          gen: 'Chat',      col: '#38bdf8' },
+      { x: 70,           qLine1: 'latency-sensitive?',    qLine2: 'just chat',          gen: 'Chat',      col: '#38bdf8' },
       { x: W / 2,        qLine1: 'hard reasoning?',       qLine2: 'one good answer',    gen: 'Reasoning', col: '#fbbf24' },
-      { x: W - 80,       qLine1: 'multi-step + tools?',   qLine2: 'finish work',        gen: 'Agentic',   col: '#6ee7b7' },
+      { x: W - 70,       qLine1: 'multi-step + tools?',   qLine2: 'finish work',        gen: 'Agentic',   col: '#6ee7b7' },
     ];
 
     const branchesHTML = branches.map((b, i) => {
       const dashLen = Math.hypot(b.x - JX, LEAF_Y - JY) + 10;
       return `
         <line id="dt-branch-${i}" x1="${JX}" y1="${JY}" x2="${b.x}" y2="${LEAF_Y}"
-              stroke="${b.col}" stroke-width="1.6" stroke-linecap="round"
+              stroke="${b.col}" stroke-width="2" stroke-linecap="round"
               stroke-dasharray="${dashLen}" stroke-dashoffset="${dashLen}"/>
 
         <g id="dt-leaf-${i}" opacity="0">
-          <text x="${b.x}" y="${LEAF_Y + 14}" text-anchor="middle"
-                font-size="9" fill="#aaa">${b.qLine1}</text>
-          <text x="${b.x}" y="${LEAF_Y + 26}" text-anchor="middle"
-                font-size="8.5" fill="#666">${b.qLine2}</text>
-          <rect x="${b.x - 38}" y="${LEAF_Y + 38}" width="76" height="22"
-                rx="11" fill="${b.col}" fill-opacity="0.18"
-                stroke="${b.col}" stroke-width="1"/>
-          <text x="${b.x}" y="${LEAF_Y + 53}" text-anchor="middle"
-                font-size="10" font-weight="700" fill="${b.col}">${b.gen}</text>
+          <text x="${b.x}" y="${LEAF_Y + 22}" text-anchor="middle"
+                font-size="13" fill="#bbb">${b.qLine1}</text>
+          <text x="${b.x}" y="${LEAF_Y + 40}" text-anchor="middle"
+                font-size="11" fill="#777">${b.qLine2}</text>
+          <rect x="${b.x - 50}" y="${LEAF_Y + 56}" width="100" height="32"
+                rx="16" fill="${b.col}" fill-opacity="0.18"
+                stroke="${b.col}" stroke-width="1.4"/>
+          <text x="${b.x}" y="${LEAF_Y + 78}" text-anchor="middle"
+                font-size="14" font-weight="700" fill="${b.col}">${b.gen}</text>
         </g>`;
     }).join('');
 
     visual.innerHTML = `
-      <svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:${W}px">
-        <!-- Title at top -->
-        <text id="dt-title" x="${(W / 2).toFixed(1)}" y="${TY}"
-              text-anchor="middle" font-size="11" font-weight="700"
+      <svg viewBox="0 0 ${W} ${H}" style="width:100%">
+        <text id="dt-title" x="${(W / 2).toFixed(1)}" y="${TY + 10}"
+              text-anchor="middle" font-size="16" font-weight="700"
               fill="#ddd" opacity="0">Pick the right model</text>
 
-        <!-- Trunk line -->
-        <line id="dt-trunk" x1="${JX}" y1="${TY + 10}" x2="${JX}" y2="${TY + 10}"
-              stroke="#666" stroke-width="2" stroke-linecap="round"/>
+        <line id="dt-trunk" x1="${JX}" y1="${TY + 30}" x2="${JX}" y2="${TY + 30}"
+              stroke="#666" stroke-width="2.5" stroke-linecap="round"/>
 
         ${branchesHTML}
 
-        <!-- Caption at the bottom -->
-        <text id="dt-cap" x="${(W / 2).toFixed(1)}" y="${H - 10}" text-anchor="middle"
-              font-size="9" fill="#666" opacity="0">
+        <text id="dt-cap" x="${(W / 2).toFixed(1)}" y="${H - 20}" text-anchor="middle"
+              font-size="11" fill="#777" opacity="0">
           Pick wrong and you either pay too much or get a wrong answer fast.
         </text>
       </svg>`;
@@ -3236,91 +3232,88 @@ const animations = {
     );
     if (!visual) return;
 
-    const W = 460, H = 280;
-    // Network block at the center, slightly left so doer loop has room
-    const NX = 150, NY = 60, NW = 110, NH = 160;
+    // Portrait — bigger block in the middle, more room for the loops on top, sides, and bottom.
+    const W = 380, H = 600;
+    const NX = 110, NY = 200, NW = 160, NH = 200;
     const NCX = NX + NW / 2, NCY = NY + NH / 2;
 
     // Six internal layers (small circles down the block)
     const layerCount = 6;
     const layers = Array.from({ length: layerCount }, (_, i) => {
-      const ly = NY + 22 + (i / (layerCount - 1)) * (NH - 44);
+      const ly = NY + 28 + (i / (layerCount - 1)) * (NH - 56);
       return { y: ly };
     });
 
     const layerCircles = layers.map((l, i) => `
       <circle class="nn3-layer" id="nn3-layer-${i}"
-              cx="${NCX}" cy="${l.y}" r="5"
+              cx="${NCX}" cy="${l.y}" r="7"
               fill="#7dd3fc" opacity="0.18"/>
     `).join('');
 
+    // Doer side of the diagram — tools box BELOW the block (since the SVG is portrait)
+    const TOOLS_X = NCX - 60, TOOLS_Y = NY + NH + 60, TOOLS_W = 120, TOOLS_H = 50;
+    const doerArrowLen = TOOLS_Y - (NY + NH);
+
     visual.innerHTML = `
-      <svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:${W}px">
+      <svg viewBox="0 0 ${W} ${H}" style="width:100%">
 
         <!-- Network block -->
         <rect id="nn3-block" x="${NX}" y="${NY}" width="${NW}" height="${NH}"
-              rx="10" ry="10"
-              fill="#0d0d0d" stroke="#2a2a2a" stroke-width="1" opacity="0"/>
+              rx="14" ry="14"
+              fill="#0d0d0d" stroke="#2a2a2a" stroke-width="1.4" opacity="0"/>
         ${layerCircles}
-        <text id="nn3-block-lbl" x="${NCX}" y="${NY - 8}" text-anchor="middle"
-              font-size="9" fill="#888" opacity="0">transformer</text>
+        <text id="nn3-block-lbl" x="${NCX}" y="${NY - 14}" text-anchor="middle"
+              font-size="13" fill="#bbb" opacity="0">transformer</text>
 
-        <!-- Predictor loop (left side, sky blue) -->
-        <!-- Arc: from top-left of block, looping out left, back to bottom-left -->
+        <!-- Predictor loop (left side) -->
         <path id="nn3-pred-path"
-              d="M ${NX} ${NY + 24} C ${NX - 60} ${NY + 30}, ${NX - 60} ${NY + NH - 30}, ${NX} ${NY + NH - 24}"
-              fill="none" stroke="#38bdf8" stroke-width="2"
-              stroke-dasharray="320" stroke-dashoffset="320" opacity="0.85"/>
-        <!-- arrowhead -->
-        <polygon id="nn3-pred-tip" points="0,-4 8,0 0,4"
-                 fill="#38bdf8" opacity="0"
-                 transform="translate(${NX} ${NY + 24}) rotate(-10)"/>
-        <text id="nn3-pred-lbl" x="${NX - 70}" y="${NCY - 6}" text-anchor="middle"
-              font-size="10" font-weight="700" fill="#38bdf8" opacity="0">Predictor</text>
-        <text id="nn3-pred-sub" x="${NX - 70}" y="${NCY + 6}" text-anchor="middle"
-              font-size="7.5" fill="#888" opacity="0">append + repeat</text>
+              d="M ${NX} ${NY + 30} C ${NX - 80} ${NY + 40}, ${NX - 80} ${NY + NH - 40}, ${NX} ${NY + NH - 30}"
+              fill="none" stroke="#38bdf8" stroke-width="2.5"
+              stroke-dasharray="500" stroke-dashoffset="500" opacity="0.85"/>
+        <text id="nn3-pred-lbl" x="${NX - 80}" y="${NCY - 4}" text-anchor="middle"
+              font-size="14" font-weight="700" fill="#38bdf8" opacity="0">Predictor</text>
+        <text id="nn3-pred-sub" x="${NX - 80}" y="${NCY + 14}" text-anchor="middle"
+              font-size="11" fill="#888" opacity="0">append + repeat</text>
 
-        <!-- Thinker loop (top, tight arc, amber) -->
-        <!-- Tight arc above the block looping back into itself (silent inner loop) -->
+        <!-- Thinker loop (right side, tight arc — silent inner loop) -->
         <path id="nn3-think-path"
-              d="M ${NX + 28} ${NY + 12} C ${NX + 28} ${NY - 28}, ${NX + NW - 28} ${NY - 28}, ${NX + NW - 28} ${NY + 12}"
-              fill="none" stroke="#fbbf24" stroke-width="2"
-              stroke-dasharray="180" stroke-dashoffset="180"/>
-        <text id="nn3-think-lbl" x="${NCX}" y="${NY - 32}" text-anchor="middle"
-              font-size="10" font-weight="700" fill="#fbbf24" opacity="0">Thinker</text>
-        <text id="nn3-think-sub" x="${NCX}" y="${NY - 22}" text-anchor="middle"
-              font-size="7.5" fill="#888" opacity="0">silent inner pass</text>
+              d="M ${NX + NW} ${NY + 30} C ${NX + NW + 80} ${NY + 40}, ${NX + NW + 80} ${NY + NH - 40}, ${NX + NW} ${NY + NH - 30}"
+              fill="none" stroke="#fbbf24" stroke-width="2.5"
+              stroke-dasharray="500" stroke-dashoffset="500"/>
+        <text id="nn3-think-lbl" x="${NX + NW + 80}" y="${NCY - 4}" text-anchor="middle"
+              font-size="14" font-weight="700" fill="#fbbf24" opacity="0">Thinker</text>
+        <text id="nn3-think-sub" x="${NX + NW + 80}" y="${NCY + 14}" text-anchor="middle"
+              font-size="11" fill="#888" opacity="0">silent inner pass</text>
 
-        <!-- Doer loop (right side out to tools box, green) -->
-        <!-- Tool box at right -->
-        <rect id="nn3-tools" x="${W - 90}" y="${NCY - 22}" width="70" height="44"
-              rx="6" fill="#0d0d0d" stroke="#16a34a" stroke-width="1" opacity="0"/>
-        <text id="nn3-tools-lbl" x="${W - 55}" y="${NCY - 5}" text-anchor="middle"
-              font-size="9" font-weight="600" fill="#6ee7b7" opacity="0">tools</text>
-        <text id="nn3-tools-sub" x="${W - 55}" y="${NCY + 8}" text-anchor="middle"
-              font-size="7" fill="#888" opacity="0">world / runtime</text>
+        <!-- Doer loop (out the bottom to a tools box, then back up) -->
+        <rect id="nn3-tools" x="${TOOLS_X}" y="${TOOLS_Y}" width="${TOOLS_W}" height="${TOOLS_H}"
+              rx="8" fill="#0d0d0d" stroke="#16a34a" stroke-width="1.4" opacity="0"/>
+        <text id="nn3-tools-lbl" x="${(TOOLS_X + TOOLS_W / 2).toFixed(1)}" y="${(TOOLS_Y + 22).toFixed(1)}" text-anchor="middle"
+              font-size="13" font-weight="600" fill="#6ee7b7" opacity="0">tools</text>
+        <text id="nn3-tools-sub" x="${(TOOLS_X + TOOLS_W / 2).toFixed(1)}" y="${(TOOLS_Y + 38).toFixed(1)}" text-anchor="middle"
+              font-size="10" fill="#888" opacity="0">world / runtime</text>
 
-        <!-- Out arrow: right of block to left of tool box -->
+        <!-- Out arrow: down from block-bottom-left to tools box top-left -->
         <path id="nn3-doer-out"
-              d="M ${NX + NW} ${NCY - 6} L ${W - 90} ${NCY - 6}"
-              fill="none" stroke="#6ee7b7" stroke-width="2"
-              stroke-dasharray="${W - 90 - (NX + NW)}"
-              stroke-dashoffset="${W - 90 - (NX + NW)}"/>
-        <!-- In arrow: left of tool box to right of block -->
+              d="M ${(NCX - 14).toFixed(1)} ${NY + NH} L ${(NCX - 14).toFixed(1)} ${TOOLS_Y}"
+              fill="none" stroke="#6ee7b7" stroke-width="2.4"
+              stroke-dasharray="${doerArrowLen}"
+              stroke-dashoffset="${doerArrowLen}"/>
+        <!-- In arrow: up from tools box top-right to block-bottom-right -->
         <path id="nn3-doer-in"
-              d="M ${W - 90} ${NCY + 6} L ${NX + NW} ${NCY + 6}"
-              fill="none" stroke="#6ee7b7" stroke-width="2"
-              stroke-dasharray="${W - 90 - (NX + NW)}"
-              stroke-dashoffset="${W - 90 - (NX + NW)}"/>
+              d="M ${(NCX + 14).toFixed(1)} ${TOOLS_Y} L ${(NCX + 14).toFixed(1)} ${NY + NH}"
+              fill="none" stroke="#6ee7b7" stroke-width="2.4"
+              stroke-dasharray="${doerArrowLen}"
+              stroke-dashoffset="${doerArrowLen}"/>
 
-        <text id="nn3-doer-lbl" x="${(NX + NW + W - 90) / 2}" y="${NCY - 18}" text-anchor="middle"
-              font-size="10" font-weight="700" fill="#6ee7b7" opacity="0">Doer</text>
-        <text id="nn3-doer-sub" x="${(NX + NW + W - 90) / 2}" y="${NCY + 24}" text-anchor="middle"
-              font-size="7.5" fill="#888" opacity="0">tool call · result</text>
+        <text id="nn3-doer-lbl" x="${NCX}" y="${(TOOLS_Y - 14).toFixed(1)}" text-anchor="middle"
+              font-size="14" font-weight="700" fill="#6ee7b7" opacity="0">Doer</text>
+        <text id="nn3-doer-sub" x="${(TOOLS_X + TOOLS_W + 30).toFixed(1)}" y="${(TOOLS_Y - 4).toFixed(1)}" text-anchor="start"
+              font-size="11" fill="#888" opacity="0">tool call · result</text>
 
         <!-- Closing caption -->
-        <text id="nn3-caption" x="${W / 2}" y="${H - 14}" text-anchor="middle"
-              font-size="9" fill="#666" opacity="0">
+        <text id="nn3-caption" x="${W / 2}" y="${H - 22}" text-anchor="middle"
+              font-size="12" fill="#777" opacity="0">
           Same engine. Three different cars.
         </text>
       </svg>`;
@@ -3446,10 +3439,10 @@ const animations = {
 
     // Thinking fades, CoT block expands
     tl.to(thinking, { autoAlpha: 0, duration: 0.25 }, 2.4);
-    tl.to(cot, { autoAlpha: 1, height: 130, duration: 0.5, ease: 'power2.out' }, 2.5);
+    tl.to(cot, { autoAlpha: 1, height: 320, duration: 0.5, ease: 'power2.out' }, 2.5);
 
     // Stream scrolls upward through the window (one full pass over duplicated content)
-    const streamScrollHeight = -250;
+    const streamScrollHeight = -380;
     tl.to(cotStream, { y: streamScrollHeight, duration: 3.2, ease: 'none' }, 2.9);
 
     // Line counter ticks up alongside the scroll
@@ -3653,8 +3646,9 @@ function makeScalingCurve(config) {
     );
     if (!visual) return;
 
-    const W = 480, H = 240;
-    const L = 50, R = 440, T = 38, B = 196;
+    // Portrait viewBox so the curve fills the viewport-tall visual column.
+    const W = 380, H = 540;
+    const L = 70, R = 350, T = 70, B = 460;
     const IW = R - L, IH = B - T;
 
     // Map normalized 0..1 → pixel coords
@@ -3677,30 +3671,30 @@ function makeScalingCurve(config) {
     ].map(m => `
       <line x1="${L}" y1="${py(m.v).toFixed(1)}" x2="${R}" y2="${py(m.v).toFixed(1)}"
             stroke="#1a1a1a" stroke-width="0.6" stroke-dasharray="${m.v === 0 ? '' : '3,4'}"/>
-      ${m.label ? `<text x="${L - 6}" y="${(py(m.v) + 3).toFixed(1)}" text-anchor="end"
-                    font-size="8" fill="#555">${m.label}</text>` : ''}
+      ${m.label ? `<text x="${L - 8}" y="${(py(m.v) + 4).toFixed(1)}" text-anchor="end"
+                    font-size="11" fill="#666">${m.label}</text>` : ''}
     `).join('');
 
     // X-axis ticks (log scale feel — three positions: low/mid/high)
     const xMarks = [0, 0.5, 1].map((v, i) => `
-      <line x1="${px(v).toFixed(1)}" y1="${B}" x2="${px(v).toFixed(1)}" y2="${B + 4}"
+      <line x1="${px(v).toFixed(1)}" y1="${B}" x2="${px(v).toFixed(1)}" y2="${B + 5}"
             stroke="#3a3a3a" stroke-width="1"/>
-      <text x="${px(v).toFixed(1)}" y="${B + 14}" text-anchor="${i === 0 ? 'start' : i === 2 ? 'end' : 'middle'}"
-            font-size="8" fill="#555">${i === 0 ? 'less' : i === 2 ? 'more' : ''}</text>
+      <text x="${px(v).toFixed(1)}" y="${B + 18}" text-anchor="${i === 0 ? 'start' : i === 2 ? 'end' : 'middle'}"
+            font-size="11" fill="#666">${i === 0 ? 'less' : i === 2 ? 'more' : ''}</text>
     `).join('');
 
     // Labeled points
     const dots = config.points.map((p, i) => `
       <circle class="sc-dot" id="sc-dot-${i}" cx="${px(p.x).toFixed(1)}" cy="${py(p.y).toFixed(1)}"
-              r="4" fill="${config.color}" opacity="0"/>
+              r="6" fill="${config.color}" opacity="0"/>
       <text class="sc-dot-lbl" id="sc-dot-lbl-${i}"
-            x="${px(p.x).toFixed(1)}" y="${(py(p.y) - 9).toFixed(1)}"
+            x="${px(p.x).toFixed(1)}" y="${(py(p.y) - 14).toFixed(1)}"
             text-anchor="${p.x > 0.85 ? 'end' : p.x < 0.15 ? 'start' : 'middle'}"
-            font-size="9" font-weight="700" fill="${config.color}" opacity="0">${p.name}</text>
+            font-size="13" font-weight="700" fill="${config.color}" opacity="0">${p.name}</text>
       ${p.sub ? `<text class="sc-dot-sub" id="sc-dot-sub-${i}"
-            x="${px(p.x).toFixed(1)}" y="${(py(p.y) + 13).toFixed(1)}"
+            x="${px(p.x).toFixed(1)}" y="${(py(p.y) + 20).toFixed(1)}"
             text-anchor="${p.x > 0.85 ? 'end' : p.x < 0.15 ? 'start' : 'middle'}"
-            font-size="7.5" fill="#888" opacity="0">${p.sub}</text>` : ''}
+            font-size="10" fill="#888" opacity="0">${p.sub}</text>` : ''}
     `).join('');
 
     // Annotation at the right edge
@@ -3711,42 +3705,42 @@ function makeScalingCurve(config) {
 
     // Optional thinking-time slider for inference-curve
     const slider = config.withSlider
-      ? `<line id="sc-slider" x1="${px(0).toFixed(1)}" y1="${B + 22}"
-               x2="${px(0).toFixed(1)}" y2="${B + 28}"
-               stroke="${config.color}" stroke-width="2.5" stroke-linecap="round" opacity="0"/>
-         <text id="sc-slider-lbl" x="${px(0).toFixed(1)}" y="${B + 36}"
-               text-anchor="middle" font-size="7.5" fill="${config.color}" opacity="0">thinking budget</text>`
+      ? `<line id="sc-slider" x1="${px(0).toFixed(1)}" y1="${B + 28}"
+               x2="${px(0).toFixed(1)}" y2="${B + 38}"
+               stroke="${config.color}" stroke-width="3" stroke-linecap="round" opacity="0"/>
+         <text id="sc-slider-lbl" x="${px(0).toFixed(1)}" y="${B + 50}"
+               text-anchor="middle" font-size="10" fill="${config.color}" opacity="0">thinking budget</text>`
       : '';
 
     visual.innerHTML = `
-      <svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:${W}px">
-        <text x="${(L + R) / 2}" y="20" text-anchor="middle"
-              font-size="10" font-weight="600" fill="#ccc">${config.title}</text>
+      <svg viewBox="0 0 ${W} ${H}" style="width:100%">
+        <text x="${(L + R) / 2}" y="32" text-anchor="middle"
+              font-size="14" font-weight="600" fill="#ddd">${config.title}</text>
 
         ${yMarks}
 
-        <line x1="${L}" y1="${T}" x2="${L}" y2="${B}" stroke="#444" stroke-width="1"/>
-        <line x1="${L}" y1="${B}" x2="${R}" y2="${B}" stroke="#444" stroke-width="1"/>
+        <line x1="${L}" y1="${T}" x2="${L}" y2="${B}" stroke="#444" stroke-width="1.2"/>
+        <line x1="${L}" y1="${B}" x2="${R}" y2="${B}" stroke="#444" stroke-width="1.2"/>
 
         ${xMarks}
 
-        <text x="${(L + R) / 2}" y="${H - 10}" text-anchor="middle"
-              font-size="8.5" fill="#666">${config.xLabel}</text>
+        <text x="${(L + R) / 2}" y="${H - 14}" text-anchor="middle"
+              font-size="12" fill="#888">${config.xLabel}</text>
 
-        <text transform="rotate(-90,14,${((T + B) / 2).toFixed(1)})"
-              x="14" y="${((T + B) / 2 + 4).toFixed(1)}" text-anchor="middle"
-              font-size="8.5" fill="#666">${config.yLabel}</text>
+        <text transform="rotate(-90,22,${((T + B) / 2).toFixed(1)})"
+              x="22" y="${((T + B) / 2 + 4).toFixed(1)}" text-anchor="middle"
+              font-size="12" fill="#888">${config.yLabel}</text>
 
         <path id="sc-path" d="${pathD}"
-              fill="none" stroke="${config.color}" stroke-width="2.5"
+              fill="none" stroke="${config.color}" stroke-width="3"
               stroke-linejoin="round" stroke-linecap="round"
               stroke-dasharray="${dashLen}" stroke-dashoffset="${dashLen}"/>
 
         ${dots}
 
-        <text id="sc-ann" x="${(annAtX + annOffsetX).toFixed(1)}" y="${(annAtY - 18).toFixed(1)}"
+        <text id="sc-ann" x="${(annAtX + annOffsetX).toFixed(1)}" y="${(annAtY - 26).toFixed(1)}"
               text-anchor="${annAnchor}"
-              font-size="9" font-weight="600" fill="${config.color}" opacity="0">${config.annotation}</text>
+              font-size="13" font-weight="600" fill="${config.color}" opacity="0">${config.annotation}</text>
 
         ${slider}
       </svg>`;
