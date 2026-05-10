@@ -1665,19 +1665,17 @@ const animations = {
 
     if (!visual) return;
 
-    const W = 520, H = 300, PL = 60, PB = 56, PT = 28, PR = 40;
+    // Portrait viewBox so the bars + 175× gap callout fill the column.
+    const W = 380, H = 600, PL = 70, PB = 70, PT = 50, PR = 50;
     const IW = W - PL - PR, IH = H - PT - PB;
 
-    // Bar positions
-    const barW = 70;
-    const gap   = IW * 0.55;
-    const xPaid = PL + IW * 0.18;
-    const xComp = PL + IW * 0.62;
+    // Bar positions — two bars centered horizontally with gap box between
+    const barW = 80;
+    const xPaid = PL + IW * 0.20;
+    const xComp = PL + IW * 0.80;
 
-    // Heights: $200 vs $35,000. Log-scale so $200 is visibly there.
-    // Linear scale: $200/$35000 = 0.57% — invisible. Use a narrative scale instead.
-    // Paid bar = 14px, Compute bar = full IH. Keeps the visual impact dramatic.
-    const hPaid = 22;
+    // Heights: $200 vs $35,000. Use narrative scale (paid stays small).
+    const hPaid = 36;
     const hComp = IH;
 
     const yBase = PT + IH;
@@ -1690,45 +1688,38 @@ const animations = {
     visual.innerHTML = `
       <div class="chart-frame">
         <div class="chart-header">A single power user, one month</div>
-        <svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:${W}px">
+        <svg viewBox="0 0 ${W} ${H}" style="width:100%">
 
-          <!-- baseline -->
-          <line x1="${PL - 8}" y1="${yBase}" x2="${PL + IW + 8}" y2="${yBase}" stroke="#3a3a3a" stroke-width="1"/>
+          <line x1="${PL - 10}" y1="${yBase}" x2="${PL + IW + 10}" y2="${yBase}" stroke="#3a3a3a" stroke-width="1.2"/>
 
-          <!-- Paid bar ($200, blue) -->
           <rect id="sg-bar-paid" x="${xPaid - barW/2}" y="${yBase}" width="${barW}" height="0"
-                fill="#3b82f6" rx="3"/>
+                fill="#3b82f6" rx="4"/>
 
-          <!-- Compute bar ($35k, dark navy) -->
           <rect id="sg-bar-comp" x="${xComp - barW/2}" y="${yBase}" width="${barW}" height="0"
-                fill="#1e3a5f" rx="3"/>
+                fill="#1e3a5f" rx="4"/>
 
-          <!-- $200 label (above paid bar) -->
-          <text id="sg-lbl-paid" x="${xPaid}" y="${yPaid - 8}" text-anchor="middle"
-                font-size="15" font-weight="700" fill="#3b82f6" opacity="0">$200</text>
-          <text id="sg-sub-paid" x="${xPaid}" y="${yBase + 18}" text-anchor="middle"
-                font-size="11" fill="#888">paid</text>
+          <text id="sg-lbl-paid" x="${xPaid}" y="${yPaid - 12}" text-anchor="middle"
+                font-size="20" font-weight="700" fill="#3b82f6" opacity="0">$200</text>
+          <text id="sg-sub-paid" x="${xPaid}" y="${yBase + 26}" text-anchor="middle"
+                font-size="14" fill="#888">paid</text>
 
-          <!-- $35,000 label -->
-          <text id="sg-lbl-comp" x="${xComp}" y="${yComp - 10}" text-anchor="middle"
-                font-size="15" font-weight="700" fill="#93c5fd" opacity="0">$35,000</text>
-          <text id="sg-sub-comp" x="${xComp}" y="${yBase + 18}" text-anchor="middle"
-                font-size="11" fill="#888">compute consumed</text>
+          <text id="sg-lbl-comp" x="${xComp}" y="${yComp - 14}" text-anchor="middle"
+                font-size="22" font-weight="700" fill="#93c5fd" opacity="0">$35,000</text>
+          <text id="sg-sub-comp" x="${xComp}" y="${yBase + 26}" text-anchor="middle"
+                font-size="14" fill="#888">compute consumed</text>
 
-          <!-- 175× gap box (dashed, appears last) -->
-          <rect id="sg-gap-box" x="${xPaid + barW/2 + 8}" y="${arrowY - 18}"
-                width="${xComp - barW/2 - (xPaid + barW/2) - 16}" height="36"
-                fill="none" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="5,3"
-                rx="4" opacity="0"/>
-          <!-- dashed lines from box to bars -->
+          <rect id="sg-gap-box" x="${xPaid + barW/2 + 10}" y="${arrowY - 24}"
+                width="${xComp - barW/2 - (xPaid + barW/2) - 20}" height="48"
+                fill="none" stroke="#ef4444" stroke-width="1.8" stroke-dasharray="6,4"
+                rx="6" opacity="0"/>
           <line id="sg-gap-line-l" x1="${xPaid + barW/2}" y1="${arrowY}"
-                x2="${xPaid + barW/2 + 8}" y2="${arrowY}"
-                stroke="#ef4444" stroke-width="1" stroke-dasharray="4,3" opacity="0"/>
-          <line id="sg-gap-line-r" x1="${xComp - barW/2 - 8}" y1="${arrowY}"
+                x2="${xPaid + barW/2 + 10}" y2="${arrowY}"
+                stroke="#ef4444" stroke-width="1.2" stroke-dasharray="4,3" opacity="0"/>
+          <line id="sg-gap-line-r" x1="${xComp - barW/2 - 10}" y1="${arrowY}"
                 x2="${xComp - barW/2}" y2="${arrowY}"
-                stroke="#ef4444" stroke-width="1" stroke-dasharray="4,3" opacity="0"/>
-          <text id="sg-gap-lbl" x="${(xPaid + xComp) / 2}" y="${arrowY + 5}"
-                text-anchor="middle" font-size="13" font-weight="700" fill="#ef4444"
+                stroke="#ef4444" stroke-width="1.2" stroke-dasharray="4,3" opacity="0"/>
+          <text id="sg-gap-lbl" x="${(xPaid + xComp) / 2}" y="${arrowY + 7}"
+                text-anchor="middle" font-size="18" font-weight="700" fill="#ef4444"
                 opacity="0">175× gap</text>
         </svg>
         <p class="chart-caption" id="sg-caption-italic">This is one documented user, not the typical subscriber. The figure has been widely cited and rounded, and the methodology has not been published. The directional fact, that flat-rate plans can be exploited by automated agents at the extreme tail, is not in dispute.</p>
@@ -1774,10 +1765,11 @@ const animations = {
     if (!visual) return;
 
     // Chart geometry
-    const W = 560, H = 290;
-    const L = 52, R = 516, T = 42, B = 230;
-    const IW = R - L, IH = B - T;  // 464 × 188
-    const MAX_BAR_H = IH * 0.78;   // ~147px — reserves ~41px above tallest bar for labels
+    // Portrait — bars and annotations fill the column.
+    const W = 400, H = 600;
+    const L = 56, R = 380, T = 90, B = 540;
+    const IW = R - L, IH = B - T;
+    const MAX_BAR_H = IH * 0.78;
 
     // Log-scale x mapper  ($5 → L,  $35k → R)
     const logMin = Math.log10(5), logRange = Math.log10(35000) - logMin;
@@ -1794,7 +1786,7 @@ const animations = {
       { lbl:'$20K', v:20000, h:0.22, blue:false },
     ];
 
-    const BW = 34;  // bar width px
+    const BW = 36;  // bar width px
 
     const barsHTML = bins.map((b, i) => {
       const cx  = xS(b.v);
@@ -1804,10 +1796,10 @@ const animations = {
       return `
         <rect class="ud-bar" id="ud-bar-${i}"
               x="${(cx - BW/2).toFixed(1)}" y="${B}" width="${BW}" height="0"
-              fill="${col}" rx="2"
+              fill="${col}" rx="3"
               data-by="${by.toFixed(1)}" data-bh="${bh.toFixed(1)}"/>
-        <text x="${cx.toFixed(1)}" y="${B + 16}" text-anchor="middle"
-              font-size="9.5" fill="#777">${b.lbl}</text>`;
+        <text x="${cx.toFixed(1)}" y="${B + 22}" text-anchor="middle"
+              font-size="12" fill="#888">${b.lbl}</text>`;
     }).join('');
 
     // Geometry for annotations
@@ -1820,53 +1812,45 @@ const animations = {
     visual.innerHTML = `
       <div class="chart-frame">
         <div class="chart-header">Monthly compute consumed by Claude Max subscribers (illustrative)</div>
-        <svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:${W}px">
-          <!-- y-axis label rotated -->
-          <text transform="rotate(-90,14,${((T+B)/2).toFixed(1)})"
-                x="14" y="${((T+B)/2+4).toFixed(1)}"
-                text-anchor="middle" font-size="9" fill="#666">share of subscribers</text>
+        <svg viewBox="0 0 ${W} ${H}" style="width:100%">
+          <text transform="rotate(-90,22,${((T+B)/2).toFixed(1)})"
+                x="22" y="${((T+B)/2+4).toFixed(1)}"
+                text-anchor="middle" font-size="12" fill="#888">share of subscribers</text>
 
-          <!-- baseline -->
-          <line x1="${L}" y1="${B}" x2="${R}" y2="${B}" stroke="#3a3a3a" stroke-width="1"/>
+          <line x1="${L}" y1="${B}" x2="${R}" y2="${B}" stroke="#3a3a3a" stroke-width="1.2"/>
 
-          <!-- x-axis label -->
-          <text x="${((L+R)/2).toFixed(1)}" y="${H-6}" text-anchor="middle"
-                font-size="9" fill="#666" font-style="italic">monthly compute consumed (retail API equivalent, log scale)</text>
+          <text x="${((L+R)/2).toFixed(1)}" y="${H-12}" text-anchor="middle"
+                font-size="11" fill="#777" font-style="italic">monthly compute consumed (retail API equivalent, log scale)</text>
 
-          <!-- histogram bars -->
           ${barsHTML}
 
-          <!-- $200 dashed line -->
           <line id="ud-pline" x1="${x200.toFixed(1)}" y1="${T}"
                 x2="${x200.toFixed(1)}" y2="${B}"
                 stroke="#e2e8f0" stroke-width="1.5" stroke-dasharray="5,3" opacity="0"/>
-          <text id="ud-plbl1" x="${x200.toFixed(1)}" y="${T - 4}"
-                text-anchor="middle" font-size="9" font-weight="600"
+          <text id="ud-plbl1" x="${x200.toFixed(1)}" y="${T - 6}"
+                text-anchor="middle" font-size="12" font-weight="600"
                 fill="#e2e8f0" opacity="0">$200 paid</text>
-          <text id="ud-plbl2" x="${x200.toFixed(1)}" y="${T + 7}"
-                text-anchor="middle" font-size="8.5" fill="#9ca3af" opacity="0">monthly subscription</text>
+          <text id="ud-plbl2" x="${x200.toFixed(1)}" y="${T + 9}"
+                text-anchor="middle" font-size="10.5" fill="#9ca3af" opacity="0">monthly subscription</text>
 
-          <!-- Cross-subsidy pool label -->
-          <text id="ud-blbl1" x="${midBlue}" y="${T + 16}"
-                text-anchor="middle" font-size="9.5" font-weight="600"
+          <text id="ud-blbl1" x="${midBlue}" y="${T + 22}"
+                text-anchor="middle" font-size="13" font-weight="600"
                 fill="#5b8fd4" opacity="0">Cross-subsidy pool</text>
-          <text id="ud-blbl2" x="${midBlue}" y="${T + 28}"
-                text-anchor="middle" font-size="8.5" fill="#9ca3af" opacity="0">most users, well below $200</text>
+          <text id="ud-blbl2" x="${midBlue}" y="${T + 38}"
+                text-anchor="middle" font-size="11" fill="#9ca3af" opacity="0">most users, well below $200</text>
 
-          <!-- Margin-eating tail label -->
-          <text id="ud-rlbl1" x="${midRed}" y="${T + 16}"
-                text-anchor="middle" font-size="9.5" font-weight="600"
+          <text id="ud-rlbl1" x="${midRed}" y="${T + 22}"
+                text-anchor="middle" font-size="13" font-weight="600"
                 fill="#c05a52" opacity="0">Margin-eating tail</text>
-          <text id="ud-rlbl2" x="${midRed}" y="${T + 28}"
-                text-anchor="middle" font-size="8.5" fill="#9ca3af" opacity="0">small minority, far above $200</text>
+          <text id="ud-rlbl2" x="${midRed}" y="${T + 38}"
+                text-anchor="middle" font-size="11" fill="#9ca3af" opacity="0">small minority, far above $200</text>
 
-          <!-- $35K outlier dot -->
           <circle id="ud-dot" cx="${x35k.toFixed(1)}" cy="${dotY.toFixed(1)}"
-                  r="5" fill="#c05a52" opacity="0"/>
-          <text id="ud-dlbl1" x="${(x35k + 10).toFixed(1)}" y="${(dotY - 5).toFixed(1)}"
-                font-size="8.5" fill="#c05a52" opacity="0">~99th percentile</text>
-          <text id="ud-dlbl2" x="${(x35k + 10).toFixed(1)}" y="${(dotY + 6).toFixed(1)}"
-                font-size="8.5" fill="#c05a52" opacity="0">$35K user</text>
+                  r="6" fill="#c05a52" opacity="0"/>
+          <text id="ud-dlbl1" x="${(x35k - 12).toFixed(1)}" y="${(dotY - 6).toFixed(1)}"
+                text-anchor="end" font-size="11" fill="#c05a52" opacity="0">~99th percentile</text>
+          <text id="ud-dlbl2" x="${(x35k - 12).toFixed(1)}" y="${(dotY + 8).toFixed(1)}"
+                text-anchor="end" font-size="11" fill="#c05a52" opacity="0">$35K user</text>
         </svg>
         <p class="chart-caption">The shape above is a log-normal distribution, the empirically observed pattern of consumer usage across nearly every flat-rate service ever measured. Most subscribers consume well below the price they pay. A small minority consume far more. AI follows the same shape with a fatter tail than most.</p>
         <p class="chart-source"><strong>Sources.</strong> Distribution shape based on the long-tail / log-normal pattern documented across SaaS usage research (the Pareto principle, dating to 1896, generalizes to most consumer-service usage). Specific subscriber counts at each spending level are illustrative. Anthropic has not published its actual usage distribution. The $35K user is the single documented case (TechCrunch, April 2026).</p>
@@ -1899,7 +1883,7 @@ const animations = {
       .to(captionItalic, { autoAlpha: 1, y: 0, duration: 0.4 }, after + 1.1)
       .to(sourceLine, { autoAlpha: 1, y: 0, duration: 0.4 }, after + 1.4)
       // Pulse dot (finite)
-      .to('#ud-dot', { attr: { r: 8 }, duration: 0.5, yoyo: true, repeat: 3, ease: 'sine.inOut' }, after + 1.7);
+      .to('#ud-dot', { attr: { r: 10 }, duration: 0.5, yoyo: true, repeat: 3, ease: 'sine.inOut' }, after + 1.7);
   },
 
   'price-table': (scene, visual) => {
@@ -2054,8 +2038,9 @@ const animations = {
     );
     if (!visual) return;
 
-    const VW = 520, VH = 270;
-    const L = 44, R = 490, T = 52, B = 220;
+    // Portrait viewBox so the descending bars dominate the column.
+    const VW = 380, VH = 600;
+    const L = 56, R = 360, T = 100, B = 530;
     const IW = R - L, IH = B - T;
 
     const bars = [
@@ -2073,12 +2058,11 @@ const animations = {
     const BW   = slot * 0.62;
     const py   = v => B - (v / maxV) * IH;
 
-    // Y grid
     const yGrid = [0, 50, 100].map(v => `
       <line x1="${L}" y1="${py(v).toFixed(1)}" x2="${R}" y2="${py(v).toFixed(1)}"
             stroke="#1e1e1e" stroke-width="0.6"/>
-      <text x="${L-4}" y="${(py(v)+3.5).toFixed(1)}" text-anchor="end"
-            font-size="9" fill="#555">${v}</text>`).join('');
+      <text x="${L-6}" y="${(py(v)+4).toFixed(1)}" text-anchor="end"
+            font-size="11" fill="#666">${v}</text>`).join('');
 
     const barsHTML = bars.map((b, i) => {
       const cx  = L + i * slot + slot / 2;
@@ -2091,30 +2075,28 @@ const animations = {
               x="${(cx-BW/2).toFixed(1)}" y="${B}" width="${BW.toFixed(1)}" height="0"
               fill="${col}" rx="3"
               data-by="${by.toFixed(1)}" data-bh="${bh.toFixed(1)}"/>
-        <text id="sf-val-${i}" x="${cx.toFixed(1)}" y="${(by-6).toFixed(1)}"
-              text-anchor="middle" font-size="11" font-weight="700"
+        <text id="sf-val-${i}" x="${cx.toFixed(1)}" y="${(by-10).toFixed(1)}"
+              text-anchor="middle" font-size="14" font-weight="700"
               fill="${valCol}" opacity="0">${b.v}</text>
-        <text x="${cx.toFixed(1)}" y="${B+15}" text-anchor="middle"
-              font-size="9" fill="#666">${b.q}</text>`;
+        <text x="${cx.toFixed(1)}" y="${B+22}" text-anchor="middle"
+              font-size="11" fill="#777">${b.q}</text>`;
     }).join('');
 
     // "AI shrinkflation" annotation at top-right
     const tagX = (R - 10).toFixed(1);
-    const tagY = (T - 10).toFixed(1);
+    const tagY = (T - 30).toFixed(1);
 
     visual.innerHTML = `
       <div class="chart-frame">
         <div class="chart-header">Included usage at a $20 plan, indexed (Q1 2024 = 100)</div>
-        <svg viewBox="0 0 ${VW} ${VH}" style="width:100%;max-width:${VW}px">
-          <!-- grid + axes -->
-          <line x1="${L}" y1="${B}" x2="${R}" y2="${B}" stroke="#333" stroke-width="1"/>
+        <svg viewBox="0 0 ${VW} ${VH}" style="width:100%">
+          <line x1="${L}" y1="${B}" x2="${R}" y2="${B}" stroke="#444" stroke-width="1.2"/>
           ${yGrid}
           ${barsHTML}
-          <!-- AI shrinkflation tag -->
           <text id="sf-tag1" x="${tagX}" y="${tagY}" text-anchor="end"
-                font-size="10.5" font-weight="700" fill="#c05a52" opacity="0">"AI shrinkflation"</text>
-          <text id="sf-tag2" x="${tagX}" y="${(parseFloat(tagY)+13).toFixed(1)}" text-anchor="end"
-                font-size="9" fill="#888" opacity="0">went viral, April 2026</text>
+                font-size="14" font-weight="700" fill="#c05a52" opacity="0">"AI shrinkflation"</text>
+          <text id="sf-tag2" x="${tagX}" y="${(parseFloat(tagY)+18).toFixed(1)}" text-anchor="end"
+                font-size="11" fill="#888" opacity="0">went viral, April 2026</text>
         </svg>
         <p class="chart-caption">The pattern is illustrative. Quarterly figures are smoothed across plans. The direction, that included usage at $20 is roughly half what it was two years ago, is well documented across Anthropic, OpenAI, and Google.</p>
         <p class="chart-source"><strong>Sources.</strong> FindSkill.ai (April 2026 Plus limits), Aizolo subscription guide, AIviewer.ai. Index values illustrative.</p>
@@ -2241,8 +2223,9 @@ const animations = {
     );
     if (!visual) return;
 
-    const VW = 540, VH = 300;
-    const L = 44, R = 510, T = 22, B = 200;
+    // Portrait — taller chart so the three oscillating curves are more dramatic.
+    const VW = 380, VH = 600;
+    const L = 50, R = 360, T = 130, B = 510;
     const IW = R - L, IH = B - T;
 
     // X: 2022–2032, Y: 0–1 normalised
@@ -2269,67 +2252,62 @@ const animations = {
     const phaseBands = phases.map((p,i) => {
       const cx = ((px(p.x1)+px(p.x2))/2).toFixed(1);
       const colors = ['#5b8fd4','#d97706','#c05a52','#4ade80'];
-      return `<text id="cc-ph-${i}" x="${cx}" y="${B+28}" text-anchor="middle"
-                    font-size="9" font-weight="600" fill="${colors[i]}" opacity="0">${p.lbl}</text>`;
+      return `<text id="cc-ph-${i}" x="${cx}" y="${B+38}" text-anchor="middle"
+                    font-size="11" font-weight="600" fill="${colors[i]}" opacity="0">${p.lbl}</text>`;
     }).join('');
 
-    // Dividers between phases
     const dividers = [2024,2026,2030].map(yr =>
-      `<line x1="${px(yr).toFixed(1)}" y1="${B}" x2="${px(yr).toFixed(1)}" y2="${B+6}"
-             stroke="#333" stroke-width="0.8"/>`).join('');
+      `<line x1="${px(yr).toFixed(1)}" y1="${B}" x2="${px(yr).toFixed(1)}" y2="${B+8}"
+             stroke="#444" stroke-width="0.8"/>`).join('');
 
-    // X-axis tick labels
     const xTicks = [2022,2024,2026,2028,2030,2032].map(yr =>
-      `<text x="${px(yr).toFixed(1)}" y="${B+14}" text-anchor="middle" font-size="9" fill="#555">'${String(yr).slice(2)}</text>`
+      `<text x="${px(yr).toFixed(1)}" y="${B+20}" text-anchor="middle" font-size="11" fill="#777">'${String(yr).slice(2)}</text>`
     ).join('');
 
-    // Annotation peaks
     const capexPeakX = px(2026).toFixed(1);
     const supplyPeakX = px(2030).toFixed(1);
 
-    // Legend
+    // Legend — stacked vertically at the top of the chart since the SVG is narrow
     const legend = `
-      <circle cx="${L}"    cy="${T-6}" r="4" fill="#ef4444"/>
-      <text x="${L+8}"     y="${T-2}"  font-size="9" fill="#ef4444">Token price</text>
-      <circle cx="${L+85}" cy="${T-6}" r="4" fill="#1e40af"/>
-      <text x="${L+93}"    y="${T-2}"  font-size="9" fill="#3b82f6">Capex commitments</text>
-      <line  x1="${L+205}" y1="${T-6}" x2="${L+225}" y2="${T-6}" stroke="#4ade80" stroke-width="2" stroke-dasharray="5,3"/>
-      <text x="${L+229}"   y="${T-2}"  font-size="9" fill="#4ade80">Supply (4-yr lag)</text>`;
+      <g transform="translate(${L},${T - 80})">
+        <circle cx="0" cy="0" r="5" fill="#ef4444"/>
+        <text x="12" y="4" font-size="12" fill="#ef4444">Token price</text>
+        <circle cx="0" cy="22" r="5" fill="#1e40af"/>
+        <text x="12" y="26" font-size="12" fill="#3b82f6">Capex commitments</text>
+        <line x1="-5" y1="44" x2="5" y2="44" stroke="#4ade80" stroke-width="2.5" stroke-dasharray="5,3"/>
+        <text x="12" y="48" font-size="12" fill="#4ade80">Supply (4-yr lag)</text>
+      </g>`;
 
     visual.innerHTML = `
       <div class="chart-frame">
         <div class="chart-header">The commodity supply cycle, applied to AI compute</div>
-        <svg viewBox="0 0 ${VW} ${VH}" style="width:100%;max-width:${VW}px">
+        <svg viewBox="0 0 ${VW} ${VH}" style="width:100%">
           <defs>
             <clipPath id="${clipId}">
-              <rect id="cc-clip-rect" x="${L}" y="${T-4}" width="0" height="${IH+8}"/>
+              <rect id="cc-clip-rect" x="${L}" y="${T-8}" width="0" height="${IH+16}"/>
             </clipPath>
           </defs>
 
-          <!-- axes + ticks -->
-          <line x1="${L}" y1="${B}" x2="${R}" y2="${B}" stroke="#333" stroke-width="1"/>
+          <line x1="${L}" y1="${B}" x2="${R}" y2="${B}" stroke="#444" stroke-width="1.2"/>
           ${xTicks}${dividers}${phaseBands}${legend}
 
-          <!-- three curves, clipped -->
-          <path d="${toPath(tokenPts)}"  fill="none" stroke="#ef4444" stroke-width="2.2" stroke-linejoin="round" clip-path="url(#${clipId})"/>
-          <path d="${toPath(capexPts)}"  fill="none" stroke="#1e40af" stroke-width="2.2" stroke-linejoin="round" clip-path="url(#${clipId})"/>
-          <path d="${toPath(supplyPts)}" fill="none" stroke="#4ade80" stroke-width="2"   stroke-linejoin="round" stroke-dasharray="6,4" clip-path="url(#${clipId})"/>
+          <path d="${toPath(tokenPts)}"  fill="none" stroke="#ef4444" stroke-width="2.6" stroke-linejoin="round" clip-path="url(#${clipId})"/>
+          <path d="${toPath(capexPts)}"  fill="none" stroke="#1e40af" stroke-width="2.6" stroke-linejoin="round" clip-path="url(#${clipId})"/>
+          <path d="${toPath(supplyPts)}" fill="none" stroke="#4ade80" stroke-width="2.4" stroke-linejoin="round" stroke-dasharray="7,5" clip-path="url(#${clipId})"/>
 
-          <!-- annotation: capex peak -->
-          <line id="cc-ann-cap-l" x1="${capexPeakX}" y1="${py(.94).toFixed(1)}" x2="${capexPeakX}" y2="${py(1.05).toFixed(1)}"
-                stroke="#1e40af" stroke-width="1" stroke-dasharray="3,2" opacity="0"/>
-          <text id="cc-ann-cap-t1" x="${capexPeakX}" y="${py(1.12).toFixed(1)}" text-anchor="middle"
-                font-size="9" font-weight="600" fill="#3b82f6" opacity="0">Capex peaks</text>
-          <text id="cc-ann-cap-t2" x="${capexPeakX}" y="${py(1.12+0.08).toFixed(1)}" text-anchor="middle"
-                font-size="8.5" fill="#555" opacity="0">2025-26</text>
+          <line id="cc-ann-cap-l" x1="${capexPeakX}" y1="${py(.94).toFixed(1)}" x2="${capexPeakX}" y2="${py(1.04).toFixed(1)}"
+                stroke="#1e40af" stroke-width="1.2" stroke-dasharray="3,2" opacity="0"/>
+          <text id="cc-ann-cap-t1" x="${capexPeakX}" y="${py(1.08).toFixed(1)}" text-anchor="middle"
+                font-size="11" font-weight="600" fill="#3b82f6" opacity="0">Capex peaks</text>
+          <text id="cc-ann-cap-t2" x="${capexPeakX}" y="${py(1.08+0.06).toFixed(1)}" text-anchor="middle"
+                font-size="10" fill="#777" opacity="0">2025-26</text>
 
-          <!-- annotation: supply peak -->
-          <line id="cc-ann-sup-l" x1="${supplyPeakX}" y1="${py(.98).toFixed(1)}" x2="${supplyPeakX}" y2="${py(1.1).toFixed(1)}"
-                stroke="#4ade80" stroke-width="1" stroke-dasharray="3,2" opacity="0"/>
-          <text id="cc-ann-sup-t1" x="${supplyPeakX}" y="${py(1.17).toFixed(1)}" text-anchor="middle"
-                font-size="9" font-weight="600" fill="#4ade80" opacity="0">Supply hits</text>
-          <text id="cc-ann-sup-t2" x="${supplyPeakX}" y="${py(1.17+0.08).toFixed(1)}" text-anchor="middle"
-                font-size="8.5" fill="#555" opacity="0">~2029-30</text>
+          <line id="cc-ann-sup-l" x1="${supplyPeakX}" y1="${py(.98).toFixed(1)}" x2="${supplyPeakX}" y2="${py(1.06).toFixed(1)}"
+                stroke="#4ade80" stroke-width="1.2" stroke-dasharray="3,2" opacity="0"/>
+          <text id="cc-ann-sup-t1" x="${supplyPeakX}" y="${py(1.1).toFixed(1)}" text-anchor="end"
+                font-size="11" font-weight="600" fill="#4ade80" opacity="0">Supply hits</text>
+          <text id="cc-ann-sup-t2" x="${supplyPeakX}" y="${py(1.1+0.06).toFixed(1)}" text-anchor="end"
+                font-size="10" fill="#777" opacity="0">~2029-30</text>
         </svg>
         <p class="chart-caption">Capex peaking in 2025-26 plus a roughly four-year build cycle for power and data center capacity points to supply hitting around 2029-30. The price trough follows by a year or two. The right panel of any oil refinery cycle looks similar.</p>
         <p class="chart-source"><strong>Sources.</strong> Morgan Stanley AI capex forecasts, Sightline Climate (transformer lead times), Tom's Hardware (delayed builds). Cobweb model from commodity economics literature.</p>
@@ -2368,11 +2346,11 @@ const animations = {
     );
     if (!visual) return;
 
-    const VW = 520, VH = 290;
-    const L = 52, R = 500, T = 28, B = 220;
+    // Portrait — taller bars dramatize the log-scale efficiency growth.
+    const VW = 380, VH = 600;
+    const L = 60, R = 360, T = 60, B = 510;
     const IW = R - L, IH = B - T;
 
-    // GPU generations matching PDF exactly: V100→A100→H100→H200→B200→Rubin*
     const chips = [
       { lbl:['V100','2017'],  val:0.4,  proj:false },
       { lbl:['A100','2020'],  val:1.2,  proj:false },
@@ -2394,7 +2372,6 @@ const animations = {
       const cx = L + i * gap + gap / 2;
       const bh = barH(c.val);
       const by = B - bh;
-      // Projected = lighter green, confirmed = full green
       const fill = c.proj ? '#86efac' : '#16a34a';
       const valCol = c.proj ? '#86efac' : '#4ade80';
       const [line1, line2] = c.lbl;
@@ -2403,45 +2380,41 @@ const animations = {
               x="${(cx-BW/2).toFixed(1)}" y="${B}" width="${BW.toFixed(1)}" height="0"
               fill="${fill}" rx="3"
               data-by="${by.toFixed(1)}" data-bh="${bh.toFixed(1)}"/>
-        <text id="tpw-val-${i}" x="${cx.toFixed(1)}" y="${(by-5).toFixed(1)}"
-              text-anchor="middle" font-size="10" font-weight="700"
+        <text id="tpw-val-${i}" x="${cx.toFixed(1)}" y="${(by-8).toFixed(1)}"
+              text-anchor="middle" font-size="13" font-weight="700"
               fill="${valCol}" opacity="0">${c.val}</text>
-        <text x="${cx.toFixed(1)}" y="${B+14}" text-anchor="middle"
-              font-size="9" fill="#888">${line1}</text>
-        <text x="${cx.toFixed(1)}" y="${B+25}" text-anchor="middle"
-              font-size="8.5" fill="#555">${line2}</text>`;
+        <text x="${cx.toFixed(1)}" y="${B+22}" text-anchor="middle"
+              font-size="12" font-weight="600" fill="#bbb">${line1}</text>
+        <text x="${cx.toFixed(1)}" y="${B+38}" text-anchor="middle"
+              font-size="10" fill="#777">${line2}</text>`;
     }).join('');
 
-    // Y-axis log ticks
     const yTicks = [0.4,1,3,10,30].map(v => {
       const ty = (B - barH(v)).toFixed(1);
-      return `<line x1="${L-4}" y1="${ty}" x2="${L}" y2="${ty}" stroke="#444" stroke-width="0.8"/>
-              <text x="${L-7}" y="${(parseFloat(ty)+3.5).toFixed(1)}" text-anchor="end"
-                    font-size="8.5" fill="#555">${v}</text>
+      return `<line x1="${L-5}" y1="${ty}" x2="${L}" y2="${ty}" stroke="#555" stroke-width="0.8"/>
+              <text x="${L-9}" y="${(parseFloat(ty)+4).toFixed(1)}" text-anchor="end"
+                    font-size="11" fill="#777">${v}</text>
               <line x1="${L}" y1="${ty}" x2="${R}" y2="${ty}"
-                    stroke="#181818" stroke-width="0.5" stroke-dasharray="3,4"/>`;
+                    stroke="#181818" stroke-width="0.6" stroke-dasharray="3,4"/>`;
     }).join('');
 
     visual.innerHTML = `
       <div class="chart-frame">
         <div class="chart-header">Inference efficiency by GPU generation, log scale</div>
-        <svg viewBox="0 0 ${VW} ${VH}" style="width:100%;max-width:${VW}px">
-          <!-- axes -->
-          <line x1="${L}" y1="${T}" x2="${L}" y2="${B}" stroke="#444" stroke-width="1"/>
-          <line x1="${L}" y1="${B}" x2="${R}" y2="${B}" stroke="#444" stroke-width="1"/>
+        <svg viewBox="0 0 ${VW} ${VH}" style="width:100%">
+          <line x1="${L}" y1="${T}" x2="${L}" y2="${B}" stroke="#444" stroke-width="1.2"/>
+          <line x1="${L}" y1="${B}" x2="${R}" y2="${B}" stroke="#444" stroke-width="1.2"/>
           ${yTicks}
 
-          <!-- y-axis label -->
-          <text transform="rotate(-90,14,${((T+B)/2).toFixed(1)})"
-                x="14" y="${((T+B)/2+4).toFixed(1)}" text-anchor="middle"
-                font-size="9" fill="#666">tokens / watt</text>
+          <text transform="rotate(-90,22,${((T+B)/2).toFixed(1)})"
+                x="22" y="${((T+B)/2+4).toFixed(1)}" text-anchor="middle"
+                font-size="12" fill="#888">tokens / watt</text>
 
           ${barsHTML}
 
-          <!-- Projected note -->
-          <rect x="${(R-88).toFixed(1)}" y="${T+2}" width="86" height="16" fill="#86efac22" rx="3"/>
-          <text x="${(R-44).toFixed(1)}" y="${T+13}" text-anchor="middle"
-                font-size="8.5" fill="#86efac">* projected</text>
+          <rect x="${(R-110).toFixed(1)}" y="${T+8}" width="100" height="22" fill="#86efac22" rx="4"/>
+          <text x="${(R-60).toFixed(1)}" y="${T+22}" text-anchor="middle"
+                font-size="11" fill="#86efac">* projected</text>
         </svg>
         <p class="chart-caption">Eight years, roughly 110 times more efficient. NVIDIA's published gain from Hopper to Blackwell is roughly 10×, with up to 50× cited for specific workloads (vendor-reported). Rubin is projected from public roadmap commentary.</p>
         <p class="chart-source"><strong>Source.</strong> NVIDIA developer blog ("Scaling token factory revenue", 2026). Generation-by-generation values are order-of-magnitude indicative.</p>
