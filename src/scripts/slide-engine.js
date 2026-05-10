@@ -1945,64 +1945,74 @@ const animations = {
     );
     if (!visual) return;
 
-    // Chart area (labels live to the right of R)
-    const VW = 560, VH = 260;
-    const L = 44, R = 380, T = 18, B = 226;
+    // Rotated portrait: years run TOP to BOTTOM on the y-axis,
+    // prices run LEFT to RIGHT on the x-axis. Each tier is a vertical
+    // bar at its price level, drawn from its launch year down to now.
+    const VW = 360, VH = 600;
+    const L = 70, R = 320, T = 30, B = 540;
     const IW = R - L, IH = B - T;
 
-    // Scales
-    const maxY = 265, xEnd = 2026.8;
-    const py = v  => B - (v / maxY) * IH;
-    const px = yr => L + ((yr - 2023) / (xEnd - 2023)) * IW;
+    // Time on Y, prices on X
+    const yMin = 2023, yMax = 2026.8;
+    const xMaxPrice = 270;
+    const py = yr => T + ((yr - yMin) / (yMax - yMin)) * IH;
+    const pxPr = v  => L + (v / xMaxPrice) * IW;
 
-    // Y grid lines + labels
-    const yTicks = [20, 100, 200, 250];
-    const yGrid = yTicks.map(v => `
-      <line x1="${L}" y1="${py(v).toFixed(1)}" x2="${R}" y2="${py(v).toFixed(1)}"
-            stroke="#1e1e1e" stroke-width="0.6"/>
-      <text x="${L-5}" y="${(py(v)+3.5).toFixed(1)}" text-anchor="end"
-            font-size="9" fill="#555">$${v}</text>`).join('');
+    // Year ticks down the Y-axis
+    const yearTicks = [2023, 2024, 2025, 2026].map(yr => `
+      <line x1="${L - 4}" y1="${py(yr).toFixed(1)}" x2="${L + 4}" y2="${py(yr).toFixed(1)}"
+            stroke="#3a3a3a" stroke-width="1"/>
+      <text x="${L - 10}" y="${(py(yr) + 4).toFixed(1)}" text-anchor="end"
+            font-size="12" fill="#666">${yr}</text>`).join('');
 
-    // X tick labels
-    const xTicks = [2023,2024,2025,2026].map(yr => `
-      <text x="${px(yr).toFixed(1)}" y="${B+14}" text-anchor="middle"
-            font-size="9" fill="#555">${yr}</text>`).join('');
+    // Price ticks along the X-axis (bottom)
+    const priceTicks = [20, 100, 200, 250].map(v => `
+      <line x1="${pxPr(v).toFixed(1)}" y1="${B}" x2="${pxPr(v).toFixed(1)}" y2="${B + 4}"
+            stroke="#3a3a3a" stroke-width="1"/>
+      <text x="${pxPr(v).toFixed(1)}" y="${B + 16}" text-anchor="middle"
+            font-size="11" fill="#666">$${v}</text>`).join('');
 
-    // Four tiers: [label, sublabel, price, launch year decimal, color, dashed]
+    // Four tiers — each is a vertical bar at its price level,
+    // drawn from launch year (top) down to "now" (bottom).
     const tiers = [
-      { lbl:'$20 standard',   sub:'flat for 3+ years',   val:20,  xr:2023.0,   col:'#3b82f6', dash:false },
-      { lbl:'$200 ceiling',   sub:'added Dec 2024',       val:200, xr:2024.92,  col:'#c05a52', dash:false },
-      { lbl:'$100 power-user',sub:'added May 2025',       val:100, xr:2025.375, col:'#d97706', dash:false },
-      { lbl:'$250 Google Ultra', sub:'',                  val:250, xr:2025.375, col:'#c0524a', dash:true  },
+      { lbl:'$20 standard',     sub:'flat for 3+ years', val:20,  xr:2023.0,   col:'#3b82f6', dash:false },
+      { lbl:'$200 ceiling',     sub:'added Dec 2024',     val:200, xr:2024.92,  col:'#c05a52', dash:false },
+      { lbl:'$100 power-user',  sub:'added May 2025',     val:100, xr:2025.375, col:'#d97706', dash:false },
+      { lbl:'$250 Google Ultra',sub:'added May 2025',     val:250, xr:2025.375, col:'#c0524a', dash:true  },
     ];
 
     const tiersHTML = tiers.map((t, i) => {
-      const lx = px(t.xr), ty = py(t.val);
+      const xPos = pxPr(t.val);
+      const yLaunch = py(t.xr);
       const dashAttr = t.dash ? 'stroke-dasharray="6,4"' : '';
-      const lxF = lx.toFixed(1), tyF = ty.toFixed(1);
-      const lblX = (R + 8).toFixed(1);
+      // Label position: just below the bottom of the bar, beside the column
+      const lblY = B + 30;
+      const lblAnchor = t.val > 220 ? 'end' : t.val < 60 ? 'start' : 'middle';
       return `
         <!-- tier ${i}: ${t.lbl} -->
-        <line id="pt-line-${i}" x1="${lxF}" y1="${tyF}" x2="${lxF}" y2="${tyF}"
-              stroke="${t.col}" stroke-width="${i===0?2.8:2}" ${dashAttr}
+        <line id="pt-line-${i}" x1="${xPos.toFixed(1)}" y1="${yLaunch.toFixed(1)}"
+              x2="${xPos.toFixed(1)}" y2="${yLaunch.toFixed(1)}"
+              stroke="${t.col}" stroke-width="${i===0?3.2:2.4}" ${dashAttr}
               stroke-linecap="round" opacity="${i===0?1:0}"/>
-        <circle id="pt-dot-${i}" cx="${lxF}" cy="${tyF}" r="4.5"
+        <circle id="pt-dot-${i}" cx="${xPos.toFixed(1)}" cy="${yLaunch.toFixed(1)}" r="5"
                 fill="${t.col}" opacity="0"/>
-        <text id="pt-lbl-${i}" x="${lblX}" y="${(ty+1).toFixed(1)}"
-              font-size="9.5" font-weight="600" fill="${t.col}" opacity="0">${t.lbl}</text>
-        ${t.sub ? `<text id="pt-sub-${i}" x="${lblX}" y="${(ty+12).toFixed(1)}"
-              font-size="8.5" fill="#666" opacity="0">${t.sub}</text>` : ''}`;
+        <text id="pt-lbl-${i}" x="${xPos.toFixed(1)}" y="${lblY}"
+              text-anchor="${lblAnchor}"
+              font-size="13" font-weight="600" fill="${t.col}" opacity="0">${t.lbl}</text>
+        ${t.sub ? `<text id="pt-sub-${i}" x="${xPos.toFixed(1)}" y="${lblY + 14}"
+              text-anchor="${lblAnchor}"
+              font-size="10.5" fill="#666" opacity="0">${t.sub}</text>` : ''}`;
     }).join('');
 
     visual.innerHTML = `
       <div class="chart-frame">
         <div class="chart-header">Monthly subscription tiers, 2023 to 2026</div>
-        <svg viewBox="0 0 ${VW} ${VH}" style="width:100%;max-width:${VW}px">
+        <svg viewBox="0 0 ${VW} ${VH}" style="width:100%">
           <!-- axes -->
-          <line x1="${L}" y1="${B}" x2="${R}" y2="${B}" stroke="#333" stroke-width="1"/>
-          <line x1="${L}" y1="${T}" x2="${L}" y2="${B}" stroke="#333" stroke-width="1"/>
-          ${yGrid}
-          ${xTicks}
+          <line x1="${L}" y1="${B}" x2="${R}" y2="${B}" stroke="#444" stroke-width="1"/>
+          <line x1="${L}" y1="${T}" x2="${L}" y2="${B}" stroke="#444" stroke-width="1"/>
+          ${yearTicks}
+          ${priceTicks}
           ${tiersHTML}
         </svg>
         <p class="chart-caption">The labs raised the ceiling by adding new tiers. They did not raise the existing ones. ChatGPT Plus, Claude Pro, Google AI Pro, and Perplexity Pro all still sit at the $20 line.</p>
@@ -2015,19 +2025,20 @@ const animations = {
 
     const tl = gsap.timeline({ repeat: -1, repeatDelay: 2.5 });
 
-    // $20 line draws across entire x range first
-    tl.to('#pt-line-0', { attr: { x2: R }, duration: 1.5, ease: 'power1.inOut' })
+    // $20 line draws full vertical range first (from launch year to now)
+    const yEnd0 = py(yMax);
+    tl.to('#pt-line-0', { attr: { y2: yEnd0 }, duration: 1.5, ease: 'power1.inOut' })
       .to('#pt-dot-0',  { opacity: 1, duration: 0.3 }, 0.1)
       .to(['#pt-lbl-0','#pt-sub-0'], { opacity: 1, duration: 0.3, stagger: 0.1 }, '-=0.3');
 
-    // Remaining tiers appear in sequence, each drawing from launch to R
+    // Remaining tiers appear in sequence — line draws from launch to now (bottom)
     [[1,'#pt-line-1','#pt-dot-1',['#pt-lbl-1','#pt-sub-1']],
      [2,'#pt-line-2','#pt-dot-2',['#pt-lbl-2','#pt-sub-2']],
-     [3,'#pt-line-3','#pt-dot-3',['#pt-lbl-3']]
+     [3,'#pt-line-3','#pt-dot-3',['#pt-lbl-3','#pt-sub-3']]
     ].forEach(([i, lineId, dotId, lblIds]) => {
-      const launchX = px(tiers[i].xr).toFixed(1);
+      const yEnd = py(yMax).toFixed(1);
       tl
-        .to(lineId, { opacity: 1, attr: { x2: R }, duration: 0.65, ease: 'power2.out' }, '+=0.3')
+        .to(lineId, { opacity: 1, attr: { y2: yEnd }, duration: 0.65, ease: 'power2.out' }, '+=0.3')
         .to(dotId,  { opacity: 1, duration: 0.2 }, '<+0.1')
         .to(lblIds, { opacity: 1, duration: 0.25, stagger: 0.08 }, '-=0.15');
     });
@@ -2137,69 +2148,66 @@ const animations = {
     );
     if (!visual) return;
 
-    // Gantt chart layout
-    const VW = 560, VH = 280;
-    const L = 52, R = 520, T = 24, B = 240;
+    // Rotated portrait Gantt: time runs TOP-DOWN on the y-axis.
+    // Each phase is a column with a vertical bar covering its active years.
+    const VW = 380, VH = 600;
+    const L = 80, R = 360, T = 90, B = 540;
     const IW = R - L, IH = B - T;
 
-    const xMin = 2022.5, xMax = 2027.5, xRange = xMax - xMin;
-    const px = yr => L + ((yr - xMin) / xRange) * IW;
+    const yMin = 2022.5, yMax = 2027.5;
+    const py = yr => T + ((yr - yMin) / (yMax - yMin)) * IH;
 
-    // 4 rows, evenly spaced
-    const rows = 4;
-    const rowH = IH / rows;
-    const BAR_H = 24;
-    const cy = i => T + (i + 0.5) * rowH;
-
-    // Phase definitions: [label, sublabel, start year, end year, color]
     const phases = [
-      { lbl:'Phase 1 · Pure API, pay per token',        col:'#3b82f6', x1:2022.9, x2:2024.3  },
-      { lbl:'Phase 2 · Flat-rate seats',                col:'#1e40af', x1:2023.6, x2:2025.5  },
-      { lbl:'Phase 3 · Hybrid (per-seat + consumption)',col:'#c05a52', x1:2024.75,x2:2027.5  },
-      { lbl:'Phase 4 · Usage-based',                    col:'#d97706', x1:2026.0, x2:2027.5  },
+      { lbl:'Phase 1', sub:'pure API · per token',          col:'#3b82f6', y1:2022.9, y2:2024.3  },
+      { lbl:'Phase 2', sub:'flat-rate seats',                col:'#1e40af', y1:2023.6, y2:2025.5  },
+      { lbl:'Phase 3', sub:'hybrid (seat + consumption)',    col:'#c05a52', y1:2024.75,y2:2027.5  },
+      { lbl:'Phase 4', sub:'usage-based',                    col:'#d97706', y1:2026.0, y2:2027.5  },
     ];
 
-    // X-axis tick labels
-    const xTicks = [2023,2024,2025,2026,2027].map(yr => `
-      <text x="${px(yr).toFixed(1)}" y="${B+16}" text-anchor="middle"
-            font-size="9.5" fill="#555">${yr}</text>`).join('');
+    const cols = phases.length;
+    const colW = IW / cols;
+    const BAR_W = colW * 0.55;
+    const cx = i => L + (i + 0.5) * colW;
 
-    // Grid verticals at year marks
-    const xGrid = [2023,2024,2025,2026,2027].map(yr => `
-      <line x1="${px(yr).toFixed(1)}" y1="${T}" x2="${px(yr).toFixed(1)}" y2="${B}"
-            stroke="#1a1a1a" stroke-width="0.6"/>`).join('');
+    // Year ticks down the Y-axis
+    const yearTicks = [2023, 2024, 2025, 2026, 2027].map(yr => `
+      <line x1="${L - 4}" y1="${py(yr).toFixed(1)}" x2="${R}" y2="${py(yr).toFixed(1)}"
+            stroke="#1a1a1a" stroke-width="0.6"/>
+      <text x="${L - 10}" y="${(py(yr) + 4).toFixed(1)}" text-anchor="end"
+            font-size="11" fill="#666">${yr}</text>`).join('');
 
-    // Phase bars + labels
+    // Phase columns: header at the top + vertical bar growing down
     const phHTML = phases.map((p, i) => {
-      const x1 = px(p.x1), x2 = px(p.x2);
-      const yCtr = cy(i);
+      const xCtr = cx(i);
+      const yStart = py(p.y1);
+      const headY = T - 30;
       return `
-        <!-- phase ${i+1} label -->
-        <text id="bp-lbl-${i}" x="${x1.toFixed(1)}" y="${(yCtr - BAR_H/2 - 5).toFixed(1)}"
-              font-size="9.5" font-weight="600" fill="${p.col}" opacity="0">${p.lbl}</text>
-        <!-- bar -->
+        <text id="bp-lbl-${i}" x="${xCtr.toFixed(1)}" y="${headY}"
+              text-anchor="middle" font-size="13" font-weight="700"
+              fill="${p.col}" opacity="0">${p.lbl}</text>
+        <text id="bp-sub-${i}" x="${xCtr.toFixed(1)}" y="${headY + 14}"
+              text-anchor="middle" font-size="9" fill="#888" opacity="0">${p.sub}</text>
         <rect id="bp-bar-${i}"
-              x="${x1.toFixed(1)}" y="${(yCtr - BAR_H/2).toFixed(1)}"
-              width="0" height="${BAR_H}" fill="${p.col}" rx="3" opacity="0"/>`;
+              x="${(xCtr - BAR_W / 2).toFixed(1)}" y="${yStart.toFixed(1)}"
+              width="${BAR_W.toFixed(1)}" height="0"
+              fill="${p.col}" rx="3" opacity="0"/>`;
     }).join('');
 
-    // "NOW" marker at 2026
-    const nowX = px(2026).toFixed(1);
+    // "NOW" marker — horizontal line across at 2026
+    const nowY = py(2026).toFixed(1);
 
     visual.innerHTML = `
       <div class="chart-frame">
         <div class="chart-header">Four phases of enterprise AI pricing</div>
-        <svg viewBox="0 0 ${VW} ${VH}" style="width:100%;max-width:${VW}px">
-          <!-- baseline -->
-          <line x1="${L}" y1="${B}" x2="${R}" y2="${B}" stroke="#333" stroke-width="1"/>
-          ${xGrid}
-          ${xTicks}
+        <svg viewBox="0 0 ${VW} ${VH}" style="width:100%">
+          <line x1="${L}" y1="${T}" x2="${L}" y2="${B}" stroke="#444" stroke-width="1"/>
+          ${yearTicks}
           ${phHTML}
-          <!-- NOW marker -->
-          <line id="bp-now-line" x1="${nowX}" y1="${T}" x2="${nowX}" y2="${B}"
-                stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="4,3" opacity="0"/>
-          <text id="bp-now-lbl" x="${nowX}" y="${T-6}" text-anchor="middle"
-                font-size="9" font-weight="700" fill="#fbbf24" opacity="0">NOW</text>
+          <!-- NOW marker (horizontal) -->
+          <line id="bp-now-line" x1="${L}" y1="${nowY}" x2="${R}" y2="${nowY}"
+                stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="5,4" opacity="0"/>
+          <text id="bp-now-lbl" x="${R + 6}" y="${nowY}"
+                font-size="11" font-weight="700" fill="#fbbf24" opacity="0">NOW</text>
         </svg>
         <p class="chart-caption">Each new phase did not replace the previous one. Phase 1 still exists. Phase 2 still exists. The enterprise market now operates across all four simultaneously, with the bill assembled from whichever phases the customer is in.</p>
         <p class="chart-source"><strong>Sources.</strong> GitHub blog (April 2026), Microsoft Partner blog (May 2026), CNBC reporting on Anthropic enterprise contract changes (2026).</p>
@@ -2212,10 +2220,11 @@ const animations = {
     const tl = gsap.timeline({ repeat: -1, repeatDelay: 2.5 });
 
     phases.forEach((p, i) => {
-      const barW = px(p.x2) - px(p.x1);
+      const yStart = py(p.y1);
+      const barH = py(p.y2) - yStart;
       tl
-        .to(`#bp-lbl-${i}`, { opacity: 1, duration: 0.25 }, i * 0.55)
-        .to(`#bp-bar-${i}`,  { opacity: 1, attr: { width: barW }, duration: 0.5, ease: 'power2.out' }, i * 0.55 + 0.1);
+        .to([`#bp-lbl-${i}`, `#bp-sub-${i}`], { opacity: 1, duration: 0.25, stagger: 0.08 }, i * 0.55)
+        .to(`#bp-bar-${i}`,  { opacity: 1, attr: { height: barH }, duration: 0.55, ease: 'power2.out' }, i * 0.55 + 0.15);
     });
 
     const after = phases.length * 0.55 + 0.55;
@@ -2793,60 +2802,68 @@ const animations = {
     );
     if (!visual) return;
 
-    const W = 360, H = 240;
-    const CX = 60, CY = H/2;          // user origin
-    const AX = 200, AY = H/2;         // agent
-    const RX = 320;                    // inference column
-    const N = 7;                       // visible inference call lines
+    // Portrait: user at top, agent below, fan-out lines going DOWN
+    // to a row of inference call dots near the bottom.
+    const W = 360, H = 600;
+    const CX = W / 2, CY = 60;          // user at top center
+    const AX = W / 2, AY = 200;         // agent below user
+    const FAN_Y = 470;                   // y where inference call dots land
+    const N = 7;                         // visible inference call lines
 
-    const lines = Array.from({length:N}, (_, i) => {
-      const yy = 30 + i * ((H - 60) / (N - 1));
+    const fanXStart = 50, fanXEnd = W - 50;
+    const lines = Array.from({ length: N }, (_, i) => {
+      const xx = fanXStart + i * ((fanXEnd - fanXStart) / (N - 1));
       return `<line class="nw-call" id="nw-call-${i}"
-                x1="${AX}" y1="${AY}" x2="${RX}" y2="${yy.toFixed(1)}"
-                stroke="#c05a52" stroke-width="1.4" stroke-linecap="round"
-                stroke-dasharray="160" stroke-dashoffset="160" opacity="0.85"/>
-              <circle id="nw-tok-${i}" cx="${RX}" cy="${yy.toFixed(1)}" r="3.6"
+                x1="${AX}" y1="${AY + 24}" x2="${xx.toFixed(1)}" y2="${FAN_Y}"
+                stroke="#c05a52" stroke-width="1.6" stroke-linecap="round"
+                stroke-dasharray="500" stroke-dashoffset="500" opacity="0.85"/>
+              <circle id="nw-tok-${i}" cx="${xx.toFixed(1)}" cy="${FAN_Y}" r="5"
                       fill="#c05a52" opacity="0"/>`;
     }).join('');
 
     visual.innerHTML = `
       <div class="chart-frame">
         <div class="chart-header">One question. Many calls.</div>
-        <svg viewBox="0 0 ${W} ${H}" style="width:100%;display:block;max-width:${W}px">
-          <!-- user node -->
-          <circle cx="${CX}" cy="${CY}" r="22" fill="#3b82f6" opacity="0.18"/>
-          <circle cx="${CX}" cy="${CY}" r="14" fill="#3b82f6"/>
-          <text x="${CX}" y="${CY+38}" text-anchor="middle" font-size="9" fill="#888">you</text>
-          <text x="${CX}" y="${CY+50}" text-anchor="middle" font-size="8" fill="#555">1 question</text>
+        <svg viewBox="0 0 ${W} ${H}" style="width:100%;display:block">
+          <!-- user node at top -->
+          <circle cx="${CX}" cy="${CY}" r="28" fill="#3b82f6" opacity="0.18"/>
+          <circle cx="${CX}" cy="${CY}" r="18" fill="#3b82f6"/>
+          <text x="${CX + 50}" y="${CY - 6}" font-size="14" font-weight="600" fill="#bbb">you</text>
+          <text x="${CX + 50}" y="${CY + 12}" font-size="11" fill="#666">1 question</text>
 
-          <!-- arrow user → agent -->
-          <line id="nw-link" x1="${CX+18}" y1="${CY}" x2="${AX-18}" y2="${AY}"
-                stroke="#888" stroke-width="1.2"
+          <!-- arrow user → agent (vertical) -->
+          <line id="nw-link" x1="${CX}" y1="${CY + 22}" x2="${CX}" y2="${CY + 22}"
+                stroke="#888" stroke-width="1.4" stroke-linecap="round"
                 stroke-dasharray="160" stroke-dashoffset="160"/>
 
           <!-- agent node -->
-          <circle cx="${AX}" cy="${AY}" r="22" fill="#c05a52" opacity="0.2"/>
-          <circle cx="${AX}" cy="${AY}" r="14" fill="#c05a52"/>
-          <text x="${AX}" y="${AY+38}" text-anchor="middle" font-size="9" fill="#888">agent</text>
-          <text x="${AX}" y="${AY+50}" text-anchor="middle" font-size="8" fill="#555">retries · verifies</text>
+          <circle cx="${AX}" cy="${AY}" r="28" fill="#c05a52" opacity="0.2"/>
+          <circle cx="${AX}" cy="${AY}" r="18" fill="#c05a52"/>
+          <text x="${AX + 50}" y="${AY - 6}" font-size="14" font-weight="600" fill="#bbb">agent</text>
+          <text x="${AX + 50}" y="${AY + 12}" font-size="11" fill="#666">retries · verifies</text>
 
-          <!-- inference fan-out -->
+          <!-- inference fan-out below -->
           ${lines}
 
-          <!-- inference column header -->
-          <text x="${RX}" y="22" text-anchor="middle" font-size="9" fill="#888">inference calls</text>
-          <text id="nw-count" x="${RX}" y="${H-10}" text-anchor="middle"
-                font-size="11" font-weight="700" fill="#c05a52" opacity="0">20×</text>
+          <!-- inference label + count at the bottom -->
+          <text x="${(W / 2).toFixed(1)}" y="${FAN_Y + 26}" text-anchor="middle"
+                font-size="11" fill="#888">inference calls</text>
+          <text id="nw-count" x="${(W / 2).toFixed(1)}" y="${H - 18}" text-anchor="middle"
+                font-size="22" font-weight="700" fill="#c05a52" opacity="0">20×</text>
         </svg>
         <p class="chart-caption">You ask one question. The agent fires twenty inference calls. Then it retries. Then it verifies. Then it bills you.</p>
       </div>`;
 
     const tl = gsap.timeline({ repeat: -1, repeatDelay: 2 });
-    tl.to('#nw-link', { strokeDashoffset: 0, duration: 0.6, ease: 'power1.inOut' });
+
+    // user → agent line draws downward
+    tl.to('#nw-link', { attr: { y2: AY - 22 }, strokeDashoffset: 0, duration: 0.6, ease: 'power1.inOut' });
+
     for (let i = 0; i < N; i++) {
-      tl.to(`#nw-call-${i}`, { strokeDashoffset: 0, duration: 0.32, ease: 'power1.out' }, `+=${i===0?0.1:0.04}`);
-      tl.to(`#nw-tok-${i}`,  { opacity: 1, duration: 0.18 }, '-=0.12');
+      tl.to(`#nw-call-${i}`, { strokeDashoffset: 0, duration: 0.36, ease: 'power1.out' }, `+=${i === 0 ? 0.1 : 0.05}`);
+      tl.to(`#nw-tok-${i}`,  { opacity: 1, duration: 0.2 }, '-=0.14');
     }
+
     tl.to('#nw-count', { opacity: 1, duration: 0.4 }, '+=0.2')
       .to('#nw-count', { scale: 1.15, transformOrigin: 'center', duration: 0.4, yoyo: true, repeat: 1, ease: 'sine.inOut' }, '+=0.1');
   },
@@ -2929,10 +2946,9 @@ const animations = {
     );
     if (!visual) return;
 
-    const W = 380, H = 260;
-    const AX = 60, AY = H / 2;          // doer (agent) origin
-    const TX_LEFT = 200;                  // start of tool column
-    const TX_RIGHT = 350;                 // tool box right edge
+    // Portrait viewBox so the SVG fills the viewport-tall visual column.
+    const W = 380, H = 600;
+    const DX = W / 2, DY = 70;            // doer at top center
 
     const tools = [
       'search_flights()',
@@ -2943,56 +2959,58 @@ const animations = {
       'run_command()',
     ];
 
-    const yStart = 30, yEnd = H - 30;
-    const yStep = (yEnd - yStart) / (tools.length - 1);
+    // Tools stack vertically below the doer. Lines fan from doer to the
+    // LEFT edge of each tool box, so the angles spread the lines out.
+    const boxW = 240, boxH = 36, boxGap = 12;
+    const boxX = (W - boxW) / 2;
+    const startY = 170;
 
     const linesAndBoxes = tools.map((name, i) => {
-      const ty = (yStart + i * yStep).toFixed(1);
+      const ty = startY + i * (boxH + boxGap);
+      const tcy = ty + boxH / 2;
       return `
         <line class="att-line" id="att-line-${i}"
-              x1="${AX}" y1="${AY}" x2="${TX_LEFT}" y2="${ty}"
-              stroke="#6ee7b7" stroke-width="1.4" stroke-linecap="round"
-              stroke-dasharray="200" stroke-dashoffset="200" opacity="0.85"/>
+              x1="${DX}" y1="${DY + 24}" x2="${boxX}" y2="${tcy.toFixed(1)}"
+              stroke="#6ee7b7" stroke-width="1.6" stroke-linecap="round"
+              stroke-dasharray="500" stroke-dashoffset="500" opacity="0.85"/>
         <rect class="att-box" id="att-box-${i}"
-              x="${TX_LEFT + 6}" y="${(parseFloat(ty) - 9).toFixed(1)}"
-              width="${TX_RIGHT - TX_LEFT - 12}" height="18"
-              rx="4" fill="rgba(110,231,183,0.04)"
-              stroke="#6ee7b7" stroke-width="1" opacity="0"/>
+              x="${boxX}" y="${ty}" width="${boxW}" height="${boxH}"
+              rx="6" fill="rgba(110,231,183,0.04)"
+              stroke="#6ee7b7" stroke-width="1.2" opacity="0"/>
         <text class="att-name" id="att-name-${i}"
-              x="${TX_LEFT + 14}" y="${(parseFloat(ty) + 4).toFixed(1)}"
-              font-size="9" font-family="ui-monospace, SFMono-Regular, monospace"
+              x="${boxX + 14}" y="${(tcy + 5).toFixed(1)}"
+              font-size="14" font-family="ui-monospace, SFMono-Regular, monospace"
               fill="#6ee7b7" opacity="0">${name}</text>`;
     }).join('');
 
     visual.innerHTML = `
       <div class="chart-frame">
         <div class="chart-header">The doer needs tools. You write them.</div>
-        <svg viewBox="0 0 ${W} ${H}" style="width:100%;display:block;max-width:${W}px">
-          <!-- doer node -->
-          <circle cx="${AX}" cy="${AY}" r="22" fill="#6ee7b7" opacity="0.18"/>
-          <circle cx="${AX}" cy="${AY}" r="14" fill="#6ee7b7"/>
-          <text x="${AX}" y="${AY + 38}" text-anchor="middle" font-size="9" fill="#888">doer</text>
-          <text x="${AX}" y="${AY + 50}" text-anchor="middle" font-size="8" fill="#555">agent + skills</text>
+        <svg viewBox="0 0 ${W} ${H}" style="width:100%;display:block">
+          <!-- doer node at top center -->
+          <circle cx="${DX}" cy="${DY}" r="28" fill="#6ee7b7" opacity="0.18"/>
+          <circle cx="${DX}" cy="${DY}" r="18" fill="#6ee7b7"/>
+          <text x="${DX}" y="${DY + 50}" text-anchor="middle"
+                font-size="13" font-weight="600" fill="#bbb">doer</text>
+          <text x="${DX}" y="${DY + 66}" text-anchor="middle"
+                font-size="10" fill="#666">agent + skills</text>
 
-          <!-- tool fan-out -->
+          <!-- tool fan-out below -->
           ${linesAndBoxes}
 
-          <!-- column header -->
-          <text x="${((TX_LEFT + TX_RIGHT) / 2).toFixed(1)}" y="20" text-anchor="middle"
-                font-size="9" fill="#888">tools / skills</text>
-          <text id="att-count" x="${((TX_LEFT + TX_RIGHT) / 2).toFixed(1)}" y="${H - 8}"
-                text-anchor="middle" font-size="11" font-weight="700"
+          <text id="att-count" x="${(W / 2).toFixed(1)}" y="${H - 18}"
+                text-anchor="middle" font-size="15" font-weight="700"
                 fill="#6ee7b7" opacity="0">${tools.length}+ tools</text>
         </svg>
-        <p class="chart-caption">The doer can call tools but it does not invent them. You write them. Next week — building agents and skills.</p>
+        <p class="chart-caption">The doer can call tools but it does not invent them. You write them. Next week, building agents and skills.</p>
       </div>`;
 
     const tl = gsap.timeline({ repeat: -1, repeatDelay: 2 });
 
     tools.forEach((_, i) => {
-      tl.to(`#att-line-${i}`, { strokeDashoffset: 0, duration: 0.32, ease: 'power1.out' }, i * 0.16);
-      tl.to(`#att-box-${i}`,  { opacity: 1, duration: 0.2 }, i * 0.16 + 0.2);
-      tl.to(`#att-name-${i}`, { opacity: 1, duration: 0.2 }, i * 0.16 + 0.25);
+      tl.to(`#att-line-${i}`, { strokeDashoffset: 0, duration: 0.4, ease: 'power1.out' }, i * 0.18);
+      tl.to(`#att-box-${i}`,  { opacity: 1, duration: 0.25 }, i * 0.18 + 0.25);
+      tl.to(`#att-name-${i}`, { opacity: 1, duration: 0.25 }, i * 0.18 + 0.3);
     });
 
     tl.to('#att-count', { opacity: 1, duration: 0.4 }, '+=0.2');
